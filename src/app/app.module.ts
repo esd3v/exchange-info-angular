@@ -1,3 +1,4 @@
+import { AppStoreModule } from './store/store.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -8,6 +9,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [AppComponent, HomeComponent],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule,
+    AppStoreModule,
+  ],
   imports: [BrowserModule, AppRoutingModule, BrowserAnimationsModule],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
