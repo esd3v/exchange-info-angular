@@ -8,10 +8,11 @@ import { AppComponent } from './components/app/app.component';
 import { HomeComponent } from './components/home/home.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InterceptorService } from './services/interceptor.service';
+import { HeaderComponent } from './components/header/header.component';
 import { SkeletonComponent } from './components/skeleton/skeleton.component';
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, SkeletonComponent],
+  declarations: [AppComponent, HomeComponent, SkeletonComponent, HeaderComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
