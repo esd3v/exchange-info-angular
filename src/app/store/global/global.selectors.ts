@@ -7,11 +7,11 @@ export const featureSelector =
 export const globalSymbol = createSelector(featureSelector, (state) => {
   const { base, quote } = state.currency;
 
-  return base ? `${base}${quote}` : undefined;
+  return base ? `${base}${quote}` : null;
 });
 
 export const globalPair = createSelector(featureSelector, (state) => {
   const { base, quote } = state.currency;
 
-  return base ? `${base}/${quote}` : undefined;
+  return base ? `${base}/${quote}` : null;
 });
