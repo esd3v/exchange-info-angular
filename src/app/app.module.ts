@@ -1,7 +1,7 @@
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppStoreModule } from './store/store.module';
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './components/app/app.component';
@@ -13,7 +13,12 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { SkeletonComponent } from './components/skeleton/skeleton.component';
 
 @NgModule({
-  declarations: [AppComponent, HomeComponent, SkeletonComponent, HeaderComponent],
+  declarations: [
+    AppComponent,
+    HomeComponent,
+    SkeletonComponent,
+    HeaderComponent,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -29,6 +34,7 @@ import { SkeletonComponent } from './components/skeleton/skeleton.component';
       useClass: InterceptorService,
       multi: true,
     },
+    Title,
   ],
   bootstrap: [AppComponent],
 })
