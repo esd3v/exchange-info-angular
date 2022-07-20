@@ -12,6 +12,7 @@ import { InterceptorService } from './services/interceptor.service';
 import { HeaderComponent } from './components/header/header.component';
 import { TickerCardComponent } from './components/ticker-card/ticker-card.component';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { TickerPairComponent } from './components/ticker-pair/ticker-pair.component';
 import { SkeletonComponent } from './components/skeleton/skeleton.component';
 
 @NgModule({
@@ -21,6 +22,7 @@ import { SkeletonComponent } from './components/skeleton/skeleton.component';
     SkeletonComponent,
     HeaderComponent,
     TickerCardComponent,
+    TickerPairComponent,
   ],
   imports: [
     BrowserModule,
