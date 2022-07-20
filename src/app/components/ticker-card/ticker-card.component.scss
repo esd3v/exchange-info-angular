@@ -1,0 +1,19 @@
+$padding: 8px;
+
+:host {
+  & mat-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    & .title {
+      font-weight: 500;
+      flex-shrink: 0;
+      text-transform: capitalize;
+      margin-right: 8px;
+    }
+    & .content {
+      flex-grow: 1;
+      text-align: right;
+    }
+  }
+}

@@ -3,12 +3,14 @@ import { AppStoreModule } from './store/store.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatCardModule } from '@angular/material/card';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './components/app/app.component';
 import { HomeComponent } from './components/home/home.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InterceptorService } from './services/interceptor.service';
 import { HeaderComponent } from './components/header/header.component';
+import { TickerCardComponent } from './components/ticker-card/ticker-card.component';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { SkeletonComponent } from './components/skeleton/skeleton.component';
 
@@ -18,6 +20,7 @@ import { SkeletonComponent } from './components/skeleton/skeleton.component';
     HomeComponent,
     SkeletonComponent,
     HeaderComponent,
+    TickerCardComponent,
   ],
   imports: [
     BrowserModule,
@@ -26,6 +29,7 @@ import { SkeletonComponent } from './components/skeleton/skeleton.component';
     AppStoreModule,
     HttpClientModule,
     MatToolbarModule,
+    MatCardModule,
     NgxSkeletonLoaderModule,
   ],
   providers: [

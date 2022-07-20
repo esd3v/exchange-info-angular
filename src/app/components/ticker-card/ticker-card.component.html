@@ -1,0 +1,14 @@
+<mat-card className="{styles.root}">
+  <div class="title">{{ title }}</div>
+  <div class="content">
+    <ng-template [ngIf]="loading">
+      <app-skeleton></app-skeleton>
+    </ng-template>
+    <ng-template [ngIf]="value === null && !loading">
+      N/A
+    </ng-template>
+    <ng-template [ngIf]="!loading && value !== null">
+      {{ value }}
+    </ng-template>
+  </div>
+</mat-card>
