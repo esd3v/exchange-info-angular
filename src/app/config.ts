@@ -8,3 +8,4 @@ export const API_WEBSOCKET_BASEURL = 'wss://stream.binance.com:9443/ws';
 export const WEBSOCKET_ENABLED = false;
 export const WEBSOCKET_UNSUBSCRIBEDELAY = 1500;
 export const TOFIXED_DIGITS = 2;
+export const DEFAULT_PAIR = 'ETH_USDT'
