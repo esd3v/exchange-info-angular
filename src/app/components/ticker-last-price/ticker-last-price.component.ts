@@ -23,18 +23,15 @@ export class TickerLastPriceComponent implements OnInit {
 
   lastPrice$ = this.store.select(selectors.ticker.lastPrice);
   prevLastPrice$ = this.store.select(selectors.ticker.prevLastPrice);
-  positive: boolean = true;
+  positive: boolean | null = null;
 
   ngOnInit(): void {
     this.lastPrice$
       .pipe(combineLatestWith(this.prevLastPrice$))
       .subscribe(([lastPrice, prevLastPrice]) => {
-        this.positive =
-          lastPrice === null ||
-          prevLastPrice === null ||
-          lastPrice === prevLastPrice
-            ? false
-            : lastPrice > prevLastPrice;
+        if (lastPrice && prevLastPrice) {
+          this.positive = prevLastPrice !== null && lastPrice > prevLastPrice;
+        }
       });
   }
 }
