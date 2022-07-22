@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'formatLastPrice',
 })
 export class FormatLastPricePipe implements PipeTransform {
-  transform(value: number | null) {
+  transform(value: string | null) {
     return value ? formatLastPrice(value) : value;
   }
 }

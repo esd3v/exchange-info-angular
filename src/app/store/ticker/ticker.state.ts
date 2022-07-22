@@ -3,7 +3,7 @@ import { ParsedTicker } from './../../models/parsed-ticker.model';
 export type TickerState = {
   [key in keyof ParsedTicker]: ParsedTicker[key] | null;
 } & {
-  prevLastPrice: number | null;
+  prevLastPrice: string | null;
 };
 
 export const initialState: TickerState = {

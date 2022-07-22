@@ -11,13 +11,16 @@ export const parsePair = (pair: string, separator: '/' | '_') => {
   return { base, quote };
 };
 
-export const formatLastPrice = (value: number): string | number => {
+export const formatLastPrice = (value: string): string | number => {
   // Also cut zeros at the end
   const number = Number(value);
 
-  return Math.floor(value) === 0 // e.g value is 0.069442
-    ? isScientific(number)
-      ? value
-      : number
-    : number.toFixed(TOFIXED_DIGITS);
+  if (isScientific(number)) {
+    return value;
+    // e.g 0.0000038 / -0.0000038
+  } else if (Math.floor(number) <= 0) {
+    return number;
+  } else {
+    return number.toFixed(TOFIXED_DIGITS);
+  }
 };

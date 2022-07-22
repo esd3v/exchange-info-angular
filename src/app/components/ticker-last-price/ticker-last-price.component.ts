@@ -30,7 +30,8 @@ export class TickerLastPriceComponent implements OnInit {
       .pipe(combineLatestWith(this.prevLastPrice$))
       .subscribe(([lastPrice, prevLastPrice]) => {
         if (lastPrice && prevLastPrice) {
-          this.positive = prevLastPrice !== null && lastPrice > prevLastPrice;
+          this.positive =
+            prevLastPrice !== null && Number(lastPrice) > Number(prevLastPrice);
         }
       });
   }

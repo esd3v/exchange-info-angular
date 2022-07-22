@@ -22,10 +22,10 @@ export class TickerService {
   }: Ticker): ParsedTicker {
     return {
       symbol,
-      lastPrice: Number(lastPrice),
-      lastQuantity: Number(lastQty),
-      priceChange: Number(priceChange),
-      priceChangePercent: Number(priceChangePercent),
+      lastPrice,
+      lastQuantity: lastQty,
+      priceChange,
+      priceChangePercent,
       numberOfTrades: count,
     };
   }
