@@ -10,6 +10,6 @@ export class TickerCardComponent {
 
   @Input() title: string | null = null;
   @Input() value: string | number | null = null;
-  @Input() loading?: boolean;
-  @Input() positive?: boolean;
+  @Input() loading: boolean = false;
+  @Input() positive: boolean = false;
 }

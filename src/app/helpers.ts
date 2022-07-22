@@ -15,7 +15,7 @@ export const formatLastPrice = (value: number): string | number => {
   // Also cut zeros at the end
   const number = Number(value);
 
-  return Math.floor(value) === 0
+  return Math.floor(value) === 0 // e.g value is 0.069442
     ? isScientific(number)
       ? value
       : number

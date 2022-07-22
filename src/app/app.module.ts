@@ -16,6 +16,7 @@ import { TickerGroupComponent } from './components/ticker-group/ticker-group.com
 import { TickerPairComponent } from './components/ticker-pair/ticker-pair.component';
 import { SkeletonComponent } from './components/skeleton/skeleton.component';
 import { TickerLastPriceComponent } from './components/ticker-last-price/ticker-last-price.component';
+import { FormatLastPricePipe } from './pipes/format-last-price.pipe';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { TickerLastPriceComponent } from './components/ticker-last-price/ticker-
     TickerGroupComponent,
     TickerPairComponent,
     TickerLastPriceComponent,
+    FormatLastPricePipe,
   ],
   imports: [
     BrowserModule,

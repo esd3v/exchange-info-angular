@@ -1,7 +1,7 @@
 <app-ticker-card
   title="Last price"
-  [value]="formattedLastPrice"
-  [loading]="!formattedLastPrice"
+  [value]="lastPrice$ | async | formatLastPrice"
+  [loading]="!(lastPrice$ | async)"
   [positive]="positive"
 >
 </app-ticker-card>
