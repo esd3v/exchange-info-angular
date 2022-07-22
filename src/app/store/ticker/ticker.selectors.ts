@@ -8,3 +8,8 @@ export const lastPrice = createSelector(
   featureSelector,
   (state) => state.lastPrice
 );
+
+export const prevLastPrice = createSelector(
+  featureSelector,
+  (state) => state.prevLastPrice
+);

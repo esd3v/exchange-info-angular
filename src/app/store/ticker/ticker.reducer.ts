@@ -29,7 +29,7 @@ export const tickerReducer = createReducer(
       // TODO Improve
       prevLastPrice:
         symbol !== state.symbol
-          ? undefined
+          ? null
           : lastPrice !== state.lastPrice
           ? state.lastPrice
           : state.prevLastPrice,

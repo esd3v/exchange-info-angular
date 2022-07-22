@@ -15,6 +15,7 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { TickerGroupComponent } from './components/ticker-group/ticker-group.component';
 import { TickerPairComponent } from './components/ticker-pair/ticker-pair.component';
 import { SkeletonComponent } from './components/skeleton/skeleton.component';
+import { TickerLastPriceComponent } from './components/ticker-last-price/ticker-last-price.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { SkeletonComponent } from './components/skeleton/skeleton.component';
     TickerCardComponent,
     TickerGroupComponent,
     TickerPairComponent,
+    TickerLastPriceComponent,
   ],
   imports: [
     BrowserModule,
