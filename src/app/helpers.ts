@@ -11,7 +11,10 @@ export const parsePair = (pair: string, separator: '/' | '_') => {
   return { base, quote };
 };
 
-export const formatLastPrice = (value: string): string | number => {
+export const formatLastPrice = (
+  value: string,
+  fixedDigits: number = TOFIXED_DIGITS
+): string | number => {
   // Also cut zeros at the end
   const number = Number(value);
 
@@ -21,6 +24,9 @@ export const formatLastPrice = (value: string): string | number => {
   } else if (Math.floor(number) <= 0) {
     return number;
   } else {
-    return number.toFixed(TOFIXED_DIGITS);
+    return number.toFixed(fixedDigits);
   }
 };
+
+export const isPositive = (value: string | null) =>
+  value === null || Number(value) === 0 ? null : Number(value) > 0;

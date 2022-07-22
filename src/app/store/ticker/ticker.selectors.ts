@@ -13,3 +13,8 @@ export const prevLastPrice = createSelector(
   featureSelector,
   (state) => state.prevLastPrice
 );
+
+export const priceChange = createSelector(
+  featureSelector,
+  (state) => state.priceChange
+);
