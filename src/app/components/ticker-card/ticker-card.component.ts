@@ -11,5 +11,5 @@ export class TickerCardComponent {
   @Input() title: string | null = null;
   @Input() value: string | number | null = null;
   @Input() loading: boolean = false;
-  @Input() positive: boolean = false;
+  @Input() positive: boolean | null = null;
 }
