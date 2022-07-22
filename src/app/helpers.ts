@@ -1,5 +1,8 @@
 import { TOFIXED_DIGITS } from './config';
 
+export const addPlusIfPositive = (value: string): string =>
+  `${Number(value) > 0 ? `+${value}` : value}`;
+
 export const isScientific = (value: string | number) =>
   /\d+\.?\d*e[+-]*\d+/i.test(
     typeof value === 'number' ? value.toString() : value
@@ -27,6 +30,9 @@ export const formatLastPrice = (
     return number.toFixed(fixedDigits);
   }
 };
+
+export const formatPriceChangePercent = (value: string) =>
+  `${addPlusIfPositive(Number(value).toFixed(TOFIXED_DIGITS))}%`;
 
 export const isPositive = (value: string | null) =>
   value === null || Number(value) === 0 ? null : Number(value) > 0;

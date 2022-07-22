@@ -18,6 +18,8 @@ import { SkeletonComponent } from './components/skeleton/skeleton.component';
 import { TickerLastPriceComponent } from './components/ticker-last-price/ticker-last-price.component';
 import { TickerChangeComponent } from './components/ticker-change/ticker-change.component';
 import { FormatLastPricePipe } from './pipes/format-last-price.pipe';
+import { TickerChangePercentComponent } from './components/ticker-change-percent/ticker-change-percent.component';
+import { FormatPriceChangePercentPipe } from './pipes/format-price-change-percent.pipe';
 
 @NgModule({
   declarations: [
@@ -31,6 +33,8 @@ import { FormatLastPricePipe } from './pipes/format-last-price.pipe';
     TickerLastPriceComponent,
     TickerChangeComponent,
     FormatLastPricePipe,
+    TickerChangePercentComponent,
+    FormatPriceChangePercentPipe,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,7 @@
+<app-ticker-card
+  title="24 change percent"
+  [value]="priceChangePercent$ | async | formatPriceChangePercent"
+  [loading]="!(priceChangePercent$ | async)"
+  [positive]="positive | async"
+>
+</app-ticker-card>

@@ -18,3 +18,8 @@ export const priceChange = createSelector(
   featureSelector,
   (state) => state.priceChange
 );
+
+export const priceChangePercent = createSelector(
+  featureSelector,
+  (state) => state.priceChangePercent
+);
