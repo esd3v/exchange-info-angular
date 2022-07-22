@@ -28,3 +28,8 @@ export const lastQuantity = createSelector(
   featureSelector,
   (state) => state.lastQuantity
 );
+
+export const numberOfTrades = createSelector(
+  featureSelector,
+  (state) => state.numberOfTrades
+);

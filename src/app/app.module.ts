@@ -21,6 +21,7 @@ import { FormatLastPricePipe } from './pipes/format-last-price.pipe';
 import { TickerChangePercentComponent } from './components/ticker-change-percent/ticker-change-percent.component';
 import { FormatPriceChangePercentPipe } from './pipes/format-price-change-percent.pipe';
 import { TickerLastQuantityComponent } from './components/ticker-last-quantity/ticker-last-quantity.component';
+import { TickerTradesComponent } from './components/ticker-trades/ticker-trades.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { TickerLastQuantityComponent } from './components/ticker-last-quantity/t
     TickerChangePercentComponent,
     FormatPriceChangePercentPipe,
     TickerLastQuantityComponent,
+    TickerTradesComponent,
   ],
   imports: [
     BrowserModule,
