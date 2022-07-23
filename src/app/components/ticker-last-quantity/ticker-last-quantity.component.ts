@@ -13,5 +13,6 @@ export class TickerLastQuantityComponent {
   loading$ = this.store.select(selectors.ticker.loading);
   lastQuantity$ = this.store
     .select(selectors.ticker.lastQuantity)
-    .pipe(map(Number));
+    // Don't use just map(Number) because we need also null result for N/A
+    .pipe(map((data) => data && Number(data)));
 }

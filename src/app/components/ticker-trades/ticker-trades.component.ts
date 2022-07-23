@@ -13,5 +13,6 @@ export class TickerTradesComponent {
   loading$ = this.store.select(selectors.ticker.loading);
   numberOfTrades$ = this.store
     .select(selectors.ticker.numberOfTrades)
-    .pipe(map(Number));
+    // Don't use just map(Number) because we need also null result for N/A
+    .pipe(map((data) => data && Number(data)));
 }
