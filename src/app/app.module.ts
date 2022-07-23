@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
+import { MatDividerModule } from '@angular/material/divider';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './components/app/app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -24,6 +25,7 @@ import { FormatPriceChangePercentPipe } from './pipes/format-price-change-percen
 import { TickerLastQuantityComponent } from './components/ticker-last-quantity/ticker-last-quantity.component';
 import { TickerTradesComponent } from './components/ticker-trades/ticker-trades.component';
 import { EffectsModule } from '@ngrx/effects';
+import { WindowComponent } from './components/window/window.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +43,7 @@ import { EffectsModule } from '@ngrx/effects';
     FormatPriceChangePercentPipe,
     TickerLastQuantityComponent,
     TickerTradesComponent,
+    WindowComponent,
   ],
   imports: [
     BrowserModule,
@@ -50,6 +53,7 @@ import { EffectsModule } from '@ngrx/effects';
     HttpClientModule,
     MatToolbarModule,
     MatCardModule,
+    MatDividerModule,
     NgxSkeletonLoaderModule,
     EffectsModule.forRoot([TickerEffects]),
   ],

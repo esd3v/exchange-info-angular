@@ -1,0 +1,13 @@
+<mat-card>
+  <mat-card-subtitle class="header">{{ title }}</mat-card-subtitle>
+  <mat-divider></mat-divider>
+  <mat-card-content class="content"
+    ><div
+      class="spinner"
+      [ngClass]="{
+        'spinner--loading': loading
+      }"
+    ></div>
+    <ng-content></ng-content
+  ></mat-card-content>
+</mat-card>
