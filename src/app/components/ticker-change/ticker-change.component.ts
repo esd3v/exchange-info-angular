@@ -11,6 +11,7 @@ import { AppState, selectors } from 'src/app/store';
 export class TickerChangeComponent {
   constructor(private store: Store<AppState>) {}
 
+  loading$ = this.store.select(selectors.ticker.loading);
   priceChange$ = this.store.select(selectors.ticker.priceChange);
   positive = this.priceChange$.pipe(map(isPositive));
 }

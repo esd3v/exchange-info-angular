@@ -6,30 +6,35 @@ export const featureSelector =
 
 export const lastPrice = createSelector(
   featureSelector,
-  (state) => state.lastPrice
+  (state) => state.data.lastPrice
 );
 
 export const prevLastPrice = createSelector(
   featureSelector,
-  (state) => state.prevLastPrice
+  (state) => state.data.prevLastPrice
 );
 
 export const priceChange = createSelector(
   featureSelector,
-  (state) => state.priceChange
+  (state) => state.data.priceChange
 );
 
 export const priceChangePercent = createSelector(
   featureSelector,
-  (state) => state.priceChangePercent
+  (state) => state.data.priceChangePercent
 );
 
 export const lastQuantity = createSelector(
   featureSelector,
-  (state) => state.lastQuantity
+  (state) => state.data.lastQuantity
 );
 
 export const numberOfTrades = createSelector(
   featureSelector,
-  (state) => state.numberOfTrades
+  (state) => state.data.numberOfTrades
+);
+
+export const loading = createSelector(
+  featureSelector,
+  (state) => state.status === 'loading'
 );

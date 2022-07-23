@@ -10,6 +10,7 @@ import { AppState, selectors } from 'src/app/store';
 export class TickerTradesComponent {
   constructor(private store: Store<AppState>) {}
 
+  loading$ = this.store.select(selectors.ticker.loading);
   numberOfTrades$ = this.store
     .select(selectors.ticker.numberOfTrades)
     .pipe(map(Number));

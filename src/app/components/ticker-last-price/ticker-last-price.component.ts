@@ -21,6 +21,7 @@ import { filter, combineLatestWith, last, takeLast, of } from 'rxjs';
 export class TickerLastPriceComponent implements OnInit {
   constructor(private store: Store<AppState>) {}
 
+  loading$ = this.store.select(selectors.ticker.loading);
   lastPrice$ = this.store.select(selectors.ticker.lastPrice);
   prevLastPrice$ = this.store.select(selectors.ticker.prevLastPrice);
   positive: boolean | null = null;

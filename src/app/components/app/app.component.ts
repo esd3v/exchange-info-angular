@@ -3,7 +3,7 @@ import { TickerService } from './../../services/ticker.service';
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { combineLatestWith, first, last, range, takeLast } from 'rxjs';
+import { combineLatestWith, filter, first, last, range, takeLast } from 'rxjs';
 import { SITE_NAME } from 'src/app/config';
 import { formatLastPrice } from 'src/app/helpers';
 import { actions, AppState, selectors } from 'src/app/store';
@@ -54,12 +54,8 @@ export class AppComponent implements OnInit {
   }
 
   createTicker() {
-    this.globalSymbol$.subscribe((data) => {
-      if (data) {
-        this.tickerService.get({ symbol: data }).subscribe((data) => {
-          this.store.dispatch(actions.ticker.createTicker({ payload: data }));
-        });
-      }
+    this.globalSymbol$.pipe(filter(Boolean)).subscribe((symbol) => {
+      this.store.dispatch(actions.ticker.load({ symbol }));
     });
   }
 

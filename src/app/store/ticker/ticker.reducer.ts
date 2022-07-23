@@ -1,11 +1,15 @@
-import { createTicker } from './ticker.actions';
+import { actions } from 'src/app/store';
 import { createReducer, on } from '@ngrx/store';
 import { initialState } from './ticker.state';
 
 export const tickerReducer = createReducer(
   initialState,
+  on(actions.ticker.load, (state) => ({
+    ...state,
+    status: 'loading',
+  })),
   on(
-    createTicker,
+    actions.ticker.loadSuccess,
     (
       state,
       {
@@ -20,19 +24,23 @@ export const tickerReducer = createReducer(
       }
     ) => ({
       ...state,
-      symbol,
-      lastPrice,
-      lastQuantity,
-      numberOfTrades,
-      priceChange,
-      priceChangePercent,
-      // TODO Improve
-      prevLastPrice:
-        symbol !== state.symbol
-          ? null
-          : lastPrice !== state.lastPrice
-          ? state.lastPrice
-          : state.prevLastPrice,
+      data: {
+        ...state.data,
+        symbol,
+        lastPrice,
+        lastQuantity,
+        numberOfTrades,
+        priceChange,
+        priceChangePercent,
+        // TODO Improve
+        prevLastPrice:
+          symbol !== state.data.symbol
+            ? null
+            : lastPrice !== state.data.lastPrice
+            ? state.data.lastPrice
+            : state.data.prevLastPrice,
+      },
+      status: 'success',
     })
   )
 );

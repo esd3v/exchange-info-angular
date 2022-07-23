@@ -1,3 +1,4 @@
+import { TickerEffects } from './store/ticker/ticker.effects';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppStoreModule } from './store/store.module';
 import { NgModule } from '@angular/core';
@@ -22,6 +23,7 @@ import { TickerChangePercentComponent } from './components/ticker-change-percent
 import { FormatPriceChangePercentPipe } from './pipes/format-price-change-percent.pipe';
 import { TickerLastQuantityComponent } from './components/ticker-last-quantity/ticker-last-quantity.component';
 import { TickerTradesComponent } from './components/ticker-trades/ticker-trades.component';
+import { EffectsModule } from '@ngrx/effects';
 
 @NgModule({
   declarations: [
@@ -49,6 +51,7 @@ import { TickerTradesComponent } from './components/ticker-trades/ticker-trades.
     MatToolbarModule,
     MatCardModule,
     NgxSkeletonLoaderModule,
+    EffectsModule.forRoot([TickerEffects]),
   ],
   providers: [
     {

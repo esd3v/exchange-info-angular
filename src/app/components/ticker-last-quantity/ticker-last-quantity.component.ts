@@ -10,6 +10,7 @@ import { AppState, selectors } from 'src/app/store';
 export class TickerLastQuantityComponent {
   constructor(private store: Store<AppState>) {}
 
+  loading$ = this.store.select(selectors.ticker.loading);
   lastQuantity$ = this.store
     .select(selectors.ticker.lastQuantity)
     .pipe(map(Number));
