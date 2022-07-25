@@ -1,4 +1,3 @@
-import { create } from './pairs.actions';
 import { actions } from 'src/app/store';
 import { createReducer, on } from '@ngrx/store';
 import { initialState, PairsState } from './pairs.state';

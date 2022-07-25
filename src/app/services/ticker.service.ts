@@ -1,8 +1,6 @@
 import { Ticker } from './../models/ticker.model';
 import { ParsedTicker } from 'src/app/models/parsed-ticker.model';
-import { ExchangeInfoParsed } from './../models/exchange-info-parsed.model';
-import { ExchangeInfo } from './../models/exchange-info.model';
-import { map, mergeMap, Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 

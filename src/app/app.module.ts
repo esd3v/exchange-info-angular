@@ -26,6 +26,7 @@ import { TickerLastQuantityComponent } from './components/ticker-last-quantity/t
 import { TickerTradesComponent } from './components/ticker-trades/ticker-trades.component';
 import { EffectsModule } from '@ngrx/effects';
 import { WindowComponent } from './components/window/window.component';
+import { ExchangeInfoEffects } from './store/exchangeInfo/exchangeInfo.effects';
 
 @NgModule({
   declarations: [
@@ -55,7 +56,7 @@ import { WindowComponent } from './components/window/window.component';
     MatCardModule,
     MatDividerModule,
     NgxSkeletonLoaderModule,
-    EffectsModule.forRoot([TickerEffects]),
+    EffectsModule.forRoot([TickerEffects, ExchangeInfoEffects]),
   ],
   providers: [
     {

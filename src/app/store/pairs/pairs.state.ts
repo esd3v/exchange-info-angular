@@ -1,9 +1,9 @@
-import { ExchangeInfoParsed } from './../../models/exchange-info-parsed.model';
+import { ExchangeInfo } from './../../models/exchange-info.model';
 import { LoadingStatus } from '../state';
 import { TickerState } from '../ticker/ticker.state';
 
 export type PairsState = {
-  data: (ExchangeInfoParsed['symbolInfo'] &
+  data: (ExchangeInfo['symbols'] &
     Partial<
       Pick<
         TickerState['data'],

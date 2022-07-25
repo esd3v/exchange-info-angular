@@ -3,7 +3,7 @@ import { TickerService } from './../../services/ticker.service';
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { combineLatestWith, filter, first, last, range, takeLast } from 'rxjs';
+import { combineLatestWith, filter } from 'rxjs';
 import { SITE_NAME } from 'src/app/config';
 import { formatLastPrice } from 'src/app/helpers';
 import { actions, AppState, selectors } from 'src/app/store';
@@ -29,7 +29,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.setTitle();
-    this.createTicker();
+    this.loadTicker();
+    this.loadExchangeInfo();
     this.handleEmptyPair();
   }
 
@@ -53,7 +54,11 @@ export class AppComponent implements OnInit {
       });
   }
 
-  createTicker() {
+  loadExchangeInfo() {
+    this.store.dispatch(actions.exchangeInfo.load());
+  }
+
+  loadTicker() {
     this.globalSymbol$.pipe(filter(Boolean)).subscribe((symbol) => {
       this.store.dispatch(actions.ticker.load({ symbol }));
     });
@@ -66,12 +71,16 @@ export class AppComponent implements OnInit {
 
       // If navigation ended
       if (Number(type) === 1) {
-        // If root
+        // If root (/)
         if (!this.route.children.length) {
-          this.exchangeInfoService
-            .get()
-            .subscribe(({ baseAsset, quoteAsset }) => {
+          this.store
+            .select(selectors.exchangeInfo.symbols)
+            .pipe(filter(Boolean))
+            .subscribe((data) => {
+              const { baseAsset, quoteAsset } = data[0];
               const pair = `${baseAsset}_${quoteAsset}`;
+
+              // Get currency of first symbol and nagivate
               this.router.navigate([pair]);
             });
         }
