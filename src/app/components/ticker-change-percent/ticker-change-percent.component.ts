@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { isPositive } from 'src/app/helpers';
 import { AppState, selectors } from 'src/app/store';
 
@@ -12,6 +12,10 @@ export class TickerChangePercentComponent {
   constructor(private store: Store<AppState>) {}
 
   loading$ = this.store.select(selectors.ticker.loading);
-  priceChangePercent$ = this.store.select(selectors.ticker.priceChangePercent);
-  positive = this.priceChangePercent$.pipe(map(isPositive));
+
+  priceChangePercent$ = this.store
+    .select(selectors.ticker.priceChangePercent)
+    .pipe(filter(Boolean));
+
+  positive = this.priceChangePercent$.pipe(filter(Boolean), map(isPositive));
 }

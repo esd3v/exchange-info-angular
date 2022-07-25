@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { AppState, selectors } from 'src/app/store';
 
 @Component({
@@ -14,5 +14,8 @@ export class TickerTradesComponent {
   numberOfTrades$ = this.store
     .select(selectors.ticker.numberOfTrades)
     // Don't use just map(Number) because we need also null result for N/A
-    .pipe(map((data) => data && Number(data)));
+    .pipe(
+      filter(Boolean),
+      map((data) => data && Number(data))
+    );
 }

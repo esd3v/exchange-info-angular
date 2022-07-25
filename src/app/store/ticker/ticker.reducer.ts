@@ -8,39 +8,9 @@ export const tickerReducer = createReducer(
     ...state,
     status: 'loading',
   })),
-  on(
-    actions.ticker.loadSuccess,
-    (
-      state,
-      {
-        payload: {
-          lastPrice,
-          lastQuantity,
-          numberOfTrades,
-          priceChange,
-          priceChangePercent,
-          symbol,
-        },
-      }
-    ) => ({
-      ...state,
-      data: {
-        ...state.data,
-        symbol,
-        lastPrice,
-        lastQuantity,
-        numberOfTrades,
-        priceChange,
-        priceChangePercent,
-        // TODO Improve
-        prevLastPrice:
-          symbol !== state.data.symbol
-            ? null
-            : lastPrice !== state.data.lastPrice
-            ? state.data.lastPrice
-            : state.data.prevLastPrice,
-      },
-      status: 'success',
-    })
-  )
+  on(actions.ticker.loadSuccess, (state, { data }) => ({
+    ...state,
+    data,
+    status: 'success',
+  }))
 );

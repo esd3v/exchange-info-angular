@@ -60,7 +60,7 @@ export class AppComponent implements OnInit {
 
   loadTicker() {
     this.globalSymbol$.pipe(filter(Boolean)).subscribe((symbol) => {
-      this.store.dispatch(actions.ticker.load({ symbol }));
+      this.store.dispatch(actions.ticker.load());
     });
   }
 

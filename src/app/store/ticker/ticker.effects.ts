@@ -2,7 +2,7 @@ import { TickerService } from './../../services/ticker.service';
 import { actions } from 'src/app/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
-import { switchMap, of, tap, map } from 'rxjs';
+import { switchMap, map } from 'rxjs';
 
 @Injectable()
 export class TickerEffects {
@@ -14,10 +14,10 @@ export class TickerEffects {
   loadTicker$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(actions.ticker.load),
-      switchMap(({ symbol }) => {
+      switchMap(() => {
         return this.tickerService
-          .get({ symbol })
-          .pipe(map((data) => actions.ticker.loadSuccess({ payload: data })));
+          .get()
+          .pipe(map((data) => actions.ticker.loadSuccess({ data })));
       })
     );
   });

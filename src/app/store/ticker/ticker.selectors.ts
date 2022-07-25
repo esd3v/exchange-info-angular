@@ -1,37 +1,45 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState } from '..';
+import { globalSelectors } from '../global';
 
 export const featureSelector =
   createFeatureSelector<AppState['ticker']>('ticker');
 
-export const lastPrice = createSelector(
+export const globalSelector =
+  createFeatureSelector<AppState['global']>('global');
+
+export const globalSymbol = globalSelectors.globalSymbol;
+
+export const currentTicker = createSelector(
   featureSelector,
-  (state) => state.data.lastPrice
+  globalSymbol,
+  (state, globalSymbol) =>
+    state.data?.find((item) => item.symbol === globalSymbol)
 );
 
-export const prevLastPrice = createSelector(
-  featureSelector,
-  (state) => state.data.prevLastPrice
+export const lastPrice = createSelector(
+  currentTicker,
+  (state) => state?.lastPrice
 );
 
 export const priceChange = createSelector(
-  featureSelector,
-  (state) => state.data.priceChange
+  currentTicker,
+  (state) => state?.priceChange
 );
 
 export const priceChangePercent = createSelector(
-  featureSelector,
-  (state) => state.data.priceChangePercent
+  currentTicker,
+  (state) => state?.priceChangePercent
 );
 
 export const lastQuantity = createSelector(
-  featureSelector,
-  (state) => state.data.lastQuantity
+  currentTicker,
+  (state) => state?.lastQty
 );
 
 export const numberOfTrades = createSelector(
-  featureSelector,
-  (state) => state.data.numberOfTrades
+  currentTicker,
+  (state) => state?.count
 );
 
 export const loading = createSelector(

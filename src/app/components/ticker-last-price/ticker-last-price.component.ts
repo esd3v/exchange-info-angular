@@ -1,18 +1,7 @@
-import {
-  lastPrice,
-  prevLastPrice,
-} from './../../store/ticker/ticker.selectors';
 import { Store } from '@ngrx/store';
-import {
-  Component,
-  DoCheck,
-  OnChanges,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core';
-import { formatLastPrice } from 'src/app/helpers';
+import { Component, OnInit } from '@angular/core';
 import { AppState, selectors } from 'src/app/store';
-import { filter, combineLatestWith, last, takeLast, of } from 'rxjs';
+import { filter, combineLatestWith } from 'rxjs';
 
 @Component({
   selector: 'app-ticker-last-price',
@@ -22,8 +11,12 @@ export class TickerLastPriceComponent implements OnInit {
   constructor(private store: Store<AppState>) {}
 
   loading$ = this.store.select(selectors.ticker.loading);
-  lastPrice$ = this.store.select(selectors.ticker.lastPrice);
-  prevLastPrice$ = this.store.select(selectors.ticker.prevLastPrice);
+
+  lastPrice$ = this.store
+    .select(selectors.ticker.lastPrice)
+    .pipe(filter(Boolean));
+
+  prevLastPrice$ = this.lastPrice$; // TODO Update
   positive: boolean | null = null;
 
   ngOnInit(): void {
@@ -31,8 +24,11 @@ export class TickerLastPriceComponent implements OnInit {
       .pipe(combineLatestWith(this.prevLastPrice$))
       .subscribe(([lastPrice, prevLastPrice]) => {
         if (lastPrice && prevLastPrice) {
-          this.positive =
-            prevLastPrice !== null && Number(lastPrice) > Number(prevLastPrice);
+          if (Number(lastPrice) > Number(prevLastPrice)) {
+            this.positive = true;
+          } else if (Number(lastPrice) < Number(prevLastPrice)) {
+            this.positive = false;
+          }
         }
       });
   }
