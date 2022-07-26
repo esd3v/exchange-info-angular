@@ -2,13 +2,17 @@ $padding: 8px;
 
 mat-card {
   display: flex;
+  padding: 0;
   flex-direction: column;
 }
 
 .header {
+  display: flex;
+  align-items: center;
   padding: 0 $padding;
   height: 42px;
   flex-shrink: 0;
+  border-bottom: 1px solid black;
 }
 
 .content {
