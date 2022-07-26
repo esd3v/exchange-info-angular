@@ -5,7 +5,9 @@ import { NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
+import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './components/app/app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -27,6 +29,7 @@ import { TickerTradesComponent } from './components/ticker-trades/ticker-trades.
 import { EffectsModule } from '@ngrx/effects';
 import { WindowComponent } from './components/window/window.component';
 import { ExchangeInfoEffects } from './store/exchangeInfo/exchangeInfo.effects';
+import { PairsComponent } from './components/pairs/pairs.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +48,7 @@ import { ExchangeInfoEffects } from './store/exchangeInfo/exchangeInfo.effects';
     TickerLastQuantityComponent,
     TickerTradesComponent,
     WindowComponent,
+    PairsComponent,
   ],
   imports: [
     BrowserModule,
@@ -54,6 +58,8 @@ import { ExchangeInfoEffects } from './store/exchangeInfo/exchangeInfo.effects';
     HttpClientModule,
     MatToolbarModule,
     MatCardModule,
+    MatTableModule,
+    MatPaginatorModule,
     MatDividerModule,
     NgxSkeletonLoaderModule,
     EffectsModule.forRoot([TickerEffects, ExchangeInfoEffects]),

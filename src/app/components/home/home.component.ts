@@ -17,7 +17,6 @@ export class HomeComponent implements OnInit {
 
     if (routePair !== null) {
       const { base, quote } = parsePair(routePair, '_');
-      console.log(base, quote);
 
       if (base && quote) {
         this.store.dispatch(

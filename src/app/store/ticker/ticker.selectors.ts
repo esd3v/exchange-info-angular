@@ -10,6 +10,8 @@ export const globalSelector =
 
 export const globalSymbol = globalSelectors.globalSymbol;
 
+export const data = createSelector(featureSelector, (state) => state.data);
+
 export const currentTicker = createSelector(
   featureSelector,
   globalSymbol,
