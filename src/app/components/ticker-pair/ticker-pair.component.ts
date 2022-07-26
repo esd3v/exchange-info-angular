@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map, tap } from 'rxjs';
-import { AppState, selectors } from 'src/app/store';
+import { tap } from 'rxjs';
+import { AppState } from 'src/app/store';
+import { globalSelectors } from 'src/app/store/global';
 
 @Component({
   selector: 'app-ticker-pair',
@@ -11,7 +12,7 @@ export class TickerPairComponent {
   constructor(private store: Store<AppState>) {}
 
   loading = true;
-  globalPair = this.store.select(selectors.global.globalPair).pipe(
+  globalPair = this.store.select(globalSelectors.globalPair).pipe(
     tap((data) => {
       this.loading = !Boolean(data);
     })

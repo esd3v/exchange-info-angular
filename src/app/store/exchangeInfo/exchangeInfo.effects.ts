@@ -1,8 +1,8 @@
-import { actions, AppState } from 'src/app/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { switchMap, map } from 'rxjs';
 import { ExchangeInfoService } from 'src/app/services/exchange-info.service';
+import { exchangeInfoActions } from '.';
 
 @Injectable()
 export class ExchangeInfoEffects {
@@ -13,11 +13,11 @@ export class ExchangeInfoEffects {
 
   loadTicker$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(actions.exchangeInfo.load),
+      ofType(exchangeInfoActions.load),
       switchMap(() => {
         return this.exchangeInfoService
           .get()
-          .pipe(map((data) => actions.exchangeInfo.loadSuccess(data)));
+          .pipe(map((data) => exchangeInfoActions.loadSuccess(data)));
       })
     );
   });

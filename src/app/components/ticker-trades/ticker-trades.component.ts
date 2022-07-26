@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs';
-import { AppState, selectors } from 'src/app/store';
+import { AppState } from 'src/app/store';
+import { tickerSelectors } from 'src/app/store/ticker';
 
 @Component({
   selector: 'app-ticker-trades',
@@ -10,9 +11,9 @@ import { AppState, selectors } from 'src/app/store';
 export class TickerTradesComponent {
   constructor(private store: Store<AppState>) {}
 
-  loading$ = this.store.select(selectors.ticker.loading);
+  loading$ = this.store.select(tickerSelectors.loading);
   numberOfTrades$ = this.store
-    .select(selectors.ticker.numberOfTrades)
+    .select(tickerSelectors.numberOfTrades)
     // Don't use just map(Number) because we need also null result for N/A
     .pipe(
       filter(Boolean),

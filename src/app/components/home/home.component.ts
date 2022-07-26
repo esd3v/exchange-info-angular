@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { parsePair } from 'src/app/helpers';
-import { actions, AppState } from 'src/app/store';
+import { AppState } from 'src/app/store';
+import { globalActions } from 'src/app/store/global';
 
 @Component({
   selector: 'app-home',
@@ -20,7 +21,7 @@ export class HomeComponent implements OnInit {
 
       if (base && quote) {
         this.store.dispatch(
-          actions.global.setCurrency({ payload: { base, quote } })
+          globalActions.setCurrency({ payload: { base, quote } })
         );
       }
     }

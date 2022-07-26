@@ -1,13 +1,17 @@
 import { ActivatedRoute, Router } from '@angular/router';
-import { TickerService } from './../../services/ticker.service';
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
 import { combineLatestWith, filter } from 'rxjs';
 import { SITE_NAME } from 'src/app/config';
 import { formatLastPrice } from 'src/app/helpers';
-import { actions, AppState, selectors } from 'src/app/store';
-import { ExchangeInfoService } from 'src/app/services/exchange-info.service';
+import { AppState } from 'src/app/store';
+import { globalSelectors } from 'src/app/store/global';
+import { tickerActions, tickerSelectors } from 'src/app/store/ticker';
+import {
+  exchangeInfoActions,
+  exchangeInfoSelectors,
+} from 'src/app/store/exchangeInfo';
 
 @Component({
   selector: 'app-root',
@@ -18,14 +22,12 @@ export class AppComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private titleService: Title,
-    private store: Store<AppState>,
-    private tickerService: TickerService,
-    private exchangeInfoService: ExchangeInfoService
+    private store: Store<AppState>
   ) {}
 
-  globalSymbol$ = this.store.select(selectors.global.globalSymbol);
-  globalPair$ = this.store.select(selectors.global.globalPair);
-  lastPrice$ = this.store.select(selectors.ticker.lastPrice);
+  globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
+  globalPair$ = this.store.select(globalSelectors.globalPair);
+  lastPrice$ = this.store.select(tickerSelectors.lastPrice);
 
   ngOnInit(): void {
     this.setTitle();
@@ -38,7 +40,7 @@ export class AppComponent implements OnInit {
     this.globalPair$
       .pipe(combineLatestWith(this.lastPrice$))
       .subscribe(([globalPair, _lastPrice]) => {
-        this.store.select(selectors.ticker.lastPrice).subscribe((data) => {
+        this.store.select(tickerSelectors.lastPrice).subscribe((data) => {
           const lastPrice = data;
 
           const title = lastPrice
@@ -55,12 +57,12 @@ export class AppComponent implements OnInit {
   }
 
   loadExchangeInfo() {
-    this.store.dispatch(actions.exchangeInfo.load());
+    this.store.dispatch(exchangeInfoActions.load());
   }
 
   loadTicker() {
     this.globalSymbol$.pipe(filter(Boolean)).subscribe((symbol) => {
-      this.store.dispatch(actions.ticker.load());
+      this.store.dispatch(tickerActions.load());
     });
   }
 
@@ -74,7 +76,7 @@ export class AppComponent implements OnInit {
         // If root (/)
         if (!this.route.children.length) {
           this.store
-            .select(selectors.exchangeInfo.symbols)
+            .select(exchangeInfoSelectors.symbols)
             .pipe(filter(Boolean))
             .subscribe((data) => {
               const { baseAsset, quoteAsset } = data[0];

@@ -1,11 +1,11 @@
-import { actions } from 'src/app/store';
 import { createReducer, on } from '@ngrx/store';
 import { parsePair } from 'src/app/helpers';
+import { globalActions } from '.';
 import { initialState } from './global.state';
 
 export const globalReducer = createReducer(
   initialState,
-  on(actions.global.setCurrency, (state, { payload }) => ({
+  on(globalActions.setCurrency, (state, { payload }) => ({
     ...state,
     currency: (() => {
       if (typeof payload === 'string') {

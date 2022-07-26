@@ -1,14 +1,14 @@
-import { actions } from 'src/app/store';
 import { createReducer, on } from '@ngrx/store';
+import { exchangeInfoActions } from '.';
 import { initialState } from './exchangeInfo.state';
 
 export const exchangeInfoReducer = createReducer(
   initialState,
-  on(actions.exchangeInfo.load, (state) => ({
+  on(exchangeInfoActions.load, (state) => ({
     ...state,
     status: 'loading',
   })),
-  on(actions.exchangeInfo.loadSuccess, (state, { symbols, serverTime }) => ({
+  on(exchangeInfoActions.loadSuccess, (state, { symbols, serverTime }) => ({
     ...state,
     data: {
       serverTime,
