@@ -1,17 +1,14 @@
 import { TickerEffects } from './store/ticker/ticker.effects';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AppStoreModule } from './store/store.module';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { BrowserModule, Title } from '@angular/platform-browser';
+import { Title } from '@angular/platform-browser';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './components/app/app.component';
 import { HomeComponent } from './components/home/home.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InterceptorService } from './services/interceptor.service';
 import { HeaderComponent } from './components/header/header.component';
 import { TickerCardComponent } from './components/ticker-card/ticker-card.component';
@@ -30,6 +27,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { WindowComponent } from './components/window/window.component';
 import { ExchangeInfoEffects } from './store/exchangeInfo/exchangeInfo.effects';
 import { PairsComponent } from './components/pairs/pairs.component';
+import { CoreModule } from './core/core.module';
 
 @NgModule({
   declarations: [
@@ -51,18 +49,13 @@ import { PairsComponent } from './components/pairs/pairs.component';
     PairsComponent,
   ],
   imports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    AppStoreModule,
-    HttpClientModule,
+    CoreModule,
     MatToolbarModule,
     MatCardModule,
     MatTableModule,
     MatPaginatorModule,
     MatDividerModule,
     NgxSkeletonLoaderModule,
-    EffectsModule.forRoot([TickerEffects, ExchangeInfoEffects]),
   ],
   providers: [
     {
