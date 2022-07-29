@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import { parsePair } from 'src/app/helpers';
+import { parsePair } from 'src/app/shared/helpers';
 import { globalActions } from '.';
 import { initialState } from './global.state';
 

@@ -1,6 +1,6 @@
-import { TickerState } from './ticker/ticker.state';
+import { TickerState } from '../features/ticker/store/ticker.state';
 import { GlobalState } from './global/global.state';
-import { ExchangeInfoState } from './exchangeInfo/exchangeInfo.state';
+import { ExchangeInfoState } from '../features/exchangeInfo/store/exchangeInfo.state';
 
 export type AppState = {
   global: GlobalState;

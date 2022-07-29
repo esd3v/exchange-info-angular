@@ -1,12 +1,12 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule, Optional, SkipSelf } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { AppRoutingModule } from '../app-routing.module';
+import { AppRoutingModule } from '../routing/app-routing.module';
+import { InterceptorService } from './services/interceptor.service';
 import { AppStoreModule } from '../store/store.module';
 
 @NgModule({
-  declarations: [],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -14,13 +14,15 @@ import { AppStoreModule } from '../store/store.module';
     AppStoreModule,
     HttpClientModule,
   ],
-  exports: [
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    AppStoreModule,
-    HttpClientModule,
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: InterceptorService,
+      multi: true,
+    },
+    Title,
   ],
+  exports: [AppRoutingModule],
 })
 export class CoreModule {
   public constructor(@SkipSelf() @Optional() parent: CoreModule) {

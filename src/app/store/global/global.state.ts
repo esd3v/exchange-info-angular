@@ -1,4 +1,4 @@
-import { WEBSOCKET_ENABLED } from 'src/app/config';
+import { WEBSOCKET_ENABLED } from 'src/app/shared/config';
 
 export interface GlobalState {
   serverTime: string;
