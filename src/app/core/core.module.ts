@@ -5,6 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from '../routing/app-routing.module';
 import { InterceptorService } from './services/interceptor.service';
 import { AppStoreModule } from '../store/store.module';
+import { WebsocketModule } from '../websocket/websocket.module';
 
 @NgModule({
   imports: [
@@ -13,6 +14,7 @@ import { AppStoreModule } from '../store/store.module';
     BrowserAnimationsModule,
     AppStoreModule,
     HttpClientModule,
+    WebsocketModule,
   ],
   providers: [
     {
