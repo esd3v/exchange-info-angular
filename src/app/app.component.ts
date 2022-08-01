@@ -2,7 +2,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { combineLatestWith, filter } from 'rxjs';
+import { combineLatest, combineLatestWith, filter, timer } from 'rxjs';
 import { SITE_NAME } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
@@ -12,6 +12,9 @@ import {
   exchangeInfoSelectors,
 } from 'src/app/features/exchangeInfo/store';
 import { formatLastPrice } from './shared/helpers';
+import { WebsocketService } from './websocket/services/websocket.service';
+import { WebsocketTickerService } from './features/ticker/services/websocket-ticker.service';
+import { WebsocketMessageIncoming } from './websocket/models/websocket-message-incoming.model';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +25,9 @@ export class AppComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private titleService: Title,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private websocketService: WebsocketService<WebsocketMessageIncoming>,
+    private websocketTickerService: WebsocketTickerService
   ) {}
 
   globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
@@ -34,6 +39,38 @@ export class AppComponent implements OnInit {
     this.loadTicker();
     this.loadExchangeInfo();
     this.handleEmptyPair();
+    this.websocketSubscribe();
+    this.handleWebsocketMessage();
+  }
+
+  websocketSubscribe() {
+    const tickerStatus$ = this.store.select(tickerSelectors.status);
+    const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
+
+    combineLatest([tickerStatus$, exchangeInfoStatus$]).subscribe(
+      ([tickerStatus, exchangeInfoStatus]) => {
+        if (tickerStatus === 'success' && exchangeInfoStatus === 'success') {
+          this.websocketService.connect();
+
+          this.store
+            .select(globalSelectors.globalSymbol)
+            .pipe(filter(Boolean))
+            .subscribe((globalSymbol) => {
+              this.websocketTickerService.subscribeIndividual({
+                symbols: [globalSymbol],
+              });
+            });
+        }
+      }
+    );
+  }
+
+  handleWebsocketMessage() {
+    this.websocketService.messages$.subscribe((message) => {
+      if (message.e === '24hrTicker') {
+        this.websocketTickerService.handleIncomingMessage(message);
+      }
+    });
   }
 
   setTitle() {

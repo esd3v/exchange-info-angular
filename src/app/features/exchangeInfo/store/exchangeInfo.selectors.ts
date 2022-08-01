@@ -4,6 +4,10 @@ import { AppState } from '../../../store';
 export const featureSelector =
   createFeatureSelector<AppState['exchangeInfo']>('exchangeInfo');
 
+export const status = createSelector(featureSelector, (state) => {
+  return state.status;
+});
+
 export const symbols = createSelector(featureSelector, (state) => {
   return state.data?.symbols;
 });
