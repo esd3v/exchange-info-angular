@@ -6,6 +6,7 @@ import { AppRoutingModule } from '../routing/app-routing.module';
 import { InterceptorService } from './services/interceptor.service';
 import { AppStoreModule } from '../store/store.module';
 import { WebsocketModule } from '../websocket/websocket.module';
+import { API_WEBSOCKET_BASEURL } from '../shared/config';
 
 @NgModule({
   imports: [
@@ -14,7 +15,10 @@ import { WebsocketModule } from '../websocket/websocket.module';
     BrowserAnimationsModule,
     AppStoreModule,
     HttpClientModule,
-    WebsocketModule,
+    WebsocketModule.forRoot({
+      url: API_WEBSOCKET_BASEURL,
+      reconnect: 3000,
+    }),
   ],
   providers: [
     {

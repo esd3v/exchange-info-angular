@@ -1,8 +1,8 @@
-import { WebsocketTicker } from 'src/app/features/ticker/models/websocket-ticker.model';
 import { MergeExclusive } from 'type-fest';
-import { WebsocketMessageStreamParams } from './websocket-message-stream-params.model';
+import { WebsocketTicker } from 'src/app/features/ticker/models/websocket-ticker.model';
+import { WebsocketMessageStreamResponse } from './websocket-message-stream-response.model';
 
 export type WebsocketMessageIncoming = MergeExclusive<
   WebsocketTicker,
-  WebsocketMessageStreamParams
+  WebsocketMessageStreamResponse
 >;

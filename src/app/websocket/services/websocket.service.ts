@@ -1,14 +1,29 @@
-import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
-import { WebSocketSubject } from 'rxjs/webSocket';
-import { API_WEBSOCKET_BASEURL } from 'src/app/shared/config';
+import { Inject, Injectable } from '@angular/core';
+import { interval, Subject, takeWhile } from 'rxjs';
+import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
-type Status = 'opened' | 'connecting' | 'closed' | 'closing' | 'failed' | null;
+type Status =
+  | 'open'
+  | 'connecting'
+  | 'closed'
+  | 'closing'
+  | 'failed'
+  | 'terminated'
+  | 'restoring'
+  | 'restored'
+  | null;
 
 @Injectable()
-export class WebsocketService<T> {
-  private socket$!: WebSocketSubject<any>;
-  private _messages$ = new Subject<T>();
+export class WebsocketService {
+  constructor(@Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig) {
+    this.status$.subscribe((status) => {
+      this.status = status;
+    });
+  }
+
+  private socket!: WebSocket | null;
+  private _messages$ = new Subject<MessageEvent<string>>();
+  private status!: Status;
   private _status$ = new Subject<Status>();
 
   public get messages$() {
@@ -19,53 +34,76 @@ export class WebsocketService<T> {
     return this._status$;
   }
 
-  constructor() {}
-
   connect(): void {
-    const url = API_WEBSOCKET_BASEURL;
+    this.status$.next(
+      this.status === 'terminated' ? 'restoring' : 'connecting'
+    );
+    this.socket = new WebSocket(this.config.url);
 
-    this.status$.next('connecting');
+    this.socket.onopen = () => {
+      this.status$.next(this.status === 'restoring' ? 'restored' : 'open');
 
-    this.socket$ = new WebSocketSubject({
-      url,
-      openObserver: {
-        next: () => {
-          this.status$.next('opened');
-        },
-      },
-      closeObserver: {
-        next: () => {
-          this.status$.next('closed');
-        },
-      },
-      closingObserver: {
-        next: () => {
-          this.status$.next('closing');
-        },
-      },
-    });
+      if (this.config.keepAlive) {
+        this.keepAlive();
+      }
+    };
 
-    this.socket$.subscribe({
-      next: (message) => {
-        this._messages$.next(message);
-      },
-      error: (err) => {
-        console.log('error', err);
-      },
-    });
+    this.socket.onmessage = (event) => {
+      this.messages$.next(event);
+    };
+
+    this.socket.onerror = (event) => {
+      this.status$.next('failed');
+    };
+
+    this.socket.onclose = (event) => {
+      // If terminated by server
+      if (this.status === 'open') {
+        this.status$.next('terminated');
+
+        if (this.config.reconnect) {
+          this.reconnect();
+        }
+        // If closing manually
+      } else if (this.status === 'closing') {
+        this.status$.next('closed');
+      }
+
+      this.messages$.complete();
+    };
+  }
+
+  private keepAlive() {
+    if (this.config.keepAlive?.msec) {
+      interval(this.config.keepAlive.msec)
+        .pipe(
+          takeWhile(() => this.status === 'open' || this.status === 'restored')
+        )
+        .subscribe(() => {
+          if (this.config.keepAlive?.message) {
+            this.send(this.config.keepAlive.message);
+          }
+        });
+    }
+  }
+
+  private reconnect() {
+    if (this.config.reconnect) {
+      interval(this.config.reconnect)
+        .pipe(takeWhile(() => this.status === 'terminated'))
+        .subscribe(() => {
+          this.connect();
+        });
+    }
   }
 
   close() {
-    this.socket$.complete();
-    this.status$.complete();
+    this.status$.next('closing');
+    this.socket?.close();
   }
 
   send(msg: string | Record<string, any>): void {
-    this.status$.subscribe((status) => {
-      if (status === 'opened') {
-        this.socket$.next(msg);
-      }
-    });
+    this.socket?.send(typeof msg === 'string' ? msg : JSON.stringify(msg));
   }
 
   ngOnDestroy() {
