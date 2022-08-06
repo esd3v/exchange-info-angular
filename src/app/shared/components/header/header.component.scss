@@ -2,4 +2,6 @@
 
 mat-toolbar {
   margin-bottom: ($spacer * 2);
+  display: flex;
+  justify-content: space-between;
 }
