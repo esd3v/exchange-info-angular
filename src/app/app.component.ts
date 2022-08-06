@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
     private router: Router,
     private titleService: Title,
     private store: Store<AppState>,
-    private websocketService: WebsocketService<WebsocketMessageIncoming>,
+    private websocketService: WebsocketService,
     private websocketTickerService: WebsocketTickerService
   ) {}
 
@@ -44,31 +44,41 @@ export class AppComponent implements OnInit {
   }
 
   websocketSubscribe() {
+    // TODO REMOVE
+    this.websocketService.status$.subscribe(console.log);
+
+    const websocketStatus$ = this.websocketService.status$;
     const tickerStatus$ = this.store.select(tickerSelectors.status);
     const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
 
-    combineLatest([tickerStatus$, exchangeInfoStatus$]).subscribe(
-      ([tickerStatus, exchangeInfoStatus]) => {
-        if (tickerStatus === 'success' && exchangeInfoStatus === 'success') {
-          this.websocketService.connect();
-
-          this.store
-            .select(globalSelectors.globalSymbol)
-            .pipe(filter(Boolean))
-            .subscribe((globalSymbol) => {
-              this.websocketTickerService.subscribeIndividual({
-                symbols: [globalSymbol],
-              });
+    combineLatest([
+      websocketStatus$,
+      tickerStatus$,
+      exchangeInfoStatus$,
+    ]).subscribe(([websocketStatus, tickerStatus, exchangeInfoStatus]) => {
+      if (
+        (websocketStatus === 'open' || websocketStatus === 'restored') &&
+        tickerStatus === 'success' &&
+        exchangeInfoStatus === 'success'
+      ) {
+        this.store
+          .select(globalSelectors.globalSymbol)
+          .pipe(filter(Boolean))
+          .subscribe((globalSymbol) => {
+            this.websocketTickerService.subscribeIndividual({
+              symbols: [globalSymbol],
             });
-        }
+          });
       }
-    );
+    });
   }
 
   handleWebsocketMessage() {
-    this.websocketService.messages$.subscribe((message) => {
-      if (message.e === '24hrTicker') {
-        this.websocketTickerService.handleIncomingMessage(message);
+    this.websocketService.messages$.subscribe(({ data }) => {
+      const parsed: WebsocketMessageIncoming = JSON.parse(data);
+
+      if (parsed.e === '24hrTicker') {
+        this.websocketTickerService.handleIncomingMessage(parsed);
       }
     });
   }

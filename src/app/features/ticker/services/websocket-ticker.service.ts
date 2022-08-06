@@ -7,7 +7,6 @@ import { WebsocketTicker } from '../models/websocket-ticker.model';
 import { tickerActions } from '../store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketTickerStreamParams } from '../models/websocket-ticker-stream-params.model';
-import { WebsocketMessageIncoming } from 'src/app/websocket/models/websocket-message-incoming.model';
 
 @Injectable({
   providedIn: 'root',
@@ -15,9 +14,18 @@ import { WebsocketMessageIncoming } from 'src/app/websocket/models/websocket-mes
 export class WebsocketTickerService {
   constructor(
     private store: Store<AppState>,
-    private webSocketService: WebsocketService<WebsocketMessageIncoming>,
+    private webSocketService: WebsocketService,
     private webSocketMessagesService: WebsocketMessagesService
   ) {}
+
+  private _subscribedIndividual = false;
+
+  public get subscribedIndividual() {
+    return this._subscribedIndividual;
+  }
+  public set subscribedIndividual(value) {
+    this._subscribedIndividual = value;
+  }
 
   private createIndividualStreamMessage =
     this.webSocketMessagesService.createStreamMessage<WebsocketTickerStreamParams>(
