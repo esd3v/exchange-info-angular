@@ -17,6 +17,9 @@ type Status =
 export class WebsocketService {
   constructor(@Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig) {
     this.status$.subscribe((status) => {
+      // TODO REMOVE
+      console.log(status);
+
       this.status = status;
     });
   }
@@ -68,8 +71,6 @@ export class WebsocketService {
       } else if (this.status === 'closing') {
         this.status$.next('closed');
       }
-
-      this.messages$.complete();
     };
   }
 
