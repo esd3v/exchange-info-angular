@@ -1,12 +1,12 @@
-import { Ticker } from 'src/app/features/ticker/models/ticker.model';
+import { Ticker } from 'src/app/features/tickers/models/ticker.model';
 import { LoadingStatus } from '../../../store/state';
 
-export type TickerState = {
+export type TickersState = {
   data: Ticker[] | null;
   status: LoadingStatus;
 };
 
-export const initialState: TickerState = {
+export const initialState: TickersState = {
   data: null,
   status: 'init',
 };

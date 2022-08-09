@@ -4,7 +4,7 @@ import { WebsocketMessagesService } from 'src/app/websocket/services/websocket-m
 import { AppState } from 'src/app/store';
 import { Ticker } from '../models/ticker.model';
 import { WebsocketTicker } from '../models/websocket-ticker.model';
-import { tickerActions } from '../store';
+import { tickersActions } from '../store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketTickerStreamParams } from '../models/websocket-ticker-stream-params.model';
 
@@ -53,7 +53,7 @@ export class WebsocketTickerService {
     };
 
     this.store.dispatch(
-      tickerActions.update({ symbol: message.s, data: ticker })
+      tickersActions.update({ symbol: message.s, data: ticker })
     );
   }
 }

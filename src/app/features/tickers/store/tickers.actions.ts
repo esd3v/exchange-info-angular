@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Ticker } from 'src/app/features/ticker/models/ticker.model';
+import { Ticker } from 'src/app/features/tickers/models/ticker.model';
 
 const PREFIX = '[TICKER]';
 const TICKER_CREATE = `${PREFIX} CREATE`;

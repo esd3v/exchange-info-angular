@@ -6,11 +6,11 @@ import { combineLatest, combineLatestWith, filter } from 'rxjs';
 import { SITE_NAME } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
-import { tickerActions, tickerSelectors } from 'src/app/features/ticker/store';
+import { tickersActions, tickersSelectors } from 'src/app/features/tickers/store';
 import { symbolsActions, symbolsSelectors } from 'src/app/store/symbols';
 import { formatLastPrice } from './shared/helpers';
 import { WebsocketMessageIncoming } from './websocket/models/websocket-message-incoming.model';
-import { WebsocketTickerService } from './features/ticker/services/websocket-ticker.service';
+import { WebsocketTickerService } from './features/tickers/services/websocket-ticker.service';
 import { WebsocketService } from './websocket/services/websocket.service';
 import {
   exchangeInfoActions,
@@ -41,13 +41,13 @@ export class AppComponent implements OnInit {
   }
 
   setTitle() {
-    const lastPrice$ = this.store.select(tickerSelectors.lastPrice);
+    const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
     const globalPair$ = this.store.select(globalSelectors.globalPair);
 
     globalPair$
       .pipe(combineLatestWith(lastPrice$))
       .subscribe(([globalPair, _lastPrice]) => {
-        this.store.select(tickerSelectors.lastPrice).subscribe((data) => {
+        this.store.select(tickersSelectors.lastPrice).subscribe((data) => {
           const lastPrice = data;
 
           const title = lastPrice
@@ -71,7 +71,7 @@ export class AppComponent implements OnInit {
     const globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
 
     globalSymbol$.pipe(filter(Boolean)).subscribe((symbol) => {
-      this.store.dispatch(tickerActions.load());
+      this.store.dispatch(tickersActions.load());
     });
   }
 
@@ -107,7 +107,7 @@ export class AppComponent implements OnInit {
   }
 
   websocketSubscribe() {
-    const tickerStatus$ = this.store.select(tickerSelectors.status);
+    const tickerStatus$ = this.store.select(tickersSelectors.status);
     const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
     const websocketStatus$ = this.websocketService.status$;
 

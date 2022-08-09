@@ -1,9 +1,9 @@
-import { isPositive } from './../../../../shared/helpers';
+import { isPositive } from '../../../../shared/helpers';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { tickerSelectors } from 'src/app/features/ticker/store';
+import { tickersSelectors } from 'src/app/features/tickers/store';
 
 @Component({
   selector: 'app-ticker-change',
@@ -12,10 +12,10 @@ import { tickerSelectors } from 'src/app/features/ticker/store';
 export class TickerChangeComponent {
   constructor(private store: Store<AppState>) {}
 
-  loading$ = this.store.select(tickerSelectors.loading);
+  loading$ = this.store.select(tickersSelectors.loading);
 
   priceChange$ = this.store
-    .select(tickerSelectors.priceChange)
+    .select(tickersSelectors.priceChange)
     .pipe(filter(Boolean));
 
   positive = this.priceChange$.pipe(filter(Boolean), map(isPositive));

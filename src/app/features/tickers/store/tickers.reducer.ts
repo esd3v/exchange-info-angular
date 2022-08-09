@@ -1,23 +1,23 @@
 import { createReducer, on } from '@ngrx/store';
-import { tickerActions } from '.';
-import { initialState } from './ticker.state';
+import { tickersActions } from '.';
+import { initialState } from './tickers.state';
 
-export const tickerReducer = createReducer(
+export const tickersReducer = createReducer(
   initialState,
-  on(tickerActions.load, (state) => ({
+  on(tickersActions.load, (state) => ({
     ...state,
     status: 'loading',
   })),
-  on(tickerActions.create, (state, { data }) => ({
+  on(tickersActions.create, (state, { data }) => ({
     ...state,
     data,
   })),
-  on(tickerActions.loadSuccess, (state, { data }) => ({
+  on(tickersActions.loadSuccess, (state, { data }) => ({
     ...state,
     data,
     status: 'success',
   })),
-  on(tickerActions.update, (state, { symbol, data }) => {
+  on(tickersActions.update, (state, { symbol, data }) => {
     const tickers = state.data?.map((item) =>
       item.symbol === symbol ? { ...item, ...data } : item
     );

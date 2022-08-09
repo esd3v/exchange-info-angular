@@ -1,4 +1,4 @@
-import { TickerEffects } from '../features/ticker/store/ticker.effects';
+import { TickersEffects } from '../features/tickers/store/tickers.effects';
 import { metaReducers, reducers } from './reducers';
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
@@ -10,7 +10,7 @@ import { ExchangeInfoEffects } from '../features/exchange-info/store/exchange-in
 @NgModule({
   declarations: [],
   imports: [
-    EffectsModule.forRoot([TickerEffects, ExchangeInfoEffects]),
+    EffectsModule.forRoot([TickersEffects, ExchangeInfoEffects]),
     StoreModule.forRoot(reducers, {
       metaReducers,
     }),

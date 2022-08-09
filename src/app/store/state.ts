@@ -1,11 +1,11 @@
 import { ExchangeInfoState } from '../features/exchange-info/store/exchange-info.state';
-import { TickerState } from '../features/ticker/store/ticker.state';
+import { TickersState } from '../features/tickers/store/tickers.state';
 import { GlobalState } from './global/global.state';
 import { SymbolsState } from './symbols/symbols.state';
 
 export type AppState = {
   global: GlobalState;
-  ticker: TickerState;
+  tickers: TickersState;
   symbols: SymbolsState;
   exchangeInfo: ExchangeInfoState;
 };
