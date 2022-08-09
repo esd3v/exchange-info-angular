@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, filter, map } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { tickerSelectors } from 'src/app/features/ticker/store';
-import { exchangeInfoSelectors } from 'src/app/features/exchangeInfo/store';
+import { exchangeInfoSelectors } from 'src/app/features/exchange-info/store';
 import { PairColumn } from '../../models/pair-column.model';
 import { PairRow } from '../../models/pair-row.model';
 

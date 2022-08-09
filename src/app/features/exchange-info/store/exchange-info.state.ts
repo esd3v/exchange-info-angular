@@ -1,4 +1,4 @@
-import { ExchangeInfo } from 'src/app/features/exchangeInfo/models/exchange-info.model';
+import { ExchangeInfo } from 'src/app/features/exchange-info/models/exchange-info.model';
 import { LoadingStatus } from '../../../store/state';
 
 export type ExchangeInfoState = {

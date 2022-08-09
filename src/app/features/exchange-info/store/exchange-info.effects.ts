@@ -1,7 +1,7 @@
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { switchMap, map } from 'rxjs';
-import { ExchangeInfoService } from 'src/app/features/exchangeInfo/services/exchange-info.service';
+import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { exchangeInfoActions } from '.';
 
 @Injectable()

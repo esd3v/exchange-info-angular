@@ -1,4 +1,4 @@
-import { exchangeInfoReducer } from '../features/exchangeInfo/store/exchangeInfo.reducer';
+import { exchangeInfoReducer } from '../features/exchange-info/store/exchange-info.reducer';
 import { ActionReducerMap, MetaReducer } from '@ngrx/store';
 import { environment } from '../../environments/environment';
 import { globalReducer } from './global/global.reducer';

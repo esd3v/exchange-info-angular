@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { exchangeInfoActions } from '.';
-import { initialState } from './exchangeInfo.state';
+import { initialState } from './exchange-info.state';
 
 export const exchangeInfoReducer = createReducer(
   initialState,

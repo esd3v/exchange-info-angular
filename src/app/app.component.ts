@@ -10,7 +10,7 @@ import { tickerActions, tickerSelectors } from 'src/app/features/ticker/store';
 import {
   exchangeInfoActions,
   exchangeInfoSelectors,
-} from 'src/app/features/exchangeInfo/store';
+} from 'src/app/features/exchange-info/store';
 import { formatLastPrice } from './shared/helpers';
 import { WebsocketMessageIncoming } from './websocket/models/websocket-message-incoming.model';
 import { WebsocketTickerService } from './features/ticker/services/websocket-ticker.service';

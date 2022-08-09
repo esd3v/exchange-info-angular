@@ -1,4 +1,4 @@
-import { ExchangeInfo } from './../models/exchange-info.model';
+import { ExchangeInfo } from '../models/exchange-info.model';
 import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
