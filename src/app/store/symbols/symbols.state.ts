@@ -1,9 +1,9 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { ExchangeSymbol } from '../../features/exchange-info/models/exchange-symbol.model';
 
-export type ExchangeSymbolEntity = Exclude<
+export type ExchangeSymbolEntity = Pick<
   ExchangeSymbol,
-  'orderTypes' | 'filters' | 'permissions'
+  'symbol' | 'baseAsset' | 'quoteAsset' | 'status'
 >;
 
 export const symbolsAdapter: EntityAdapter<ExchangeSymbolEntity> =

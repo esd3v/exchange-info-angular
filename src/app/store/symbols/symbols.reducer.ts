@@ -10,9 +10,9 @@ export const symbolsReducer = createReducer(
   initialState,
   on(symbolsActions.create, (state, { symbols }) => {
     const filtered = symbols.map((item) => {
-      const { orderTypes, filters, permissions, ...rest } = item;
+      const { symbol, baseAsset, quoteAsset, status } = item;
 
-      return rest;
+      return { symbol, baseAsset, quoteAsset, status };
     }) as ExchangeSymbolEntity[];
 
     return symbolsAdapter.addMany(filtered, {
