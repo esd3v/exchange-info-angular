@@ -1,12 +1,22 @@
-import { ExchangeInfo } from 'src/app/features/exchange-info/models/exchange-info.model';
+import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
 import { LoadingStatus } from '../../../store/state';
+import { ExchangeSymbol } from '../models/exchange-symbol.model';
 
-export type ExchangeInfoState = {
-  data: Pick<ExchangeInfo, 'symbols' | 'serverTime'> | null;
+export type ExchangeSymbolEntity = Exclude<
+  ExchangeSymbol,
+  'orderTypes' | 'filters' | 'permissions'
+>;
+
+export const exchangeInfoAdapter: EntityAdapter<ExchangeSymbolEntity> =
+  createEntityAdapter<ExchangeSymbolEntity>({
+    selectId: (item) => item.symbol,
+  });
+
+export interface ExchangeInfoState extends EntityState<ExchangeSymbolEntity> {
   status: LoadingStatus;
-};
+}
 
-export const initialState: ExchangeInfoState = {
-  data: null,
-  status: 'init',
-};
+export const initialState: ExchangeInfoState =
+  exchangeInfoAdapter.getInitialState({
+    status: 'init',
+  });

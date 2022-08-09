@@ -83,15 +83,24 @@ export class AppComponent implements OnInit {
       if (Number(type) === 1) {
         // If root (/)
         if (!this.route.children.length) {
+          const firstSymbol$ = this.store.select(
+            exchangeInfoSelectors.firstSymbol
+          );
+
           this.store
-            .select(exchangeInfoSelectors.symbols)
+            .select(exchangeInfoSelectors.allSymbols)
             .pipe(filter(Boolean))
             .subscribe((data) => {
-              const { baseAsset, quoteAsset } = data[0];
-              const pair = `${baseAsset}_${quoteAsset}`;
+              const firstSymbol = data[0];
+              console.log('data', data);
 
-              // Get currency of first symbol and nagivate
-              this.router.navigate([pair]);
+              if (firstSymbol) {
+                const { baseAsset, quoteAsset } = firstSymbol;
+                const pair = `${baseAsset}_${quoteAsset}`;
+
+                // Get currency of first symbol and nagivate
+                this.router.navigate([pair]);
+              }
             });
         }
       }
