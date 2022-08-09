@@ -7,14 +7,15 @@ import { SITE_NAME } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { tickerActions, tickerSelectors } from 'src/app/features/ticker/store';
-import {
-  exchangeInfoActions,
-  exchangeInfoSelectors,
-} from 'src/app/features/exchange-info/store';
+import { symbolsActions, symbolsSelectors } from 'src/app/store/symbols';
 import { formatLastPrice } from './shared/helpers';
 import { WebsocketMessageIncoming } from './websocket/models/websocket-message-incoming.model';
 import { WebsocketTickerService } from './features/ticker/services/websocket-ticker.service';
 import { WebsocketService } from './websocket/services/websocket.service';
+import {
+  exchangeInfoActions,
+  exchangeInfoSelectors,
+} from './features/exchange-info/store';
 
 @Component({
   selector: 'app-root',
@@ -83,12 +84,10 @@ export class AppComponent implements OnInit {
       if (Number(type) === 1) {
         // If root (/)
         if (!this.route.children.length) {
-          const firstSymbol$ = this.store.select(
-            exchangeInfoSelectors.firstSymbol
-          );
+          const firstSymbol$ = this.store.select(symbolsSelectors.firstSymbol);
 
           this.store
-            .select(exchangeInfoSelectors.allSymbols)
+            .select(symbolsSelectors.allSymbols)
             .pipe(filter(Boolean))
             .subscribe((data) => {
               const firstSymbol = data[0];
