@@ -10,9 +10,11 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
   <mat-paginator
-    [pageSizeOptions]="[15]"
+    [pageSizeOptions]="pageSizeOptions"
     showFirstLastButtons
     aria-label="Select page"
+    [length]="length | async"
+    (page)="handlePageChange($event)"
   >
   </mat-paginator>
 </app-window>
