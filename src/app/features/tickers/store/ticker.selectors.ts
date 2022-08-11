@@ -1,6 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState } from '../../../store';
 import { globalSelectors } from '../../../store/global';
+import { tickersAdapter } from './tickers.state';
 
 export const featureSelector =
   createFeatureSelector<AppState['tickers']>('tickers');
@@ -8,17 +9,22 @@ export const featureSelector =
 export const globalSelector =
   createFeatureSelector<AppState['global']>('global');
 
+const { selectAll, selectEntities } = tickersAdapter.getSelectors();
+
 export const globalSymbol = globalSelectors.globalSymbol;
 
-export const data = createSelector(featureSelector, (state) => state.data);
+export const tickers = createSelector(featureSelector, selectEntities);
+
+export const allTickers = createSelector(featureSelector, selectAll);
 
 export const status = createSelector(featureSelector, (state) => state.status);
 
 export const currentTicker = createSelector(
   featureSelector,
   globalSymbol,
-  (state, globalSymbol) =>
-    state.data?.find((item) => item.symbol === globalSymbol)
+  (state, globalSymbol) => {
+    return globalSymbol ? state.entities[globalSymbol] : null;
+  }
 );
 
 export const lastPrice = createSelector(
