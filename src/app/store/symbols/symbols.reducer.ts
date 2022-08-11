@@ -9,14 +9,12 @@ import {
 export const symbolsReducer = createReducer(
   initialState,
   on(symbolsActions.create, (state, { symbols }) => {
-    const filtered = symbols.map((item) => {
+    const mapped = symbols.map((item) => {
       const { symbol, baseAsset, quoteAsset, status } = item;
 
       return { symbol, baseAsset, quoteAsset, status };
     }) as ExchangeSymbolEntity[];
 
-    return symbolsAdapter.addMany(filtered, {
-      ...state,
-    });
+    return symbolsAdapter.setAll(mapped, state);
   })
 );
