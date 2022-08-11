@@ -6,7 +6,10 @@ import { combineLatest, combineLatestWith, filter } from 'rxjs';
 import { SITE_NAME } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
-import { tickersActions, tickersSelectors } from 'src/app/features/tickers/store';
+import {
+  tickersActions,
+  tickersSelectors,
+} from 'src/app/features/tickers/store';
 import { symbolsActions, symbolsSelectors } from 'src/app/store/symbols';
 import { formatLastPrice } from './shared/helpers';
 import { WebsocketMessageIncoming } from './websocket/models/websocket-message-incoming.model';
@@ -36,7 +39,7 @@ export class AppComponent implements OnInit {
     this.loadTicker();
     this.loadExchangeInfo();
     this.handleEmptyPair();
-    this.websocketSubscribe();
+    this.handleWebsocketStart();
     this.handleWebsocketMessage();
   }
 
@@ -106,7 +109,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  websocketSubscribe() {
+  handleWebsocketStart() {
     const tickerStatus$ = this.store.select(tickersSelectors.status);
     const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
     const websocketStatus$ = this.websocketService.status$;
