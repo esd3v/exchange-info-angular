@@ -19,11 +19,9 @@ import { PairRow } from '../../models/pair-row.model';
 import { WebsocketTickerService } from 'src/app/features/tickers/services/websocket-ticker.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WEBSOCKET_UNSUBSCRIBEDELAY } from 'src/app/shared/config';
-import { globalSelector } from 'src/app/features/tickers/store/ticker.selectors';
 import { globalSelectors } from 'src/app/store/global';
 import { TickerEntity } from 'src/app/features/tickers/store/tickers.state';
 import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
-import { WebsocketMessageIncoming } from 'src/app/websocket/models/websocket-message-incoming.model';
 import { Dictionary } from '@ngrx/entity';
 
 export function getPageSlice<T>({
@@ -187,7 +185,7 @@ export class PairsComponent implements OnInit, OnDestroy {
 
   private handleWebsocketStart() {
     this.websocketService.status$.subscribe((status) => {
-      if (status === 'open' || status === 'restored') {
+      if (status === 'open') {
         this.subscribeToWebsocket();
 
         // Start listening to page changes

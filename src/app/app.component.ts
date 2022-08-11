@@ -120,10 +120,9 @@ export class AppComponent implements OnInit {
       tickerStatus$,
     ]).subscribe(([websocketStatus, exchangeInfoStatus, tickerStatus]) => {
       if (
-        websocketStatus === 'open' ||
-        (websocketStatus === 'restored' &&
-          tickerStatus === 'success' &&
-          exchangeInfoStatus === 'success')
+        websocketStatus === 'open' &&
+        tickerStatus === 'success' &&
+        exchangeInfoStatus === 'success'
       ) {
         this.store
           .select(globalSelectors.globalSymbol)
