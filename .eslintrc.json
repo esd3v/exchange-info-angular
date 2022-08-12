@@ -1,0 +1,103 @@
+{
+  "root": true,
+  "ignorePatterns": ["projects/**/*"],
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": ["tsconfig.json"],
+        "createDefaultProgram": true
+      },
+      "extends": [
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          { "argsIgnorePattern": "^_" }
+        ],
+        "@typescript-eslint/explicit-member-accessibility": ["error"],
+        "padding-line-between-statements": [
+          "warn",
+          // Always require blank lines after directive (like "use-strict"), except between directives
+          { "blankLine": "always", "prev": "directive", "next": "*" },
+          { "blankLine": "any", "prev": "directive", "next": "directive" },
+          // Always require blank lines after import, except between imports
+          { "blankLine": "always", "prev": "import", "next": "*" },
+          { "blankLine": "any", "prev": "import", "next": "import" },
+          // Always require blank lines before and after every sequence of variable declarations and export
+          {
+            "blankLine": "always",
+            "prev": "*",
+            "next": ["const", "let", "var", "export"]
+          },
+          {
+            "blankLine": "always",
+            "prev": ["const", "let", "var", "export"],
+            "next": "*"
+          },
+          {
+            "blankLine": "any",
+            "prev": ["const", "let", "var", "export"],
+            "next": ["const", "let", "var", "export"]
+          },
+          // Always require blank lines before and after class declaration, if, do/while, switch, try
+          {
+            "blankLine": "always",
+            "prev": "*",
+            "next": ["if", "class", "for", "do", "while", "switch", "try"]
+          },
+          {
+            "blankLine": "always",
+            "prev": ["if", "class", "for", "do", "while", "switch", "try"],
+            "next": "*"
+          },
+          // Always require blank lines before return statements
+          { "blankLine": "always", "prev": "*", "next": "return" },
+          // Always require blank lines before and after multiline-expression
+          {
+            "blankLine": "always",
+            "prev": "*",
+            "next": "multiline-expression"
+          },
+          {
+            "blankLine": "always",
+            "prev": "multiline-expression",
+            "next": "*"
+          },
+          // Always require blank lines before and after multiline-const
+          { "blankLine": "always", "prev": "*", "next": "multiline-const" },
+          { "blankLine": "always", "prev": "multiline-const", "next": "*" },
+          // Never require blank lines before and after singleline-const
+          {
+            "blankLine": "never",
+            "prev": "singleline-const",
+            "next": "singleline-const"
+          }
+        ],
+        "@angular-eslint/directive-selector": [
+          "error",
+          {
+            "type": "attribute",
+            "prefix": "app",
+            "style": "camelCase"
+          }
+        ],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "app",
+            "style": "kebab-case"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.html"],
+      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "rules": {}
+    }
+  ]
+}
