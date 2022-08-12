@@ -9,12 +9,12 @@ import { globalSelectors } from 'src/app/store/global';
   templateUrl: './ticker-pair.component.html',
 })
 export class TickerPairComponent {
-  constructor(private store: Store<AppState>) {}
-
-  loading = true;
-  globalPair = this.store.select(globalSelectors.globalPair).pipe(
+  public loading = true;
+  public globalPair = this.store.select(globalSelectors.globalPair).pipe(
     tap((data) => {
       this.loading = !Boolean(data);
     })
   );
+
+  public constructor(private store: Store<AppState>) {}
 }

@@ -7,9 +7,9 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class ExchangeInfoService {
-  constructor(private http: HttpClient) {}
+  public constructor(private http: HttpClient) {}
 
-  get(): Observable<ExchangeInfo> {
+  public get(): Observable<ExchangeInfo> {
     return this.http.get<ExchangeInfo>('exchangeInfo');
   }
 }

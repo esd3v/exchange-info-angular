@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, interval, Subject, takeWhile } from 'rxjs';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
@@ -7,8 +7,18 @@ type Status = 'open' | 'connecting' | 'closed' | 'closing' | null;
 type Reason = 'failed' | 'terminated' | 'restoring' | 'restored' | null;
 
 @Injectable()
-export class WebsocketService {
-  constructor(@Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig) {
+export class WebsocketService implements OnDestroy {
+  public reason$ = new BehaviorSubject<Reason>(null);
+  public status$ = new BehaviorSubject<Status>(null);
+
+  private socket!: WebSocket | null;
+  private _messages$ = new Subject<MessageEvent<string>>();
+  private status!: Status;
+  private reason!: Reason;
+
+  public constructor(
+    @Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig
+  ) {
     this.status$.subscribe((status) => {
       // TODO REMOVE
       console.log(status);
@@ -24,18 +34,24 @@ export class WebsocketService {
     });
   }
 
-  private socket!: WebSocket | null;
-  private _messages$ = new Subject<MessageEvent<string>>();
-  private status!: Status;
-  private reason!: Reason;
-  public reason$ = new BehaviorSubject<Reason>(null);
-  public status$ = new BehaviorSubject<Status>(null);
-
   public get messages$() {
     return this._messages$;
   }
 
-  connect(): void {
+  public close() {
+    this.status$.next('closing');
+    this.socket?.close();
+  }
+
+  public send(msg: string | Record<string, any>): void {
+    this.socket?.send(typeof msg === 'string' ? msg : JSON.stringify(msg));
+  }
+
+  public ngOnDestroy() {
+    this.close();
+  }
+
+  public connect(): void {
     this.status$.next('connecting');
     this.reason$.next(this.reason === 'terminated' ? 'restoring' : this.reason);
     this.socket = new WebSocket(this.config.url);
@@ -58,7 +74,7 @@ export class WebsocketService {
       this.reason$.next('failed');
     };
 
-    this.socket.onclose = (event) => {
+    this.socket.onclose = () => {
       // If terminated by server
       if (this.status === 'open') {
         this.reason$.next('terminated');
@@ -96,18 +112,5 @@ export class WebsocketService {
           this.connect();
         });
     }
-  }
-
-  close() {
-    this.status$.next('closing');
-    this.socket?.close();
-  }
-
-  send(msg: string | Record<string, any>): void {
-    this.socket?.send(typeof msg === 'string' ? msg : JSON.stringify(msg));
-  }
-
-  ngOnDestroy() {
-    this.close();
   }
 }

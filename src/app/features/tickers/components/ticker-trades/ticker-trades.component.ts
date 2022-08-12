@@ -9,14 +9,15 @@ import { tickersSelectors } from 'src/app/features/tickers/store';
   templateUrl: './ticker-trades.component.html',
 })
 export class TickerTradesComponent {
-  constructor(private store: Store<AppState>) {}
+  public loading$ = this.store.select(tickersSelectors.loading);
 
-  loading$ = this.store.select(tickersSelectors.loading);
-  numberOfTrades$ = this.store
+  public numberOfTrades$ = this.store
     .select(tickersSelectors.numberOfTrades)
     // Don't use just map(Number) because we need also null result for N/A
     .pipe(
       filter(Boolean),
       map((data) => data && Number(data))
     );
+
+  public constructor(private store: Store<AppState>) {}
 }

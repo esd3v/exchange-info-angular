@@ -5,7 +5,7 @@ import { formatLastPrice } from '../helpers';
   name: 'formatLastPrice',
 })
 export class FormatLastPricePipe implements PipeTransform {
-  transform(value: string | null) {
+  public transform(value: string | null) {
     return value ? formatLastPrice(value) : value;
   }
 }

@@ -1,4 +1,4 @@
-import { InjectionToken, ModuleWithProviders, NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule } from '@angular/core';
 import { WebsocketMessagesService } from './services/websocket-messages.service';
 import { WebsocketService } from './services/websocket.service';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from './websocket-config';
@@ -7,7 +7,7 @@ import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from './websocket-config';
   providers: [WebsocketService, WebsocketMessagesService],
 })
 export class WebsocketModule {
-  static forRoot(
+  public static forRoot(
     config: WebsocketConfig
   ): ModuleWithProviders<WebsocketModule> {
     return {

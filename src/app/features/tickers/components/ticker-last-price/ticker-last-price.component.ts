@@ -9,18 +9,18 @@ import { tickersSelectors } from 'src/app/features/tickers/store';
   templateUrl: './ticker-last-price.component.html',
 })
 export class TickerLastPriceComponent implements OnInit {
-  constructor(private store: Store<AppState>) {}
+  public positive: boolean | null = null;
+  public loading$ = this.store.select(tickersSelectors.loading);
 
-  loading$ = this.store.select(tickersSelectors.loading);
-
-  lastPrice$ = this.store
+  public lastPrice$ = this.store
     .select(tickersSelectors.lastPrice)
     .pipe(filter(Boolean));
 
-  prevLastPrice$ = this.lastPrice$; // TODO Update
-  positive: boolean | null = null;
+  private prevLastPrice$ = this.lastPrice$; // TODO Update
 
-  ngOnInit(): void {
+  public constructor(private store: Store<AppState>) {}
+
+  public ngOnInit(): void {
     this.lastPrice$
       .pipe(combineLatestWith(this.prevLastPrice$))
       .subscribe(([lastPrice, prevLastPrice]) => {

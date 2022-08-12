@@ -12,13 +12,19 @@ import { WebsocketTickerStreamParams } from '../models/websocket-ticker-stream-p
   providedIn: 'root',
 })
 export class WebsocketTickerService {
-  constructor(
+  private _subscribedIndividual = false;
+
+  private createIndividualStreamMessage =
+    this.webSocketMessagesService.createStreamMessage<WebsocketTickerStreamParams>(
+      ({ symbols }) => symbols.map((item) => `${item.toLowerCase()}@ticker`),
+      1
+    );
+
+  public constructor(
     private store: Store<AppState>,
     private webSocketService: WebsocketService,
     private webSocketMessagesService: WebsocketMessagesService
   ) {}
-
-  private _subscribedIndividual = false;
 
   public get subscribedIndividual() {
     return this._subscribedIndividual;
@@ -27,23 +33,19 @@ export class WebsocketTickerService {
     this._subscribedIndividual = value;
   }
 
-  private createIndividualStreamMessage =
-    this.webSocketMessagesService.createStreamMessage<WebsocketTickerStreamParams>(
-      ({ symbols }) => symbols.map((item) => `${item.toLowerCase()}@ticker`),
-      1
-    );
-
-  subscribeIndividual(params: WebsocketTickerStreamParams) {
+  public subscribeIndividual(params: WebsocketTickerStreamParams) {
     const message = this.createIndividualStreamMessage(params).subscribe;
+
     this.webSocketService.send(message);
   }
 
-  unsubscribeIndividual(params: WebsocketTickerStreamParams) {
+  public unsubscribeIndividual(params: WebsocketTickerStreamParams) {
     const message = this.createIndividualStreamMessage(params).unsubscribe;
+
     this.webSocketService.send(message);
   }
 
-  handleIncomingMessage(message: WebsocketTicker) {
+  public handleIncomingMessage(message: WebsocketTicker) {
     const ticker: Partial<Ticker> = {
       lastPrice: message.c,
       lastQty: message.Q,

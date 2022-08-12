@@ -9,17 +9,15 @@ import { WebsocketService } from 'src/app/websocket/services/websocket.service';
   styleUrls: ['./websocket-switch.component.scss'],
 })
 export class WebsocketSwitchComponent {
-  checked = false;
-
-  constructor(private websocketService: WebsocketService) {}
-
-  disabled$ = this.websocketService.status$.pipe(
+  public disabled$ = this.websocketService.status$.pipe(
     map((status) =>
       status === 'closing' || status === 'connecting' ? true : false
     )
   );
 
-  handleChange({ checked }: MatSlideToggleChange) {
+  public constructor(private websocketService: WebsocketService) {}
+
+  public handleChange({ checked }: MatSlideToggleChange) {
     if (checked) {
       this.websocketService.connect();
     } else {

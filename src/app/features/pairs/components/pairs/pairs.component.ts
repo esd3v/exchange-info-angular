@@ -44,18 +44,10 @@ export function getPageSlice<T>({
   styleUrls: ['./pairs.component.scss'],
 })
 export class PairsComponent implements OnInit, OnDestroy {
-  dataSource!: MatTableDataSource<PairRow>;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatPaginator) private paginator!: MatPaginator;
+  public dataSource!: MatTableDataSource<PairRow>;
 
-  constructor(
-    private websocketService: WebsocketService,
-    private websocketTickerService: WebsocketTickerService,
-    private store: Store<AppState>
-  ) {
-    this.dataSource = new MatTableDataSource();
-  }
-
-  columns: PairColumn[] = [
+  public columns: PairColumn[] = [
     { id: 'pair', numeric: false, label: 'Pair' },
     { id: 'lastPrice', numeric: true, label: 'Price' },
     { id: 'priceChangePercent', numeric: true, label: '24h Change' },
@@ -71,31 +63,49 @@ export class PairsComponent implements OnInit, OnDestroy {
   private pageClicks$ = new Subject<PageEvent>();
   private subscribedSymbols: string[] = [];
 
-  get length() {
+  public constructor(
+    private websocketService: WebsocketService,
+    private websocketTickerService: WebsocketTickerService,
+    private store: Store<AppState>
+  ) {
+    this.dataSource = new MatTableDataSource();
+  }
+
+  public get length() {
     return this.tradingSymbols$.pipe(map((data) => data.length));
   }
 
-  get pageSize() {
+  private get pageSize() {
     return this.paginator?.pageSize || this.pageSizeOptions[0];
   }
 
-  get data() {
+  private get data() {
     return this.dataSource.data;
   }
 
-  set data(rows) {
+  private set data(rows) {
     this.dataSource.data = rows;
   }
 
-  getCellValue(row: PairRow, columnId: PairColumn['id']) {
+  public getCellValue(row: PairRow, columnId: PairColumn['id']) {
     return columnId === 'pair'
       ? `${row.baseAsset}/${row.quoteAsset}`
       : row[columnId];
   }
 
-  handlePageChange(event: PageEvent) {
+  public handlePageChange(event: PageEvent) {
     this.pageClicks$.next(event);
     this.pageIndex$.next(event.pageIndex);
+  }
+
+  public ngOnInit(): void {
+    this.handleWebsocketStart();
+    this.updateDataOnTickersUpdate();
+  }
+
+  public ngOnDestroy(): void {
+    this.pageClicks$.complete();
+    this.pageIndex$.complete();
   }
 
   private handlePageChangeDebounced() {
@@ -194,15 +204,5 @@ export class PairsComponent implements OnInit, OnDestroy {
         });
       }
     });
-  }
-
-  ngOnInit(): void {
-    this.handleWebsocketStart();
-    this.updateDataOnTickersUpdate();
-  }
-
-  ngOnDestroy(): void {
-    this.pageClicks$.complete();
-    this.pageIndex$.complete();
   }
 }

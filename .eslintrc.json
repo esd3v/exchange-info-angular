@@ -18,6 +18,7 @@
           { "argsIgnorePattern": "^_" }
         ],
         "@typescript-eslint/explicit-member-accessibility": ["error"],
+        "@typescript-eslint/member-ordering": ["error"],
         "padding-line-between-statements": [
           "warn",
           // Always require blank lines after directive (like "use-strict"), except between directives

@@ -3,9 +3,7 @@ import { AppState } from '..';
 import { symbolsAdapter } from './symbols.state';
 
 const featureSelector = createFeatureSelector<AppState['symbols']>('symbols');
-
-const { selectAll, selectEntities, selectIds, selectTotal } =
-  symbolsAdapter.getSelectors();
+const { selectAll, selectEntities, selectIds } = symbolsAdapter.getSelectors();
 
 export const ids = createSelector(featureSelector, selectIds);
 

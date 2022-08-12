@@ -7,12 +7,7 @@ import { symbolsActions } from 'src/app/store/symbols';
 
 @Injectable()
 export class ExchangeInfoEffects {
-  constructor(
-    private actions$: Actions,
-    private exchangeInfoService: ExchangeInfoService
-  ) {}
-
-  loadExchangeInfo$ = createEffect(() => {
+  public loadExchangeInfo$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(exchangeInfoActions.load),
       switchMap(() => {
@@ -23,7 +18,7 @@ export class ExchangeInfoEffects {
     );
   });
 
-  createSymbols$ = createEffect(() => {
+  public createSymbols$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(exchangeInfoActions.loadSuccess),
       map((data) => {
@@ -31,4 +26,9 @@ export class ExchangeInfoEffects {
       })
     );
   });
+
+  public constructor(
+    private actions$: Actions,
+    private exchangeInfoService: ExchangeInfoService
+  ) {}
 }

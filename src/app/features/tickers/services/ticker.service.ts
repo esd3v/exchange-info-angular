@@ -7,9 +7,9 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class TickerService {
-  constructor(private http: HttpClient) {}
+  public constructor(private http: HttpClient) {}
 
-  get(): Observable<Ticker[]> {
+  public get(): Observable<Ticker[]> {
     return this.http.get<Ticker[]>('ticker/24hr');
   }
 }

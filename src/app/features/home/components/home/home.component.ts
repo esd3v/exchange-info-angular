@@ -11,9 +11,12 @@ import { globalActions } from 'src/app/store/global';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  constructor(private store: Store<AppState>, private route: ActivatedRoute) {}
+  public constructor(
+    private store: Store<AppState>,
+    private route: ActivatedRoute
+  ) {}
 
-  ngOnInit() {
+  public ngOnInit() {
     const routePair = this.route.snapshot.paramMap.get('pair');
 
     if (routePair !== null) {

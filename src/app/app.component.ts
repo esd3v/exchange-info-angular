@@ -10,7 +10,7 @@ import {
   tickersActions,
   tickersSelectors,
 } from 'src/app/features/tickers/store';
-import { symbolsActions, symbolsSelectors } from 'src/app/store/symbols';
+import { symbolsSelectors } from 'src/app/store/symbols';
 import { formatLastPrice } from './shared/helpers';
 import { WebsocketMessageIncoming } from './websocket/models/websocket-message-incoming.model';
 import { WebsocketTickerService } from './features/tickers/services/websocket-ticker.service';
@@ -25,7 +25,7 @@ import {
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
-  constructor(
+  public constructor(
     private route: ActivatedRoute,
     private router: Router,
     private titleService: Title,
@@ -34,7 +34,7 @@ export class AppComponent implements OnInit {
     private store: Store<AppState>
   ) {}
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.setTitle();
     this.loadTicker();
     this.loadExchangeInfo();
@@ -43,7 +43,7 @@ export class AppComponent implements OnInit {
     this.handleWebsocketMessage();
   }
 
-  setTitle() {
+  private setTitle() {
     const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
     const globalPair$ = this.store.select(globalSelectors.globalPair);
 
@@ -66,20 +66,20 @@ export class AppComponent implements OnInit {
       });
   }
 
-  loadExchangeInfo() {
+  private loadExchangeInfo() {
     this.store.dispatch(exchangeInfoActions.load());
   }
 
-  loadTicker() {
+  private loadTicker() {
     const globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
 
-    globalSymbol$.pipe(filter(Boolean)).subscribe((symbol) => {
+    globalSymbol$.pipe(filter(Boolean)).subscribe(() => {
       this.store.dispatch(tickersActions.load());
     });
   }
 
   // If we opened root without pair param
-  handleEmptyPair() {
+  private handleEmptyPair() {
     this.router.events.subscribe((data: unknown) => {
       const { type } = data as Event;
 
@@ -87,13 +87,12 @@ export class AppComponent implements OnInit {
       if (Number(type) === 1) {
         // If root (/)
         if (!this.route.children.length) {
-          const firstSymbol$ = this.store.select(symbolsSelectors.firstSymbol);
-
           this.store
             .select(symbolsSelectors.allSymbols)
             .pipe(filter(Boolean))
             .subscribe((data) => {
               const firstSymbol = data[0];
+
               console.log('data', data);
 
               if (firstSymbol) {
@@ -109,7 +108,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  handleWebsocketStart() {
+  private handleWebsocketStart() {
     const tickerStatus$ = this.store.select(tickersSelectors.status);
     const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
     const websocketStatus$ = this.websocketService.status$;
@@ -136,7 +135,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  handleWebsocketMessage() {
+  private handleWebsocketMessage() {
     this.websocketService.messages$.subscribe(({ data }) => {
       const parsed: WebsocketMessageIncoming = JSON.parse(data);
 

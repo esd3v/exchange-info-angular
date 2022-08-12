@@ -6,10 +6,10 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./ticker-card.component.scss'],
 })
 export class TickerCardComponent {
-  constructor() {}
+  @Input() public title: string | null = null;
+  @Input() public value: string | number | null = null;
+  @Input() public loading: boolean | null = false;
+  @Input() public positive: boolean | null = null;
 
-  @Input() title: string | null = null;
-  @Input() value: string | number | null = null;
-  @Input() loading: boolean | null = false;
-  @Input() positive: boolean | null = null;
+  public constructor() {}
 }

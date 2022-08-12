@@ -5,9 +5,9 @@ import { WebsocketMessageStreamParams } from '../models/websocket-message-stream
   providedIn: 'root',
 })
 export class WebsocketMessagesService {
-  constructor() {}
+  public constructor() {}
 
-  createStreamMessage<T extends Record<string, any>>(
+  public createStreamMessage<T extends Record<string, any>>(
     fn: (params: T) => string[],
     id: number
   ) {

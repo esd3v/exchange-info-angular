@@ -7,7 +7,7 @@ import { SITE_NAME } from 'src/app/shared/config';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-  constructor() {}
+  public siteName = SITE_NAME;
 
-  siteName = SITE_NAME;
+  public constructor() {}
 }
