@@ -44,17 +44,6 @@ export function getPageSlice<T>({
   styleUrls: ['./pairs.component.scss'],
 })
 export class PairsComponent implements OnInit, OnDestroy {
-  @ViewChild(MatPaginator) private paginator!: MatPaginator;
-  public dataSource!: MatTableDataSource<PairRow>;
-
-  public columns: PairColumn[] = [
-    { id: 'pair', numeric: false, label: 'Pair' },
-    { id: 'lastPrice', numeric: true, label: 'Price' },
-    { id: 'priceChangePercent', numeric: true, label: '24h Change' },
-  ];
-
-  public pageSizeOptions = [15];
-  public displayedColumns: string[] = this.columns.map((item) => item.id);
   private tickers$ = this.store.select(tickersSelectors.tickers);
   private tradingSymbols$ = this.store.select(symbolsSelectors.tradingSymbols);
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
@@ -62,18 +51,9 @@ export class PairsComponent implements OnInit, OnDestroy {
   private pageIndex$ = new BehaviorSubject<number>(0);
   private pageClicks$ = new Subject<PageEvent>();
   private subscribedSymbols: string[] = [];
-
-  public constructor(
-    private websocketService: WebsocketService,
-    private websocketTickerService: WebsocketTickerService,
-    private store: Store<AppState>
-  ) {
-    this.dataSource = new MatTableDataSource();
-  }
-
-  public get length() {
-    return this.tradingSymbols$.pipe(map((data) => data.length));
-  }
+  private tickersStatus$ = this.store.select(tickersSelectors.status);
+  private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
+  @ViewChild(MatPaginator) private paginator!: MatPaginator;
 
   private get pageSize() {
     return this.paginator?.pageSize || this.pageSizeOptions[0];
@@ -87,25 +67,39 @@ export class PairsComponent implements OnInit, OnDestroy {
     this.dataSource.data = rows;
   }
 
-  public getCellValue(row: PairRow, columnId: PairColumn['id']) {
-    return columnId === 'pair'
-      ? `${row.baseAsset}/${row.quoteAsset}`
-      : row[columnId];
+  public pageSizeOptions = [15];
+
+  public dataSource!: MatTableDataSource<PairRow>;
+
+  public columns: PairColumn[] = [
+    { id: 'pair', numeric: false, label: 'Pair' },
+    { id: 'lastPrice', numeric: true, label: 'Price' },
+    { id: 'priceChangePercent', numeric: true, label: '24h Change' },
+  ];
+
+  public displayedColumns: string[] = this.columns.map((item) => item.id);
+  public placeholderRows = Array(this.pageSize);
+
+  public loading$ = combineLatest([
+    this.tickersStatus$,
+    this.tradingSymbolsStatus$,
+  ]).pipe(
+    map(
+      ([tickersStatus, tradingSymbolsStatus]) =>
+        tickersStatus === 'loading' || tradingSymbolsStatus === 'loading'
+    )
+  );
+
+  public get length() {
+    return this.tradingSymbols$.pipe(map((data) => data.length));
   }
 
-  public handlePageChange(event: PageEvent) {
-    this.pageClicks$.next(event);
-    this.pageIndex$.next(event.pageIndex);
-  }
-
-  public ngOnInit(): void {
-    this.handleWebsocketStart();
-    this.updateDataOnTickersUpdate();
-  }
-
-  public ngOnDestroy(): void {
-    this.pageClicks$.complete();
-    this.pageIndex$.complete();
+  public constructor(
+    private websocketService: WebsocketService,
+    private websocketTickerService: WebsocketTickerService,
+    private store: Store<AppState>
+  ) {
+    this.dataSource = new MatTableDataSource();
   }
 
   private handlePageChangeDebounced() {
@@ -161,21 +155,20 @@ export class PairsComponent implements OnInit, OnDestroy {
   }
 
   private updateDataOnTickersUpdate() {
-    const slicedSymbols$ = combineLatest([
+    const rows$ = combineLatest([
       this.tradingSymbols$,
+      this.tickers$,
       this.pageIndex$,
     ]).pipe(
-      map(([tradingSymbols, pageIndex]) => {
-        return getPageSlice({
+      map(([tradingSymbols, tickers, pageIndex]) => {
+        const pageSymbols = getPageSlice({
           page: pageIndex || 0,
           rows: tradingSymbols,
           rowsPerPage: this.pageSize,
         });
-      })
-    );
 
-    const rows$ = combineLatest([slicedSymbols$, this.tickers$]).pipe(
-      map(([slicedSymbols, tickers]) => this.createRows(slicedSymbols, tickers))
+        return this.createRows(pageSymbols, tickers);
+      })
     );
 
     rows$.subscribe((rows) => {
@@ -204,5 +197,26 @@ export class PairsComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  public getCellValue(row: PairRow, columnId: PairColumn['id']) {
+    return columnId === 'pair'
+      ? `${row.baseAsset}/${row.quoteAsset}`
+      : row[columnId];
+  }
+
+  public handlePageChange(event: PageEvent) {
+    this.pageClicks$.next(event);
+    this.pageIndex$.next(event.pageIndex);
+  }
+
+  public ngOnInit(): void {
+    this.handleWebsocketStart();
+    this.updateDataOnTickersUpdate();
+  }
+
+  public ngOnDestroy(): void {
+    this.pageClicks$.complete();
+    this.pageIndex$.complete();
   }
 }

@@ -1,9 +1,17 @@
 <app-window title="Pairs">
-  <table mat-table [dataSource]="dataSource">
+  <table
+    mat-table
+    [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
+  >
     <ng-container *ngFor="let column of columns" [matColumnDef]="column.id" }>
       <th mat-header-cell *matHeaderCellDef>{{ column.label }}</th>
       <td mat-cell *matCellDef="let element">
-        {{ getCellValue(element, column.id) }}
+        <ng-template [ngIf]="(loading$ | async) === true">
+          <app-skeleton width="80%"></app-skeleton>
+        </ng-template>
+        <ng-template [ngIf]="(loading$ | async) === false">
+          {{ getCellValue(element, column.id) }}
+        </ng-template>
       </td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
