@@ -8,34 +8,60 @@ type Reason = 'failed' | 'terminated' | 'restoring' | 'restored' | null;
 
 @Injectable()
 export class WebsocketService implements OnDestroy {
-  public reason$ = new BehaviorSubject<Reason>(null);
-  public status$ = new BehaviorSubject<Status>(null);
-
   private socket!: WebSocket | null;
   private _messages$ = new Subject<MessageEvent<string>>();
   private status!: Status;
   private reason!: Reason;
+
+  public reason$ = new BehaviorSubject<Reason>(null);
+  public status$ = new BehaviorSubject<Status>(null);
+
+  public get messages$() {
+    return this._messages$;
+  }
 
   public constructor(
     @Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig
   ) {
     this.status$.subscribe((status) => {
       // TODO REMOVE
-      console.log(status);
+      console.log('status', status);
 
       this.status = status;
     });
 
     this.reason$.subscribe((reason) => {
       // TODO REMOVE
-      console.log(reason);
+      console.log('reason', reason);
 
       this.reason = reason;
     });
   }
 
-  public get messages$() {
-    return this._messages$;
+  private keepAlive() {
+    if (this.config.keepAlive?.msec) {
+      interval(this.config.keepAlive.msec)
+        .pipe(takeWhile(() => this.status === 'open'))
+        .subscribe(() => {
+          if (this.config.keepAlive?.message) {
+            this.send(this.config.keepAlive.message);
+          }
+        });
+    }
+  }
+
+  private reconnect() {
+    if (this.config.reconnect) {
+      interval(this.config.reconnect)
+        .pipe(
+          takeWhile(
+            () => this.status === 'closed' && this.reason === 'terminated'
+          )
+        )
+        .subscribe(() => {
+          this.connect();
+        });
+    }
   }
 
   public close() {
@@ -86,31 +112,5 @@ export class WebsocketService implements OnDestroy {
 
       this.status$.next('closed');
     };
-  }
-
-  private keepAlive() {
-    if (this.config.keepAlive?.msec) {
-      interval(this.config.keepAlive.msec)
-        .pipe(takeWhile(() => this.status === 'open'))
-        .subscribe(() => {
-          if (this.config.keepAlive?.message) {
-            this.send(this.config.keepAlive.message);
-          }
-        });
-    }
-  }
-
-  private reconnect() {
-    if (this.config.reconnect) {
-      interval(this.config.reconnect)
-        .pipe(
-          takeWhile(
-            () => this.status === 'closed' && this.reason === 'terminated'
-          )
-        )
-        .subscribe(() => {
-          this.connect();
-        });
-    }
   }
 }

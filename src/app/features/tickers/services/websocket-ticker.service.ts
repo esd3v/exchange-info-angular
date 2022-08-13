@@ -20,18 +20,19 @@ export class WebsocketTickerService {
       1
     );
 
+  public get subscribedIndividual() {
+    return this._subscribedIndividual;
+  }
+
+  public set subscribedIndividual(value) {
+    this._subscribedIndividual = value;
+  }
+
   public constructor(
     private store: Store<AppState>,
     private webSocketService: WebsocketService,
     private webSocketMessagesService: WebsocketMessagesService
   ) {}
-
-  public get subscribedIndividual() {
-    return this._subscribedIndividual;
-  }
-  public set subscribedIndividual(value) {
-    this._subscribedIndividual = value;
-  }
 
   public subscribeIndividual(params: WebsocketTickerStreamParams) {
     const message = this.createIndividualStreamMessage(params).subscribe;

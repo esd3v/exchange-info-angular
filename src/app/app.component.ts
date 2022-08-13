@@ -34,15 +34,6 @@ export class AppComponent implements OnInit {
     private store: Store<AppState>
   ) {}
 
-  public ngOnInit(): void {
-    this.setTitle();
-    this.loadTicker();
-    this.loadExchangeInfo();
-    this.handleEmptyPair();
-    this.handleWebsocketStart();
-    this.handleWebsocketMessage();
-  }
-
   private setTitle() {
     const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
     const globalPair$ = this.store.select(globalSelectors.globalPair);
@@ -93,8 +84,6 @@ export class AppComponent implements OnInit {
             .subscribe((data) => {
               const firstSymbol = data[0];
 
-              console.log('data', data);
-
               if (firstSymbol) {
                 const { baseAsset, quoteAsset } = firstSymbol;
                 const pair = `${baseAsset}_${quoteAsset}`;
@@ -143,5 +132,14 @@ export class AppComponent implements OnInit {
         this.websocketTickerService.handleIncomingMessage(parsed);
       }
     });
+  }
+
+  public ngOnInit(): void {
+    this.setTitle();
+    this.loadTicker();
+    this.loadExchangeInfo();
+    this.handleEmptyPair();
+    this.handleWebsocketStart();
+    this.handleWebsocketMessage();
   }
 }

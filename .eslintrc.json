@@ -18,7 +18,22 @@
           { "argsIgnorePattern": "^_" }
         ],
         "@typescript-eslint/explicit-member-accessibility": ["error"],
-        "@typescript-eslint/member-ordering": ["error"],
+        "@typescript-eslint/member-ordering": [
+          "error",
+          {
+            "default": [
+              "field",
+              "decorated-field",
+              "get",
+              "set",
+              "decorated-get",
+              "decorated-set",
+              "constructor",
+              "method",
+              "decorated-method"
+            ]
+          }
+        ],
         "padding-line-between-statements": [
           "warn",
           // Always require blank lines after directive (like "use-strict"), except between directives

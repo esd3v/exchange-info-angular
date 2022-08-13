@@ -53,22 +53,7 @@ export class PairsComponent implements OnInit, OnDestroy {
   private subscribedSymbols: string[] = [];
   private tickersStatus$ = this.store.select(tickersSelectors.status);
   private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
-  @ViewChild(MatPaginator) private paginator!: MatPaginator;
-
-  private get pageSize() {
-    return this.paginator?.pageSize || this.pageSizeOptions[0];
-  }
-
-  private get data() {
-    return this.dataSource.data;
-  }
-
-  private set data(rows) {
-    this.dataSource.data = rows;
-  }
-
   public pageSizeOptions = [15];
-
   public dataSource!: MatTableDataSource<PairRow>;
 
   public columns: PairColumn[] = [
@@ -90,8 +75,22 @@ export class PairsComponent implements OnInit, OnDestroy {
     )
   );
 
+  @ViewChild(MatPaginator) private paginator!: MatPaginator;
+
+  private get pageSize() {
+    return this.paginator?.pageSize || this.pageSizeOptions[0];
+  }
+
   public get length() {
     return this.tradingSymbols$.pipe(map((data) => data.length));
+  }
+
+  private get data() {
+    return this.dataSource.data;
+  }
+
+  private set data(rows) {
+    this.dataSource.data = rows;
   }
 
   public constructor(
