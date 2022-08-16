@@ -1,4 +1,8 @@
 import { TOFIXED_DIGITS } from './config';
+import * as dayjs from 'dayjs';
+import * as utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export const addPlusIfPositive = (value: string): string =>
   `${Number(value) > 0 ? `+${value}` : value}`;
@@ -36,3 +40,13 @@ export const formatPriceChangePercent = (value: string) =>
 
 export const isPositive = (value: string | null) =>
   value === null || Number(value) === 0 ? null : Number(value) > 0;
+
+export const getFormattedDate = ({
+  msec,
+  utc,
+  format = 'DD-MM-YYYY HH:mm',
+}: {
+  msec: number;
+  format?: string;
+  utc?: boolean;
+}) => (utc ? dayjs.utc(msec).format(format) : dayjs(msec).format(format));

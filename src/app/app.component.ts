@@ -19,6 +19,7 @@ import {
   exchangeInfoActions,
   exchangeInfoSelectors,
 } from './features/exchange-info/store';
+import { candlesActions, candlesSelectors } from './features/candles/store';
 
 @Component({
   selector: 'app-root',
@@ -67,6 +68,21 @@ export class AppComponent implements OnInit {
     globalSymbol$.pipe(filter(Boolean)).subscribe(() => {
       this.store.dispatch(tickersActions.load());
     });
+  }
+
+  private loadCandles() {
+    const interval$ = this.store.select(candlesSelectors.interval);
+    const globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
+
+    combineLatest([globalSymbol$, interval$]).subscribe(
+      ([globalSymbol, interval]) => {
+        if (globalSymbol) {
+          this.store.dispatch(
+            candlesActions.load({ params: { symbol: globalSymbol, interval } })
+          );
+        }
+      }
+    );
   }
 
   // If we opened root without pair param
@@ -138,6 +154,7 @@ export class AppComponent implements OnInit {
     this.setTitle();
     this.loadTicker();
     this.loadExchangeInfo();
+    this.loadCandles();
     this.handleEmptyPair();
     this.handleWebsocketStart();
     this.handleWebsocketMessage();

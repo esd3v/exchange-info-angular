@@ -6,11 +6,16 @@ import { StoreModule } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from 'src/environments/environment';
 import { ExchangeInfoEffects } from '../features/exchange-info/store/exchange-info.effects';
+import { CandlesEffects } from '../features/candles/store/candles.effects';
 
 @NgModule({
   declarations: [],
   imports: [
-    EffectsModule.forRoot([TickersEffects, ExchangeInfoEffects]),
+    EffectsModule.forRoot([
+      TickersEffects,
+      ExchangeInfoEffects,
+      CandlesEffects,
+    ]),
     StoreModule.forRoot(reducers, {
       metaReducers,
     }),

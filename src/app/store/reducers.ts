@@ -5,12 +5,14 @@ import { globalReducer } from './global/global.reducer';
 import { AppState } from './state';
 import { tickersReducer } from '../features/tickers/store/tickers.reducer';
 import { exchangeInfoReducer } from '../features/exchange-info/store/exchange-info.reducer';
+import { candlesReducer } from '../features/candles/store/candles.reducer';
 
 export const reducers: ActionReducerMap<AppState> = {
   global: globalReducer,
   tickers: tickersReducer,
   symbols: symbolsReducer,
   exchangeInfo: exchangeInfoReducer,
+  candles: candlesReducer,
 };
 
 export const metaReducers: MetaReducer<AppState>[] = !environment.production
