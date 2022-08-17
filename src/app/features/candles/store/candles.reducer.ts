@@ -26,7 +26,7 @@ export const candlesReducer = createReducer(
 
     return candlesAdapter.setAll(mapped, {
       ...state,
-      status: 'loading',
+      status: 'success',
     });
   }),
   on(candlesActions.setInterval, (state, { interval }) => {

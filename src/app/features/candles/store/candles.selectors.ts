@@ -7,19 +7,20 @@ export const featureSelector =
   createFeatureSelector<AppState['candles']>('candles');
 
 const { selectAll } = candlesAdapter.getSelectors();
+const allCandles = createSelector(featureSelector, selectAll);
 
-export const ohlc = createSelector(selectAll, (state) =>
+export const ohlc = createSelector(allCandles, (state) =>
   state.map(({ open, high, low, close }) => {
     // Order is different for echarts
     return [open, close, low, high];
   })
 );
 
-export const volumes = createSelector(selectAll, (state) =>
+export const volumes = createSelector(allCandles, (state) =>
   state.map((item) => item.volume)
 );
 
-export const dates = createSelector(selectAll, (state) =>
+export const dates = createSelector(allCandles, (state) =>
   state.map((item) =>
     getFormattedDate({
       msec: item.openTime,
@@ -30,4 +31,9 @@ export const dates = createSelector(selectAll, (state) =>
 export const interval = createSelector(
   featureSelector,
   (state) => state.interval
+);
+
+export const status = createSelector(
+  featureSelector,
+  (state) => state.status
 );
