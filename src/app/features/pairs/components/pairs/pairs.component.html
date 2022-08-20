@@ -24,7 +24,7 @@
         *matCellDef="let element"
       >
         <ng-template [ngIf]="(loading$ | async) === true">
-          <app-skeleton width="80%"></app-skeleton>
+          <ngx-skeleton-loader appSkeleton width="80%"></ngx-skeleton-loader>
         </ng-template>
         <ng-template [ngIf]="(loading$ | async) === false">
           {{ getCellValue(element, column.id) }}

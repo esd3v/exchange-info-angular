@@ -8,7 +8,7 @@
     }"
   >
     <ng-template [ngIf]="loading">
-      <app-skeleton></app-skeleton>
+      <ngx-skeleton-loader appSkeleton></ngx-skeleton-loader>
     </ng-template>
     <ng-template [ngIf]="value === null && !loading"> N/A </ng-template>
     <ng-template [ngIf]="!loading && value !== null">
