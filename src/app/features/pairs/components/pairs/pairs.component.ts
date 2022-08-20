@@ -25,7 +25,7 @@ import { PairRow } from '../../models/pair-row.model';
 import { WebsocketTickerService } from 'src/app/features/tickers/services/websocket-ticker.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WEBSOCKET_UNSUBSCRIBEDELAY } from 'src/app/shared/config';
-import { globalSelectors } from 'src/app/store/global';
+import { globalActions, globalSelectors } from 'src/app/store/global';
 import { TickerEntity } from 'src/app/features/tickers/store/tickers.state';
 import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
 import { Dictionary } from '@ngrx/entity';
@@ -209,6 +209,14 @@ export class PairsComponent implements OnInit, OnDestroy {
     return columnId === 'pair'
       ? `${row.baseAsset}/${row.quoteAsset}`
       : row[columnId];
+  }
+
+  public handleRowClick({ baseAsset, quoteAsset }: PairRow) {
+    this.store.dispatch(
+      globalActions.setCurrency({
+        payload: { base: baseAsset, quote: quoteAsset },
+      })
+    );
   }
 
   public handlePageChange(event: PageEvent) {

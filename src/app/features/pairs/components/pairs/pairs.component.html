@@ -36,6 +36,7 @@
       class="table__row"
       mat-row
       *matRowDef="let row; columns: displayedColumns"
+      (click)="handleRowClick(row)"
     ></tr>
   </table>
   <mat-paginator
