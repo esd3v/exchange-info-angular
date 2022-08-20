@@ -1,0 +1,33 @@
+@use "@angular/material" as mat;
+
+$hoverColor: mat.get-color-from-palette(mat.$grey-palette, 100);
+
+@mixin override-mat-table {
+  $padding: 8px;
+
+  & thead {
+    & tr {
+      height: 0;
+      & th {
+        padding: 0 $padding $padding $padding;
+        &:first-of-type {
+          padding: 0 $padding $padding 0;
+        }
+      }
+    }
+  }
+  & tbody {
+    & tr {
+      height: 0;
+      &:hover {
+        background-color: $hoverColor;
+      }
+      & td {
+        padding: $padding;
+        &:first-of-type {
+          padding: 0;
+        }
+      }
+    }
+  }
+}

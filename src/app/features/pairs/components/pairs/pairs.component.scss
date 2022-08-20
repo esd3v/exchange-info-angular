@@ -1,3 +1,17 @@
-table {
+@import "src/styles/overrides.scss";
+
+.table {
   width: 100%;
+  table-layout: fixed;
+
+  @include override-mat-table();
+
+  &__row {
+    cursor: pointer;
+  }
+  &__cell {
+    &--alignedRight {
+      text-align: right !important;
+    }
+  }
 }

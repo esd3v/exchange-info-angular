@@ -1,5 +1,11 @@
 import { debounceTime } from 'rxjs/operators';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation,
+} from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
@@ -42,6 +48,7 @@ export function getPageSlice<T>({
   selector: 'app-pairs',
   templateUrl: './pairs.component.html',
   styleUrls: ['./pairs.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class PairsComponent implements OnInit, OnDestroy {
   private tickers$ = this.store.select(tickersSelectors.tickers);

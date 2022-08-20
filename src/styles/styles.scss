@@ -3,6 +3,7 @@
 @include mat.core();
 
 @import "bootstrap/scss/bootstrap-grid";
+@import "./overrides";
 
 html,
 body {
@@ -12,7 +13,7 @@ body {
 
 body {
   margin: 0;
-  background-color: #EBF1F5;
+  background-color: #ebf1f5;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
