@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { TickerCardModule } from '../ticker-card/ticker.module';
+import { TickerCardModule } from '../ticker-card/ticker-card.module';
 import { CommonModule } from '@angular/common';
 import { TickerLastQuantityComponent } from './ticker-last-quantity.component';
 
