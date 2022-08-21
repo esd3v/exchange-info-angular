@@ -125,6 +125,8 @@ export class ChartComponent implements OnInit {
             xAxisIndex: [0, 1],
             start: 75,
             end: 100,
+            maxSpan: 25,
+            minSpan: 5,
           },
           xAxis: [
             {
