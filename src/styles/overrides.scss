@@ -11,7 +11,7 @@ $hoverColor: mat.get-color-from-palette(mat.$grey-palette, 100);
       & th {
         padding: 0 $padding $padding $padding;
         &:first-of-type {
-          padding: 0 $padding $padding 0;
+          padding-left: 0;
         }
       }
     }
@@ -25,7 +25,7 @@ $hoverColor: mat.get-color-from-palette(mat.$grey-palette, 100);
       & td {
         padding: $padding;
         &:first-of-type {
-          padding: 0;
+          padding-left: 0;
         }
       }
     }
