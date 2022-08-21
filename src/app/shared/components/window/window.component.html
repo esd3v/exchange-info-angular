@@ -1,5 +1,10 @@
 <mat-card>
-  <div class="header">{{ title }}</div>
+  <div class="header">
+    <span>
+      {{ title }}
+    </span>
+    <ng-content select="[role=actions]"></ng-content>
+  </div>
   <mat-card-content class="content"
     ><div
       class="spinner"

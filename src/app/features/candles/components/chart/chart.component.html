@@ -1,3 +1,17 @@
-<app-window title="Chart" [loading]="(loading$ | async) === true"
-  ><div echarts [options]="chartOptions" class="chart"></div>
+<app-window title="Chart" [loading]="(loading$ | async) === true">
+  <div echarts [options]="chartOptions" class="chart"></div>
+  <div role="actions">
+    <span class="time">Time</span>
+    <mat-form-field appearance="legacy" floatLabel="never">
+      <mat-label>Time</mat-label>
+      <mat-select
+        panelOpen="false"
+        [value]="interval"
+        (selectionChange)="handleIntervalChange($event)"
+        ><mat-option *ngFor="let interval of intervals" [value]="interval">
+          {{ interval }}
+        </mat-option></mat-select
+      >
+    </mat-form-field>
+  </div>
 </app-window>

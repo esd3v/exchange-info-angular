@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { MatSelectChange } from '@angular/material/select';
 import { Store } from '@ngrx/store';
 import { EChartsOption } from 'echarts';
 import { combineLatest, filter, map } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { candlesSelectors } from '../../store';
+import { globalSelectors } from 'src/app/store/global';
+import { CandleInterval } from '../../models/candle-interval.model';
+import { candlesActions, candlesSelectors } from '../../store';
 
 @Component({
   selector: 'app-chart',
@@ -15,13 +18,55 @@ export class ChartComponent implements OnInit {
   private downColor = '#ec0000';
   private barMinWidth = 6;
 
+  public intervals: CandleInterval[] = [
+    '12h',
+    '15m',
+    '1M',
+    '1d',
+    '1h',
+    '1m',
+    '1w',
+    '2h',
+    '30m',
+    '3d',
+    '3m',
+    '4h',
+    '5m',
+    '6h',
+    '8h',
+  ];
+
+  public interval!: CandleInterval;
+
   public loading$ = this.store
     .select(candlesSelectors.status)
     .pipe(map((status) => status === 'loading'));
 
   public chartOptions!: EChartsOption;
 
-  public constructor(private store: Store<AppState>) {}
+  public constructor(private store: Store<AppState>) {
+    this.store.select(candlesSelectors.interval).subscribe((data) => {
+      this.interval = data;
+    });
+  }
+
+  public handleIntervalChange(event: MatSelectChange) {
+    const value = event.value as CandleInterval;
+
+    const globalSymbol$ = this.store
+      .select(globalSelectors.globalSymbol)
+      .pipe(filter(Boolean));
+
+    this.interval = value;
+
+    globalSymbol$.subscribe((data) => {
+      console.log('here');
+
+      this.store.dispatch(
+        candlesActions.load({ params: { interval: value, symbol: data } })
+      );
+    });
+  }
 
   public ngOnInit(): void {
     const ohlc$ = this.store.select(candlesSelectors.ohlc);

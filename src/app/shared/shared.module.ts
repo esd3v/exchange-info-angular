@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { MatSelectModule } from '@angular/material/select';
 import { HeaderModule } from './components/header/header.module';
 import { WindowModule } from './components/window/window.module';
 import { FormatLastPricePipe } from './pipes/format-last-price.pipe';
@@ -12,10 +13,11 @@ import { SkeletonDirective } from './directives/skeleton.directive';
     FormatPriceChangePercentPipe,
     SkeletonDirective,
   ],
-  imports: [HeaderModule, WindowModule, WebsocketSwitchModule],
+  imports: [HeaderModule, WindowModule, WebsocketSwitchModule, MatSelectModule],
   exports: [
     HeaderModule,
     WindowModule,
+    MatSelectModule,
     WebsocketSwitchModule,
     FormatLastPricePipe,
     FormatPriceChangePercentPipe,

@@ -9,8 +9,9 @@ mat-card {
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 $padding;
-  height: 42px;
+  height: $padding * 6;
   flex-shrink: 0;
   border-bottom: 1px solid #0000001f;
 }
