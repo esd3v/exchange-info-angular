@@ -118,26 +118,28 @@ export class AppComponent implements OnInit {
     const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
     const websocketStatus$ = this.websocketService.status$;
 
-    combineLatest([
-      websocketStatus$,
-      exchangeInfoStatus$,
-      tickerStatus$,
-    ]).subscribe(([websocketStatus, exchangeInfoStatus, tickerStatus]) => {
-      if (
-        websocketStatus === 'open' &&
-        tickerStatus === 'success' &&
-        exchangeInfoStatus === 'success'
-      ) {
-        this.store
-          .select(globalSelectors.globalSymbol)
-          .pipe(filter(Boolean))
-          .subscribe((globalSymbol) => {
-            this.websocketTickerService.subscribeIndividual({
-              symbols: [globalSymbol],
-            });
-          });
+    websocketStatus$.subscribe((data) => {
+      if (data === 'open') {
+        this.loadExchangeInfo();
+        this.loadTicker();
+        this.loadCandles();
       }
     });
+
+    combineLatest([exchangeInfoStatus$, tickerStatus$]).subscribe(
+      ([exchangeInfoStatus, tickerStatus]) => {
+        if (tickerStatus === 'success' && exchangeInfoStatus === 'success') {
+          this.store
+            .select(globalSelectors.globalSymbol)
+            .pipe(filter(Boolean))
+            .subscribe((globalSymbol) => {
+              this.websocketTickerService.subscribeIndividual({
+                symbols: [globalSymbol],
+              });
+            });
+        }
+      }
+    );
   }
 
   private handleWebsocketMessage() {
