@@ -13,5 +13,11 @@
     &--alignedRight {
       text-align: right !important;
     }
+    &--positive {
+      color: green;
+    }
+    &--negative {
+      color: red;
+    }
   }
 }

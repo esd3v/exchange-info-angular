@@ -16,12 +16,14 @@
         {{ column.label }}
       </th>
       <td
+        *matCellDef="let element"
         [ngClass]="{
           table__cell: true,
-          'table__cell--alignedRight': column.numeric
+          'table__cell--alignedRight': column.numeric,
+          'table__cell--positive': isPositive(element, column.id) === true,
+          'table__cell--negative': isPositive(element, column.id) === false
         }"
         mat-cell
-        *matCellDef="let element"
       >
         <ng-template [ngIf]="(loading$ | async) === true">
           <ngx-skeleton-loader appSkeleton width="80%"></ngx-skeleton-loader>

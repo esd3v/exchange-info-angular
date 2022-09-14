@@ -108,6 +108,18 @@ export class PairsComponent implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource();
   }
 
+  public isPositive(data: PairRow | undefined, columnId: PairColumn['id']) {
+    if (columnId === 'priceChangePercent') {
+      return Number(data?.priceChangePercent) > 0
+        ? true
+        : Number(data?.priceChangePercent) < 0
+        ? false
+        : null;
+    } else {
+      return null;
+    }
+  }
+
   private handlePageChangeDebounced() {
     this.unsubscribeFromWebsocket();
 
@@ -206,9 +218,15 @@ export class PairsComponent implements OnInit, OnDestroy {
   }
 
   public getCellValue(row: PairRow, columnId: PairColumn['id']) {
-    return columnId === 'pair'
-      ? `${row.baseAsset}/${row.quoteAsset}`
-      : row[columnId];
+    if (columnId === 'pair') {
+      return `${row.baseAsset}/${row.quoteAsset}`;
+    } else if (columnId === 'priceChangePercent') {
+      const data = row[columnId];
+
+      return `${Number(data) > 0 ? '+' : ''}${data}%`;
+    } else {
+      return row[columnId];
+    }
   }
 
   public handleRowClick({ baseAsset, quoteAsset }: PairRow) {
