@@ -48,6 +48,7 @@ export class WebsocketTickerService {
 
   public handleIncomingMessage(message: WebsocketTicker) {
     const ticker: Partial<Ticker> = {
+      symbol: message.s,
       lastPrice: message.c,
       lastQty: message.Q,
       priceChange: message.p,
@@ -55,8 +56,6 @@ export class WebsocketTickerService {
       count: message.n,
     };
 
-    this.store.dispatch(
-      tickersActions.update({ symbol: message.s, data: ticker })
-    );
+    this.store.dispatch(tickersActions.update({ data: ticker }));
   }
 }

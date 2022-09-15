@@ -11,7 +11,7 @@ export const create = createAction(TICKER_CREATE, props<{ data: Ticker[] }>());
 
 export const update = createAction(
   TICKER_UPDATE,
-  props<{ symbol: string; data: Partial<Ticker> }>()
+  props<{ data: Partial<Ticker> }>()
 );
 
 export const load = createAction(TICKER_LOAD);

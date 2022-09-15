@@ -36,7 +36,9 @@ export const tickersReducer = createReducer(
       status: 'success',
     });
   }),
-  on(tickersActions.update, (state, { symbol, data }) => {
-    return tickersAdapter.updateOne({ id: symbol, changes: data }, state);
+  on(tickersActions.update, (state, { data }) => {
+    return data.symbol
+      ? tickersAdapter.updateOne({ id: data.symbol, changes: data }, state)
+      : state;
   })
 );
