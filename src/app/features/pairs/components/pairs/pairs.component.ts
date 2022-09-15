@@ -1,5 +1,6 @@
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter } from 'rxjs/operators';
 import {
+  ChangeDetectionStrategy,
   Component,
   OnDestroy,
   OnInit,
@@ -9,14 +10,7 @@ import {
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
-import {
-  BehaviorSubject,
-  combineLatest,
-  interval,
-  map,
-  Subject,
-  take,
-} from 'rxjs';
+import { combineLatest, interval, map, Subject, take } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { tickersSelectors } from 'src/app/features/tickers/store';
 import { symbolsSelectors } from 'src/app/store/symbols';
@@ -49,18 +43,19 @@ export function getPageSlice<T>({
   templateUrl: './pairs.component.html',
   styleUrls: ['./pairs.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PairsComponent implements OnInit, OnDestroy {
   private tickers$ = this.store.select(tickersSelectors.tickers);
   private tradingSymbols$ = this.store.select(symbolsSelectors.tradingSymbols);
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
   private debounceTime = 1000;
-  private pageIndex$ = new BehaviorSubject<number>(0);
   private pageClicks$ = new Subject<PageEvent>();
   private subscribedSymbols: string[] = [];
   private tickersStatus$ = this.store.select(tickersSelectors.status);
   private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
+  public allRows: PairRow[] = [];
   public dataSource!: MatTableDataSource<PairRow>;
 
   public columns: PairColumn[] = [
@@ -92,21 +87,15 @@ export class PairsComponent implements OnInit, OnDestroy {
     return this.tradingSymbols$.pipe(map((data) => data.length));
   }
 
-  private get data() {
-    return this.dataSource.data;
-  }
-
-  private set data(rows) {
-    this.dataSource.data = rows;
+  private get pageData$() {
+    return this.dataSource.connect();
   }
 
   public constructor(
     private websocketService: WebsocketService,
     private websocketTickerService: WebsocketTickerService,
     private store: Store<AppState>
-  ) {
-    this.dataSource = new MatTableDataSource();
-  }
+  ) {}
 
   public isPositive(data: PairRow | undefined, columnId: PairColumn['id']) {
     if (columnId === 'priceChangePercent') {
@@ -131,11 +120,15 @@ export class PairsComponent implements OnInit, OnDestroy {
   }
 
   private subscribeToWebsocket() {
-    const symbols$ = this.createSymbolsFromRows(this.data);
+    this.pageData$.pipe(take(1)).subscribe((data) => {
+      const symbols$ = this.createSymbolsFromRows(data);
 
-    symbols$.subscribe((symbols) => {
-      this.subscribedSymbols = symbols;
-      this.websocketTickerService.subscribeIndividual({ symbols });
+      symbols$.subscribe((symbols) => {
+        if (symbols.length) {
+          this.subscribedSymbols = symbols;
+          this.websocketTickerService.subscribeIndividual({ symbols });
+        }
+      });
     });
   }
 
@@ -172,28 +165,7 @@ export class PairsComponent implements OnInit, OnDestroy {
     return rows;
   }
 
-  private updateDataOnTickersUpdate() {
-    const rows$ = combineLatest([
-      this.tradingSymbols$,
-      this.tickers$,
-      this.pageIndex$,
-    ]).pipe(
-      map(([tradingSymbols, tickers, pageIndex]) => {
-        const pageSymbols = getPageSlice({
-          page: pageIndex || 0,
-          rows: tradingSymbols,
-          rowsPerPage: this.pageSize,
-        });
-
-        return this.createRows(pageSymbols, tickers);
-      })
-    );
-
-    rows$.subscribe((rows) => {
-      this.data = rows;
-    });
-  }
-
+  // TODO Move globalSymbol filtering
   private createSymbolsFromRows(rows: PairRow[]) {
     return this.globalSymbol$.pipe(
       map((globalSymbol) =>
@@ -239,16 +211,33 @@ export class PairsComponent implements OnInit, OnDestroy {
 
   public handlePageChange(event: PageEvent) {
     this.pageClicks$.next(event);
-    this.pageIndex$.next(event.pageIndex);
   }
 
   public ngOnInit(): void {
     this.handleWebsocketStart();
-    this.updateDataOnTickersUpdate();
+
+    // React to tickers update from websockets
+    combineLatest([this.tradingSymbols$, this.tickers$])
+      .pipe(
+        filter(
+          ([tradingSymbols, tickers]) =>
+            Boolean(tradingSymbols.length) &&
+            Boolean(Object.keys(tickers).length)
+        )
+      )
+      .subscribe(([tradingSymbols, tickers]) => {
+        if (!this.dataSource) {
+          const rows = this.createRows(tradingSymbols, tickers);
+
+          this.dataSource = new MatTableDataSource(rows);
+          this.dataSource.paginator = this.paginator;
+        } else {
+          this.dataSource.data = this.createRows(tradingSymbols, tickers);
+        }
+      });
   }
 
   public ngOnDestroy(): void {
     this.pageClicks$.complete();
-    this.pageIndex$.complete();
   }
 }
