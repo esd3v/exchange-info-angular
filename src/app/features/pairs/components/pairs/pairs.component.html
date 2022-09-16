@@ -2,6 +2,7 @@
   <table
     mat-table
     class="table"
+    [trackBy]="trackRow"
     [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
   >
     <ng-container *ngFor="let column of columns" [matColumnDef]="column.id" }>

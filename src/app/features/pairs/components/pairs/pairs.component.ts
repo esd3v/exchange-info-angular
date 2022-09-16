@@ -45,7 +45,7 @@ export function getPageSlice<T>({
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PairsComponent implements OnInit, OnDestroy {
+export class PairsComponent implements OnDestroy, OnInit {
   private tickers$ = this.store.select(tickersSelectors.tickers);
   private tradingSymbols$ = this.store.select(symbolsSelectors.tradingSymbols);
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
@@ -56,7 +56,7 @@ export class PairsComponent implements OnInit, OnDestroy {
   private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
   public allRows: PairRow[] = [];
-  public dataSource!: MatTableDataSource<PairRow>;
+  public dataSource: MatTableDataSource<PairRow> = new MatTableDataSource();
 
   public columns: PairColumn[] = [
     { id: 'pair', numeric: false, label: 'Pair' },
@@ -65,7 +65,13 @@ export class PairsComponent implements OnInit, OnDestroy {
   ];
 
   public displayedColumns: string[] = this.columns.map((item) => item.id);
-  public placeholderRows = Array(this.pageSize);
+
+  public placeholderRows = Array<PairRow>(this.pageSize).fill({
+    baseAsset: '',
+    lastPrice: '',
+    priceChangePercent: '',
+    quoteAsset: '',
+  });
 
   public loading$ = combineLatest([
     this.tickersStatus$,
@@ -77,7 +83,7 @@ export class PairsComponent implements OnInit, OnDestroy {
     )
   );
 
-  @ViewChild(MatPaginator) private paginator!: MatPaginator;
+  @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
 
   private get pageSize() {
     return this.paginator?.pageSize || this.pageSizeOptions[0];
@@ -96,6 +102,10 @@ export class PairsComponent implements OnInit, OnDestroy {
     private websocketTickerService: WebsocketTickerService,
     private store: Store<AppState>
   ) {}
+
+  public trackRow(_index: number, item: PairRow) {
+    return `${item.baseAsset}${item.quoteAsset}`;
+  }
 
   public isPositive(data: PairRow | undefined, columnId: PairColumn['id']) {
     if (columnId === 'priceChangePercent') {
@@ -165,6 +175,23 @@ export class PairsComponent implements OnInit, OnDestroy {
     return rows;
   }
 
+  private getUpdatedRows(tickers: Dictionary<TickerEntity>) {
+    return this.dataSource.data.map((item): PairRow => {
+      const symbol = `${item.baseAsset}${item.quoteAsset}`;
+      const ticker = tickers[symbol];
+
+      return (
+        {
+          baseAsset: item.baseAsset,
+          lastPrice: ticker?.lastPrice || item.lastPrice,
+          priceChangePercent:
+            ticker?.priceChangePercent || item.priceChangePercent,
+          quoteAsset: item.quoteAsset,
+        } || item
+      );
+    });
+  }
+
   // TODO Move globalSymbol filtering
   private createSymbolsFromRows(rows: PairRow[]) {
     return this.globalSymbol$.pipe(
@@ -215,6 +242,7 @@ export class PairsComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.handleWebsocketStart();
+    this.dataSource.paginator = this.paginator;
 
     // React to tickers update from websockets
     combineLatest([this.tradingSymbols$, this.tickers$])
@@ -226,14 +254,9 @@ export class PairsComponent implements OnInit, OnDestroy {
         )
       )
       .subscribe(([tradingSymbols, tickers]) => {
-        if (!this.dataSource) {
-          const rows = this.createRows(tradingSymbols, tickers);
-
-          this.dataSource = new MatTableDataSource(rows);
-          this.dataSource.paginator = this.paginator;
-        } else {
-          this.dataSource.data = this.createRows(tradingSymbols, tickers);
-        }
+        this.dataSource.data = !this.dataSource.data.length
+          ? this.createRows(tradingSymbols, tickers)
+          : this.getUpdatedRows(tickers);
       });
   }
 
