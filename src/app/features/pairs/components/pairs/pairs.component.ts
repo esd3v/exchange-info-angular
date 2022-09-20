@@ -23,6 +23,7 @@ import { globalActions, globalSelectors } from 'src/app/store/global';
 import { TickerEntity } from 'src/app/features/tickers/store/tickers.state';
 import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
 import { Dictionary } from '@ngrx/entity';
+import { Router } from '@angular/router';
 
 export function getPageSlice<T>({
   page,
@@ -57,7 +58,6 @@ export class PairsComponent implements OnDestroy, OnInit {
   private tickersStatus$ = this.store.select(tickersSelectors.status);
   private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
-  public allRows: PairRow[] = [];
   public dataSource: MatTableDataSource<PairRow> = new MatTableDataSource();
 
   public columns: PairColumn[] = [
@@ -100,7 +100,8 @@ export class PairsComponent implements OnDestroy, OnInit {
   public constructor(
     private websocketService: WebsocketService,
     private websocketTickerService: WebsocketTickerService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private router: Router
   ) {}
 
   public trackRow(_index: number, item: PairRow) {
@@ -229,11 +230,15 @@ export class PairsComponent implements OnDestroy, OnInit {
   }
 
   public handleRowClick({ baseAsset, quoteAsset }: PairRow) {
+    const pair = `${baseAsset}_${quoteAsset}`;
+
     this.store.dispatch(
       globalActions.setCurrency({
         payload: { base: baseAsset, quote: quoteAsset },
       })
     );
+
+    this.router.navigate([pair]);
   }
 
   public handlePageChange(event: PageEvent) {
