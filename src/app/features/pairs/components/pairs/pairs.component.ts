@@ -46,6 +46,8 @@ export function getPageSlice<T>({
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PairsComponent implements OnDestroy, OnInit {
+  @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
+
   private tickers$ = this.store.select(tickersSelectors.tickers);
   private tradingSymbols$ = this.store.select(symbolsSelectors.tradingSymbols);
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
@@ -82,8 +84,6 @@ export class PairsComponent implements OnDestroy, OnInit {
         tickersStatus === 'loading' || tradingSymbolsStatus === 'loading'
     )
   );
-
-  @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
 
   private get pageSize() {
     return this.paginator?.pageSize || this.pageSizeOptions[0];

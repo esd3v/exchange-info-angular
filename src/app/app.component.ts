@@ -20,6 +20,7 @@ import {
   exchangeInfoSelectors,
 } from './features/exchange-info/store';
 import { candlesActions, candlesSelectors } from './features/candles/store';
+import { orderBookActions } from './features/order-book/store';
 
 @Component({
   selector: 'app-root',
@@ -60,6 +61,17 @@ export class AppComponent implements OnInit {
 
   private loadExchangeInfo() {
     this.store.dispatch(exchangeInfoActions.load());
+  }
+
+  private loadOrderBook() {
+    this.store
+      .select(globalSelectors.globalSymbol)
+      .pipe(filter(Boolean))
+      .subscribe((globalSymbol) => {
+        this.store.dispatch(
+          orderBookActions.load({ params: { symbol: globalSymbol, limit: 20 } })
+        );
+      });
   }
 
   private loadTicker() {
@@ -156,6 +168,7 @@ export class AppComponent implements OnInit {
     this.setTitle();
     this.loadTicker();
     this.loadExchangeInfo();
+    this.loadOrderBook();
     this.loadCandles();
     this.handleEmptyPair();
     this.handleWebsocketStart();

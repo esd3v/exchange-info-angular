@@ -4,6 +4,11 @@ import { AppState } from '..';
 export const featureSelector =
   createFeatureSelector<AppState['global']>('global');
 
+export const currency = createSelector(
+  featureSelector,
+  (state) => state.currency
+);
+
 export const globalPair = createSelector(featureSelector, (state) => {
   const { base, quote } = state.currency;
 

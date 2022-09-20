@@ -22,8 +22,8 @@
           "error",
           {
             "default": [
-              "field",
               "decorated-field",
+              "field",
               "get",
               "set",
               "decorated-get",
