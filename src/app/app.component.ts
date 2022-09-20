@@ -36,16 +36,15 @@ export class AppComponent implements OnInit {
     private store: Store<AppState>
   ) {}
 
-  private setTitle() {
-    const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
-    const globalPair$ = this.store.select(globalSelectors.globalPair);
+  private watchCurrencyChange() {
+    const currency$ = this.store.select(globalSelectors.currency);
 
-    globalPair$
-      .pipe(combineLatestWith(lastPrice$))
-      .subscribe(([globalPair, _lastPrice]) => {
-        this.store.select(tickersSelectors.lastPrice).subscribe((data) => {
-          const lastPrice = data;
+    currency$.subscribe(() => {
+      const globalPair$ = this.store.select(globalSelectors.globalPair);
+      const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
 
+      combineLatest([globalPair$, lastPrice$]).subscribe(
+        ([globalPair, lastPrice]) => {
           const title = lastPrice
             ? globalPair
               ? `${formatLastPrice(lastPrice)} | ${globalPair} | ${SITE_NAME}`
@@ -55,8 +54,9 @@ export class AppComponent implements OnInit {
             : `${SITE_NAME}`;
 
           this.titleService.setTitle(title);
-        });
-      });
+        }
+      );
+    });
   }
 
   private loadExchangeInfo() {
@@ -165,7 +165,7 @@ export class AppComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.setTitle();
+    this.watchCurrencyChange();
     this.loadTicker();
     this.loadExchangeInfo();
     this.loadOrderBook();
