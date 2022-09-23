@@ -1,0 +1,23 @@
+@import "./overrides.scss";
+
+@mixin common-table {
+  width: 100%;
+  table-layout: fixed;
+
+  @include override-mat-table();
+
+  &__row {
+    cursor: pointer;
+  }
+  &__cell {
+    &--alignedRight {
+      text-align: right !important;
+    }
+    &--positive {
+      color: green;
+    }
+    &--negative {
+      color: red;
+    }
+  }
+}

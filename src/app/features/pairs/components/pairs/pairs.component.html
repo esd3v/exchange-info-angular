@@ -1,7 +1,7 @@
 <app-window title="Pairs">
   <table
     mat-table
-    class="table"
+    class="pairs"
     [trackBy]="trackRow"
     [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
   >

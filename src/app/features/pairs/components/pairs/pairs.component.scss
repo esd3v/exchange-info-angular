@@ -1,23 +1,5 @@
-@import "src/styles/overrides.scss";
+@import "src/styles/common-table.scss";
 
-.table {
-  width: 100%;
-  table-layout: fixed;
-
-  @include override-mat-table();
-
-  &__row {
-    cursor: pointer;
-  }
-  &__cell {
-    &--alignedRight {
-      text-align: right !important;
-    }
-    &--positive {
-      color: green;
-    }
-    &--negative {
-      color: red;
-    }
-  }
+.pairs {
+  @include common-table();
 }
