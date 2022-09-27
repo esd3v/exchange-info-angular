@@ -230,15 +230,17 @@ export class PairsComponent implements OnDestroy, OnInit {
   }
 
   public handleRowClick({ baseAsset, quoteAsset }: PairRow) {
-    const pair = `${baseAsset}_${quoteAsset}`;
+    if (baseAsset && quoteAsset) {
+      const pair = `${baseAsset}_${quoteAsset}`;
 
-    this.store.dispatch(
-      globalActions.setCurrency({
-        payload: { base: baseAsset, quote: quoteAsset },
-      })
-    );
+      this.store.dispatch(
+        globalActions.setCurrency({
+          payload: { base: baseAsset, quote: quoteAsset },
+        })
+      );
 
-    this.router.navigate([pair]);
+      this.router.navigate([pair]);
+    }
   }
 
   public handlePageChange(event: PageEvent) {
