@@ -2,7 +2,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Store } from '@ngrx/store';
-import { combineLatest, combineLatestWith, filter } from 'rxjs';
+import { combineLatest, filter } from 'rxjs';
 import { SITE_NAME } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
@@ -21,6 +21,7 @@ import {
 } from './features/exchange-info/store';
 import { candlesActions, candlesSelectors } from './features/candles/store';
 import { orderBookActions } from './features/order-book/store';
+import { WebsocketOrderBookService } from './features/order-book/services/websocket-order-book.service';
 
 @Component({
   selector: 'app-root',
@@ -33,6 +34,7 @@ export class AppComponent implements OnInit {
     private titleService: Title,
     private websocketService: WebsocketService,
     private websocketTickerService: WebsocketTickerService,
+    private websocketOrderBookService: WebsocketOrderBookService,
     private store: Store<AppState>
   ) {}
 
@@ -135,6 +137,7 @@ export class AppComponent implements OnInit {
         this.loadExchangeInfo();
         this.loadTicker();
         this.loadCandles();
+        this.loadOrderBook();
       }
     });
 
@@ -148,6 +151,10 @@ export class AppComponent implements OnInit {
               this.websocketTickerService.subscribeIndividual({
                 symbols: [globalSymbol],
               });
+
+              this.websocketOrderBookService.subscribe({
+                symbol: globalSymbol,
+              });
             });
         }
       }
@@ -158,8 +165,14 @@ export class AppComponent implements OnInit {
     this.websocketService.messages$.subscribe(({ data }) => {
       const parsed: WebsocketMessageIncoming = JSON.parse(data);
 
+      const isOrderBook = ['lastUpdateId', 'bids', 'asks'].every((item) =>
+        Object.prototype.hasOwnProperty.call(parsed, item)
+      );
+
       if (parsed.e === '24hrTicker') {
         this.websocketTickerService.handleIncomingMessage(parsed);
+      } else if (isOrderBook) {
+        this.websocketOrderBookService.handleIncomingMessage(parsed);
       }
     });
   }

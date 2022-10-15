@@ -1,0 +1,50 @@
+<app-window [title]="title">
+  <table
+    mat-table
+    class="order-book"
+    [trackBy]="trackRow"
+    [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
+  >
+    <ng-container
+      *ngFor="let column of columns$ | async; let columnIndex = index"
+      [matColumnDef]="column.id"
+      }
+    >
+      <th
+        [ngClass]="{
+          'order-book__cell': true,
+          'order-book__cell--alignedRight': column.numeric
+        }"
+        mat-header-cell
+        *matHeaderCellDef
+      >
+        {{ columnLabels[columnIndex] }}
+      </th>
+      <td
+        *matCellDef="let element"
+        [ngClass]="{
+          'order-book__cell': true,
+          'order-book__cell--alignedRight': column.numeric,
+          'order-book__cell--positive':
+            column.id === 'price' && this.type === 'bids',
+          'order-book__cell--negative':
+            column.id === 'price' && this.type === 'asks'
+        }"
+        mat-cell
+      >
+        <ng-template [ngIf]="(loading$ | async) === true">
+          <ngx-skeleton-loader appSkeleton width="80%"></ngx-skeleton-loader>
+        </ng-template>
+        <ng-template [ngIf]="(loading$ | async) === false">
+          {{ element[columnIndex].value }}
+        </ng-template>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns$ | async"></tr>
+    <tr
+      class="table__row"
+      mat-row
+      *matRowDef="let row; columns: displayedColumns$ | async"
+    ></tr>
+  </table>
+</app-window>

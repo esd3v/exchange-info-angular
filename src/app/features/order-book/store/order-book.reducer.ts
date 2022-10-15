@@ -14,5 +14,11 @@ export const orderBookReducer = createReducer(
     bids,
     lastUpdateId,
     status: 'success',
+  })),
+  on(orderBookActions.set, (state, { asks, bids, lastUpdateId }) => ({
+    ...state,
+    asks,
+    bids,
+    lastUpdateId,
   }))
 );

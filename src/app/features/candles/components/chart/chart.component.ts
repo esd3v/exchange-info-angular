@@ -60,8 +60,6 @@ export class ChartComponent implements OnInit {
     this.interval = value;
 
     globalSymbol$.subscribe((data) => {
-      console.log('here');
-
       this.store.dispatch(
         candlesActions.load({ params: { interval: value, symbol: data } })
       );
