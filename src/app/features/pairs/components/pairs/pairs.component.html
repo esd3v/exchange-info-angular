@@ -5,7 +5,11 @@
     [trackBy]="trackRow"
     [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
   >
-    <ng-container *ngFor="let column of columns" [matColumnDef]="column.id" }>
+    <ng-container
+      *ngFor="let column of columns; let columnIndex = index"
+      [matColumnDef]="column.id"
+      }
+    >
       <th
         [ngClass]="{
           pairs__cell: true,
@@ -17,12 +21,11 @@
         {{ column.label }}
       </th>
       <td
-        *matCellDef="let element"
+        *matCellDef="let row"
+        [class]="row[columnIndex].className"
         [ngClass]="{
           pairs__cell: true,
-          'pairs__cell--alignedRight': column.numeric,
-          'pairs__cell--positive': isPositive(element, column.id) === true,
-          'pairs__cell--negative': isPositive(element, column.id) === false
+          'pairs__cell--alignedRight': column.numeric
         }"
         mat-cell
       >
@@ -30,7 +33,7 @@
           <ngx-skeleton-loader appSkeleton width="80%"></ngx-skeleton-loader>
         </ng-template>
         <ng-template [ngIf]="(loading$ | async) === false">
-          {{ getCellValue(element, column.id) }}
+          {{ row[columnIndex].value }}
         </ng-template>
       </td>
     </ng-container>

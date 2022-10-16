@@ -15,7 +15,6 @@ import { AppState } from 'src/app/store';
 import { tickersSelectors } from 'src/app/features/tickers/store';
 import { symbolsSelectors } from 'src/app/store/symbols';
 import { PairColumn } from '../../models/pair-column.model';
-import { PairRow } from '../../models/pair-row.model';
 import { WebsocketTickerService } from 'src/app/features/tickers/services/websocket-ticker.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WEBSOCKET_UNSUBSCRIBEDELAY } from 'src/app/shared/config';
@@ -24,6 +23,8 @@ import { TickerEntity } from 'src/app/features/tickers/store/tickers.state';
 import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
 import { Dictionary } from '@ngrx/entity';
 import { Router } from '@angular/router';
+import { Row } from 'src/app/shared/models/row.model';
+import { parsePair } from 'src/app/shared/helpers';
 
 export function getPageSlice<T>({
   page,
@@ -58,7 +59,7 @@ export class PairsComponent implements OnDestroy, OnInit {
   private tickersStatus$ = this.store.select(tickersSelectors.status);
   private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
-  public dataSource: MatTableDataSource<PairRow> = new MatTableDataSource();
+  public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
   public columns: PairColumn[] = [
     { id: 'pair', numeric: false, label: 'Pair' },
@@ -68,12 +69,11 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public displayedColumns: string[] = this.columns.map((item) => item.id);
 
-  public placeholderRows = Array<PairRow>(this.pageSize).fill({
-    baseAsset: '',
-    lastPrice: '',
-    priceChangePercent: '',
-    quoteAsset: '',
-  });
+  public placeholderRows = Array<Row>(this.pageSize).fill([
+    { value: '' },
+    { value: '' },
+    { value: '' },
+  ]);
 
   public loading$ = combineLatest([
     this.tickersStatus$,
@@ -104,20 +104,8 @@ export class PairsComponent implements OnDestroy, OnInit {
     private router: Router
   ) {}
 
-  public trackRow(_index: number, item: PairRow) {
-    return `${item.baseAsset}${item.quoteAsset}`;
-  }
-
-  public isPositive(data: PairRow | undefined, columnId: PairColumn['id']) {
-    if (columnId === 'priceChangePercent') {
-      return Number(data?.priceChangePercent) > 0
-        ? true
-        : Number(data?.priceChangePercent) < 0
-        ? false
-        : null;
-    } else {
-      return null;
-    }
+  public trackRow(_index: number, _row: Row) {
+    return _index;
   }
 
   private handlePageChangeDebounced() {
@@ -155,50 +143,50 @@ export class PairsComponent implements OnDestroy, OnInit {
     symbols: ExchangeSymbolEntity[],
     tickers: Dictionary<TickerEntity>
   ) {
-    const rows: PairRow[] = [];
+    const rows: Row[] = [];
 
     for (const { baseAsset, quoteAsset } of symbols) {
       const symbol = `${baseAsset}${quoteAsset}`;
+      const pair = `${baseAsset}/${quoteAsset}`;
       const ticker = tickers[symbol];
 
       if (ticker) {
         const { lastPrice, priceChangePercent } = ticker;
 
-        rows.push({
-          baseAsset,
-          quoteAsset,
-          lastPrice,
-          priceChangePercent,
-        });
+        const priceChangePercentFormatted = `${
+          Number(priceChangePercent) > 0 ? '+' : ''
+        }${priceChangePercent}%`;
+
+        rows.push([
+          { value: pair },
+          { value: lastPrice },
+          {
+            value: priceChangePercentFormatted,
+            className:
+              Number(priceChangePercent) > 0
+                ? 'pairs__cell--positive'
+                : Number(priceChangePercent) < 0
+                ? 'pairs__cell--negative'
+                : null,
+          },
+        ]);
       }
     }
 
     return rows;
   }
 
-  private getUpdatedRows(tickers: Dictionary<TickerEntity>) {
-    return this.dataSource.data.map((item): PairRow => {
-      const symbol = `${item.baseAsset}${item.quoteAsset}`;
-      const ticker = tickers[symbol];
-
-      return (
-        {
-          baseAsset: item.baseAsset,
-          lastPrice: ticker?.lastPrice || item.lastPrice,
-          priceChangePercent:
-            ticker?.priceChangePercent || item.priceChangePercent,
-          quoteAsset: item.quoteAsset,
-        } || item
-      );
-    });
-  }
-
   // TODO Move globalSymbol filtering
-  private createSymbolsFromRows(rows: PairRow[]) {
+  private createSymbolsFromRows(rows: Row[]) {
     return this.globalSymbol$.pipe(
       map((globalSymbol) =>
         rows
-          .map(({ baseAsset, quoteAsset }) => `${baseAsset}${quoteAsset}`)
+          .map((row) => {
+            const pairCell = this.getCellByColumnId(row, 'pair');
+            const { base, quote } = parsePair(pairCell.value as string, '/');
+
+            return `${base}${quote}`;
+          })
           .filter((item) => item !== globalSymbol)
       )
     );
@@ -217,25 +205,22 @@ export class PairsComponent implements OnDestroy, OnInit {
     });
   }
 
-  public getCellValue(row: PairRow, columnId: PairColumn['id']) {
-    if (columnId === 'pair') {
-      return `${row.baseAsset}/${row.quoteAsset}`;
-    } else if (columnId === 'priceChangePercent') {
-      const data = row[columnId];
+  public getCellByColumnId(row: Row, id: PairColumn['id']) {
+    const columnId = this.columns.findIndex((item) => item.id === id);
 
-      return `${Number(data) > 0 ? '+' : ''}${data}%`;
-    } else {
-      return row[columnId];
-    }
+    return row[columnId];
   }
 
-  public handleRowClick({ baseAsset, quoteAsset }: PairRow) {
-    if (baseAsset && quoteAsset) {
-      const pair = `${baseAsset}_${quoteAsset}`;
+  public handleRowClick(row: Row) {
+    const pairCell = this.getCellByColumnId(row, 'pair');
+    const { base, quote } = parsePair(pairCell.value as string, '/');
+
+    if (base && quote) {
+      const pair = `${base}_${quote}`;
 
       this.store.dispatch(
         globalActions.setCurrency({
-          payload: { base: baseAsset, quote: quoteAsset },
+          payload: { base, quote },
         })
       );
 
@@ -249,6 +234,8 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public ngOnInit(): void {
     this.handleWebsocketStart();
+
+    // Create paginator before setting dataSource, for optimization
     this.dataSource.paginator = this.paginator;
 
     // React to tickers update from websockets
@@ -261,9 +248,7 @@ export class PairsComponent implements OnDestroy, OnInit {
         )
       )
       .subscribe(([tradingSymbols, tickers]) => {
-        this.dataSource.data = !this.dataSource.data.length
-          ? this.createRows(tradingSymbols, tickers)
-          : this.getUpdatedRows(tickers);
+        this.dataSource.data = this.createRows(tradingSymbols, tickers);
       });
   }
 
