@@ -16,7 +16,10 @@ export class TickerLastPriceComponent implements OnInit {
     .select(tickersSelectors.lastPrice)
     .pipe(filter(Boolean));
 
-  private prevLastPrice$ = this.lastPrice$; // TODO Update
+  public prevLastPrice$ = this.store
+    .select(tickersSelectors.prevLastPrice)
+    .pipe(filter(Boolean));
+
 
   public constructor(private store: Store<AppState>) {}
 

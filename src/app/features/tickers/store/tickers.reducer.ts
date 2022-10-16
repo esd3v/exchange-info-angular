@@ -38,7 +38,19 @@ export const tickersReducer = createReducer(
   }),
   on(tickersActions.update, (state, { data }) => {
     return data.symbol
-      ? tickersAdapter.updateOne({ id: data.symbol, changes: data }, state)
+      ? tickersAdapter.updateOne(
+          {
+            id: data.symbol,
+            changes: {
+              ...data,
+              prevLastPrice:
+                data.lastPrice !== state.entities[data.symbol]?.lastPrice
+                  ? state.entities[data.symbol]?.lastPrice
+                  : state.entities[data.symbol]?.prevLastPrice,
+            },
+          },
+          state
+        )
       : state;
   })
 );

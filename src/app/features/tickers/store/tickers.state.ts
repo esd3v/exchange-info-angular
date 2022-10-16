@@ -10,7 +10,7 @@ export type TickerEntity = Pick<
   | 'priceChange'
   | 'priceChangePercent'
   | 'lastQty'
->;
+> & { prevLastPrice?: string };
 
 export const tickersAdapter: EntityAdapter<TickerEntity> =
   createEntityAdapter<TickerEntity>({

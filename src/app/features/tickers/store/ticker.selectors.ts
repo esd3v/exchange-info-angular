@@ -32,6 +32,11 @@ export const lastPrice = createSelector(
   (state) => state?.lastPrice
 );
 
+export const prevLastPrice = createSelector(
+  currentTicker,
+  (state) => state?.prevLastPrice
+);
+
 export const priceChange = createSelector(
   currentTicker,
   (state) => state?.priceChange

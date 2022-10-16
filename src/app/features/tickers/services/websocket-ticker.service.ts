@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { WebsocketMessagesService } from 'src/app/websocket/services/websocket-messages.service';
 import { AppState } from 'src/app/store';
-import { Ticker } from '../models/ticker.model';
 import { WebsocketTicker } from '../models/websocket-ticker.model';
 import { tickersActions } from '../store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketTickerStreamParams } from '../models/websocket-ticker-stream-params.model';
+import { TickerEntity } from '../store/tickers.state';
 
 @Injectable({
   providedIn: 'root',
@@ -47,7 +47,7 @@ export class WebsocketTickerService {
   }
 
   public handleIncomingMessage(message: WebsocketTicker) {
-    const ticker: Partial<Ticker> = {
+    const ticker: TickerEntity = {
       symbol: message.s,
       lastPrice: message.c,
       lastQty: message.Q,

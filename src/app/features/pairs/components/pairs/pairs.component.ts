@@ -151,7 +151,7 @@ export class PairsComponent implements OnDestroy, OnInit {
       const ticker = tickers[symbol];
 
       if (ticker) {
-        const { lastPrice, priceChangePercent } = ticker;
+        const { lastPrice, priceChangePercent, prevLastPrice } = ticker;
 
         const priceChangePercentFormatted = `${
           Number(priceChangePercent) > 0 ? '+' : ''
@@ -159,7 +159,16 @@ export class PairsComponent implements OnDestroy, OnInit {
 
         rows.push([
           { value: pair },
-          { value: lastPrice },
+          {
+            value: lastPrice,
+            className: prevLastPrice
+              ? lastPrice > prevLastPrice
+                ? 'pairs__cell--positive'
+                : lastPrice < prevLastPrice
+                ? 'pairs__cell--negative'
+                : null
+              : null,
+          },
           {
             value: priceChangePercentFormatted,
             className:
