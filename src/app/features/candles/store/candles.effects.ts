@@ -9,10 +9,14 @@ export class CandlesEffects {
   public loadExchangeInfo$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(candlesActions.load),
-      switchMap(({ params }) => {
+      switchMap(({ params: { interval, symbol } }) => {
         return this.candlesService
-          .get(params)
-          .pipe(map((data) => candlesActions.loadSuccess({ candles: data })));
+          .get({ interval, symbol })
+          .pipe(
+            map((data) =>
+              candlesActions.loadSuccess({ candles: data, interval })
+            )
+          );
       })
     );
   });

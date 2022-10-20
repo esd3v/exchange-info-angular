@@ -15,7 +15,7 @@ export const load = createAction(LOAD, props<{ params: CandlesGetParams }>());
 
 export const loadSuccess = createAction(
   SUCCESS,
-  props<{ candles: Candle[] }>()
+  props<{ candles: Candle[]; interval?: CandleInterval }>()
 );
 
 export const setInterval = createAction(

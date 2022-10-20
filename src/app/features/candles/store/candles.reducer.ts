@@ -21,12 +21,13 @@ export const candlesReducer = createReducer(
       status: 'loading',
     });
   }),
-  on(candlesActions.loadSuccess, (state, { candles }) => {
+  on(candlesActions.loadSuccess, (state, { candles, interval }) => {
     const mapped = candles.map(createCandleEntity) as CandleEntity[];
 
     return candlesAdapter.setAll(mapped, {
       ...state,
       status: 'success',
+      interval: interval || state.interval,
     });
   }),
   on(candlesActions.setInterval, (state, { interval }) => {
