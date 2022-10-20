@@ -22,12 +22,15 @@ import {
 import { candlesActions, candlesSelectors } from './features/candles/store';
 import { orderBookActions } from './features/order-book/store';
 import { WebsocketOrderBookService } from './features/order-book/services/websocket-order-book.service';
+import { WebsocketCandlesService } from './features/candles/services/websocket-candles.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
+  private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
+
   public constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -35,6 +38,7 @@ export class AppComponent implements OnInit {
     private websocketService: WebsocketService,
     private websocketTickerService: WebsocketTickerService,
     private websocketOrderBookService: WebsocketOrderBookService,
+    private websocketCandleService: WebsocketCandlesService,
     private store: Store<AppState>
   ) {}
 
@@ -66,29 +70,23 @@ export class AppComponent implements OnInit {
   }
 
   private loadOrderBook() {
-    this.store
-      .select(globalSelectors.globalSymbol)
-      .pipe(filter(Boolean))
-      .subscribe((globalSymbol) => {
-        this.store.dispatch(
-          orderBookActions.load({ params: { symbol: globalSymbol, limit: 20 } })
-        );
-      });
+    this.globalSymbol$.pipe(filter(Boolean)).subscribe((globalSymbol) => {
+      this.store.dispatch(
+        orderBookActions.load({ params: { symbol: globalSymbol, limit: 20 } })
+      );
+    });
   }
 
   private loadTicker() {
-    const globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
-
-    globalSymbol$.pipe(filter(Boolean)).subscribe(() => {
+    this.globalSymbol$.pipe(filter(Boolean)).subscribe(() => {
       this.store.dispatch(tickersActions.load());
     });
   }
 
   private loadCandles() {
     const interval$ = this.store.select(candlesSelectors.interval);
-    const globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
 
-    combineLatest([globalSymbol$, interval$]).subscribe(
+    combineLatest([this.globalSymbol$, interval$]).subscribe(
       ([globalSymbol, interval]) => {
         if (globalSymbol) {
           this.store.dispatch(
@@ -130,6 +128,7 @@ export class AppComponent implements OnInit {
   private handleWebsocketStart() {
     const tickerStatus$ = this.store.select(tickersSelectors.status);
     const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
+    const candleInterval$ = this.store.select(candlesSelectors.interval);
     const websocketStatus$ = this.websocketService.status$;
 
     websocketStatus$.subscribe((data) => {
@@ -141,24 +140,28 @@ export class AppComponent implements OnInit {
       }
     });
 
-    combineLatest([exchangeInfoStatus$, tickerStatus$]).subscribe(
-      ([exchangeInfoStatus, tickerStatus]) => {
-        if (tickerStatus === 'success' && exchangeInfoStatus === 'success') {
-          this.store
-            .select(globalSelectors.globalSymbol)
-            .pipe(filter(Boolean))
-            .subscribe((globalSymbol) => {
-              this.websocketTickerService.subscribeIndividual({
-                symbols: [globalSymbol],
-              });
+    combineLatest([
+      exchangeInfoStatus$,
+      tickerStatus$,
+      candleInterval$,
+    ]).subscribe(([exchangeInfoStatus, tickerStatus, candleInterval]) => {
+      if (tickerStatus === 'success' && exchangeInfoStatus === 'success') {
+        this.globalSymbol$.pipe(filter(Boolean)).subscribe((globalSymbol) => {
+          this.websocketTickerService.subscribeIndividual({
+            symbols: [globalSymbol],
+          });
 
-              this.websocketOrderBookService.subscribe({
-                symbol: globalSymbol,
-              });
-            });
-        }
+          this.websocketOrderBookService.subscribe({
+            symbol: globalSymbol,
+          });
+
+          this.websocketCandleService.subscribe({
+            symbol: globalSymbol,
+            interval: candleInterval,
+          });
+        });
       }
-    );
+    });
   }
 
   private handleWebsocketMessage() {
@@ -171,6 +174,8 @@ export class AppComponent implements OnInit {
 
       if (parsed.e === '24hrTicker') {
         this.websocketTickerService.handleIncomingMessage(parsed);
+      } else if (parsed.e === 'kline') {
+        this.websocketCandleService.handleIncomingMessage(parsed);
       } else if (isOrderBook) {
         this.websocketOrderBookService.handleIncomingMessage(parsed);
       }

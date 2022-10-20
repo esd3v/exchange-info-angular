@@ -39,7 +39,7 @@ export const candlesReducer = createReducer(
     return candlesAdapter.addOne(createCandleEntity(candle), state);
   }),
   on(candlesActions.removeFirstCandle, (state) => {
-    const id = state.ids[state.ids.length - 1] as string;
+    const id = state.ids[0] as string;
 
     return candlesAdapter.removeOne(id, state);
   }),

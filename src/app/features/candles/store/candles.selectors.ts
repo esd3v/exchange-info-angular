@@ -10,9 +10,9 @@ const { selectAll } = candlesAdapter.getSelectors();
 const allCandles = createSelector(featureSelector, selectAll);
 
 export const ohlc = createSelector(allCandles, (state) =>
-  state.map(({ open, high, low, close }) => {
+  state.map(({ open, high, low, close, openTime }) => {
     // Order is different for echarts
-    return [open, close, low, high];
+    return [open, close, low, high, openTime];
   })
 );
 
@@ -33,7 +33,4 @@ export const interval = createSelector(
   (state) => state.interval
 );
 
-export const status = createSelector(
-  featureSelector,
-  (state) => state.status
-);
+export const status = createSelector(featureSelector, (state) => state.status);
