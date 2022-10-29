@@ -1,0 +1,5 @@
+@import "src/styles/common-table.scss";
+
+.trades {
+  @include common-table();
+}

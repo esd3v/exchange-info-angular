@@ -23,6 +23,8 @@ import { candlesActions, candlesSelectors } from './features/candles/store';
 import { orderBookActions } from './features/order-book/store';
 import { WebsocketOrderBookService } from './features/order-book/services/websocket-order-book.service';
 import { WebsocketCandlesService } from './features/candles/services/websocket-candles.service';
+import { tradesActions, tradesSelectors } from './features/trades/store';
+import { WebsocketTradesService } from './features/trades/services/websocket-trades.service';
 
 @Component({
   selector: 'app-root',
@@ -39,6 +41,7 @@ export class AppComponent implements OnInit {
     private websocketTickerService: WebsocketTickerService,
     private websocketOrderBookService: WebsocketOrderBookService,
     private websocketCandleService: WebsocketCandlesService,
+    private websocketTradesService: WebsocketTradesService,
     private store: Store<AppState>
   ) {}
 
@@ -80,6 +83,14 @@ export class AppComponent implements OnInit {
   private loadTicker() {
     this.globalSymbol$.pipe(filter(Boolean)).subscribe(() => {
       this.store.dispatch(tickersActions.load());
+    });
+  }
+
+  private loadTrades() {
+    this.globalSymbol$.pipe(filter(Boolean)).subscribe((symbol) => {
+      this.store.dispatch(
+        tradesActions.load({ params: { symbol, limit: 20 } })
+      );
     });
   }
 
@@ -127,6 +138,7 @@ export class AppComponent implements OnInit {
 
   private handleWebsocketStart() {
     const tickerStatus$ = this.store.select(tickersSelectors.status);
+    const tradesStatus$ = this.store.select(tradesSelectors.status);
     const exchangeInfoStatus$ = this.store.select(exchangeInfoSelectors.status);
     const candleInterval$ = this.store.select(candlesSelectors.interval);
     const websocketStatus$ = this.websocketService.status$;
@@ -137,6 +149,7 @@ export class AppComponent implements OnInit {
         this.loadTicker();
         this.loadCandles();
         this.loadOrderBook();
+        this.loadTrades();
       }
     });
 
@@ -144,24 +157,35 @@ export class AppComponent implements OnInit {
       exchangeInfoStatus$,
       tickerStatus$,
       candleInterval$,
-    ]).subscribe(([exchangeInfoStatus, tickerStatus, candleInterval]) => {
-      if (tickerStatus === 'success' && exchangeInfoStatus === 'success') {
-        this.globalSymbol$.pipe(filter(Boolean)).subscribe((globalSymbol) => {
-          this.websocketTickerService.subscribeIndividual({
-            symbols: [globalSymbol],
-          });
+      tradesStatus$,
+    ]).subscribe(
+      ([exchangeInfoStatus, tickerStatus, candleInterval, tradesStatus]) => {
+        if (
+          tickerStatus === 'success' &&
+          exchangeInfoStatus === 'success' &&
+          tradesStatus === 'success'
+        ) {
+          this.globalSymbol$.pipe(filter(Boolean)).subscribe((globalSymbol) => {
+            this.websocketTickerService.subscribeIndividual({
+              symbols: [globalSymbol],
+            });
 
-          this.websocketOrderBookService.subscribe({
-            symbol: globalSymbol,
-          });
+            this.websocketOrderBookService.subscribe({
+              symbol: globalSymbol,
+            });
 
-          this.websocketCandleService.subscribe({
-            symbol: globalSymbol,
-            interval: candleInterval,
+            this.websocketCandleService.subscribe({
+              symbol: globalSymbol,
+              interval: candleInterval,
+            });
+
+            this.websocketTradesService.subscribe({
+              symbol: globalSymbol,
+            });
           });
-        });
+        }
       }
-    });
+    );
   }
 
   private handleWebsocketMessage() {
@@ -178,6 +202,8 @@ export class AppComponent implements OnInit {
         this.websocketCandleService.handleIncomingMessage(parsed);
       } else if (isOrderBook) {
         this.websocketOrderBookService.handleIncomingMessage(parsed);
+      } else if (parsed.e === 'trade') {
+        this.websocketTradesService.handleIncomingMessage(parsed);
       }
     });
   }
@@ -188,6 +214,7 @@ export class AppComponent implements OnInit {
     this.loadExchangeInfo();
     this.loadOrderBook();
     this.loadCandles();
+    this.loadTrades();
     this.handleEmptyPair();
     this.handleWebsocketStart();
     this.handleWebsocketMessage();

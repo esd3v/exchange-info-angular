@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import { ExchangeInfoEffects } from '../features/exchange-info/store/exchange-info.effects';
 import { CandlesEffects } from '../features/candles/store/candles.effects';
 import { OrderBookEffects } from '../features/order-book/store/order-book.effects';
+import { TradesEffects } from '../features/trades/store/trades.effects';
 
 @NgModule({
   declarations: [],
@@ -17,6 +18,7 @@ import { OrderBookEffects } from '../features/order-book/store/order-book.effect
       ExchangeInfoEffects,
       CandlesEffects,
       OrderBookEffects,
+      TradesEffects,
     ]),
     StoreModule.forRoot(reducers, {
       metaReducers,
