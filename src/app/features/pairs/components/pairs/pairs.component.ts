@@ -24,7 +24,7 @@ import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
 import { Dictionary } from '@ngrx/entity';
 import { Router } from '@angular/router';
 import { Row } from 'src/app/shared/models/row.model';
-import { parsePair } from 'src/app/shared/helpers';
+import { formatLastPrice, parsePair } from 'src/app/shared/helpers';
 
 export function getPageSlice<T>({
   page,
@@ -160,7 +160,7 @@ export class PairsComponent implements OnDestroy, OnInit {
         rows.push([
           { value: pair },
           {
-            value: lastPrice,
+            value: formatLastPrice(lastPrice),
             className: prevLastPrice
               ? lastPrice > prevLastPrice
                 ? 'pairs__cell--positive'
@@ -247,7 +247,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     // Create paginator before setting dataSource, for optimization
     this.dataSource.paginator = this.paginator;
 
-    // React to tickers update from websockets
+    // React to tickers updates
     combineLatest([this.tradingSymbols$, this.tickers$])
       .pipe(
         filter(

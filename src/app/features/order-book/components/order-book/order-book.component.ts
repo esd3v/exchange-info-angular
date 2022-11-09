@@ -8,7 +8,7 @@ import {
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
 import { combineLatest, map, Observable, take } from 'rxjs';
-import { sortRows } from 'src/app/shared/helpers';
+import { formatLastPrice, sortRows } from 'src/app/shared/helpers';
 import { NgChanges } from 'src/app/shared/models/misc.model';
 import { Row } from 'src/app/shared/models/row.model';
 import { AppState } from 'src/app/store';
@@ -92,11 +92,11 @@ export class OrderBookComponent implements OnInit, OnChanges {
       map((data) => {
         return data.map((item) => {
           const [price, quantity] = item;
-          const total = (Number(price) * Number(quantity)).toFixed(5);
+          const total = (Number(price) * Number(quantity)).toFixed(6);
 
           return [
             {
-              value: Number(price),
+              value: formatLastPrice(price),
             },
             {
               value: Number(quantity).toFixed(6),
