@@ -3,9 +3,7 @@ import { getFormattedDate } from 'src/app/shared/helpers';
 import { AppState } from 'src/app/store';
 import { candlesAdapter } from './candles.state';
 
-export const featureSelector =
-  createFeatureSelector<AppState['candles']>('candles');
-
+const featureSelector = createFeatureSelector<AppState['candles']>('candles');
 const { selectAll } = candlesAdapter.getSelectors();
 const allCandles = createSelector(featureSelector, selectAll);
 

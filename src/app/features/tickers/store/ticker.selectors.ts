@@ -3,7 +3,7 @@ import { AppState } from '../../../store';
 import { globalSelectors } from '../../../store/global';
 import { tickersAdapter } from './tickers.state';
 
-export const featureSelector =
+const featureSelector =
   createFeatureSelector<AppState['tickers']>('tickers');
 
 export const globalSelector =

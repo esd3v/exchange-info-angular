@@ -1,8 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState } from '..';
 
-export const featureSelector =
-  createFeatureSelector<AppState['global']>('global');
+const featureSelector = createFeatureSelector<AppState['global']>('global');
 
 export const currency = createSelector(
   featureSelector,
