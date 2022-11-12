@@ -1,6 +1,6 @@
 <app-ticker-card
   title="24 change"
-  [value]="priceChange$ | async | formatLastPrice"
+  [value]="priceChange$ | async | formatDecimal"
   [loading]="loading$ | async"
   [positive]="positive | async"
 >

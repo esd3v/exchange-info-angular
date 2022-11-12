@@ -24,7 +24,7 @@ import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
 import { Dictionary } from '@ngrx/entity';
 import { Router } from '@angular/router';
 import { Row } from 'src/app/shared/models/row.model';
-import { formatLastPrice, parsePair } from 'src/app/shared/helpers';
+import { formatDecimal, parsePair } from 'src/app/shared/helpers';
 
 export function getPageSlice<T>({
   page,
@@ -152,6 +152,7 @@ export class PairsComponent implements OnDestroy, OnInit {
 
       if (ticker) {
         const { lastPrice, priceChangePercent, prevLastPrice } = ticker;
+        const dLastPrice = formatDecimal(lastPrice);
 
         const priceChangePercentFormatted = `${
           Number(priceChangePercent) > 0 ? '+' : ''
@@ -160,7 +161,7 @@ export class PairsComponent implements OnDestroy, OnInit {
         rows.push([
           { value: pair },
           {
-            value: formatLastPrice(lastPrice),
+            value: dLastPrice,
             className: prevLastPrice
               ? lastPrice > prevLastPrice
                 ? 'pairs__cell--positive'

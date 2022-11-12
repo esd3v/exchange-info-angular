@@ -2,7 +2,11 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
 import { map, Observable } from 'rxjs';
-import { formatLastPrice, getFormattedDate } from 'src/app/shared/helpers';
+import {
+  formatDecimal,
+  getFormattedDate,
+  multiplyDecimal,
+} from 'src/app/shared/helpers';
 import { Row } from 'src/app/shared/models/row.model';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
@@ -78,17 +82,19 @@ export class TradesComponent implements OnInit {
       map((data) => {
         return data.map((item) => {
           const { isBuyerMaker, price, qty, time } = item;
-          const total = (Number(price) * Number(qty)).toFixed(6);
+          const dPrice = formatDecimal(price);
+          const dQty = formatDecimal(qty);
+          const total = multiplyDecimal(dPrice, dQty);
 
           return [
             {
-              value: formatLastPrice(price),
+              value: dPrice,
               className: isBuyerMaker
                 ? 'trades__cell--positive'
                 : 'trades__cell--negative',
             },
             {
-              value: Number(qty).toFixed(6),
+              value: dQty,
             },
             {
               value: total,

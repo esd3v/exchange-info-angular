@@ -7,8 +7,7 @@ import {
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
-import { combineLatest, map, Observable, take } from 'rxjs';
-import { formatLastPrice, sortRows } from 'src/app/shared/helpers';
+import { combineLatest, map, Observable } from 'rxjs';
 import { NgChanges } from 'src/app/shared/models/misc.model';
 import { Row } from 'src/app/shared/models/row.model';
 import { AppState } from 'src/app/store';
@@ -16,6 +15,7 @@ import { globalSelectors } from 'src/app/store/global';
 import { OrderBookColumn } from '../../models/order-book-column.model';
 import { orderBookSelectors } from '../../store';
 import { OrderBookProps } from './order-book.props';
+import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
 
 @Component({
   selector: 'app-order-book',
@@ -92,14 +92,16 @@ export class OrderBookComponent implements OnInit, OnChanges {
       map((data) => {
         return data.map((item) => {
           const [price, quantity] = item;
-          const total = (Number(price) * Number(quantity)).toFixed(6);
+          const dPrice = formatDecimal(price);
+          const dQuantity = formatDecimal(quantity);
+          const total = multiplyDecimal(dPrice, dQuantity);
 
           return [
             {
-              value: formatLastPrice(price),
+              value: dPrice,
             },
             {
-              value: Number(quantity).toFixed(6),
+              value: dQuantity,
             },
             {
               value: total,
@@ -112,11 +114,7 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public ngOnInit(): void {
     this.createRows$().subscribe((data) => {
-      this.dataSource.data = sortRows({
-        headCellIndex: 0,
-        order: 'desc',
-        rows: data,
-      });
+      this.dataSource.data = data;
     });
 
     this.columns$.subscribe((data) => {

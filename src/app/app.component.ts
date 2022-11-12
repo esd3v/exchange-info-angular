@@ -11,7 +11,6 @@ import {
   tickersSelectors,
 } from 'src/app/features/tickers/store';
 import { symbolsSelectors } from 'src/app/store/symbols';
-import { formatLastPrice } from './shared/helpers';
 import { WebsocketMessageIncoming } from './websocket/models/websocket-message-incoming.model';
 import { WebsocketTickerService } from './features/tickers/services/websocket-ticker.service';
 import { WebsocketService } from './websocket/services/websocket.service';
@@ -25,6 +24,7 @@ import { WebsocketOrderBookService } from './features/order-book/services/websoc
 import { WebsocketCandlesService } from './features/candles/services/websocket-candles.service';
 import { tradesActions, tradesSelectors } from './features/trades/store';
 import { WebsocketTradesService } from './features/trades/services/websocket-trades.service';
+import { formatDecimal } from './shared/helpers';
 
 @Component({
   selector: 'app-root',
@@ -54,15 +54,19 @@ export class AppComponent implements OnInit {
 
       combineLatest([globalPair$, lastPrice$]).subscribe(
         ([globalPair, lastPrice]) => {
-          const title = lastPrice
-            ? globalPair
-              ? `${formatLastPrice(lastPrice)} | ${globalPair} | ${SITE_NAME}`
-              : `${formatLastPrice(lastPrice)} | ${SITE_NAME}`
-            : globalPair
-            ? `${globalPair} | ${SITE_NAME}`
-            : `${SITE_NAME}`;
+          if (lastPrice) {
+            const dLastPrice = formatDecimal(lastPrice);
 
-          this.titleService.setTitle(title);
+            const title = lastPrice
+              ? globalPair
+                ? `${dLastPrice} | ${globalPair} | ${SITE_NAME}`
+                : `${dLastPrice} | ${SITE_NAME}`
+              : globalPair
+              ? `${globalPair} | ${SITE_NAME}`
+              : `${SITE_NAME}`;
+
+            this.titleService.setTitle(title);
+          }
         }
       );
     });

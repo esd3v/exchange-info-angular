@@ -3,6 +3,7 @@ import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { SortOrder } from './models/sort-order.model';
 import { Row } from './models/row.model';
+import { Decimal } from 'decimal.js';
 
 dayjs.extend(utc);
 
@@ -20,22 +21,22 @@ export const parsePair = (pair: string, separator: '/' | '_') => {
   return { base, quote };
 };
 
-export const formatLastPrice = (
-  value: string,
-  fixedDigits: number = TOFIXED_DIGITS
-): string | number => {
-  // Also cut zeros at the end
-  const number = Number(value);
+export const formatDecimal = (value: number | string) => {
+  const number = new Decimal(value);
 
-  if (isScientific(number)) {
-    return value;
-    // e.g 0.0000038 / -0.0000038
-  } else if (Math.floor(number) <= 0) {
-    return number;
-  } else {
-    return number.toFixed(fixedDigits);
-  }
+  return number.valueOf();
 };
+
+export const multiplyDecimal = (a: number | string, b: number | string) => {
+  const da = new Decimal(a);
+  const db = new Decimal(b);
+
+  return da.times(db).valueOf();
+};
+
+export function numberWithCommas(x: string, symbol = ',') {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, symbol);
+}
 
 export const formatPriceChangePercent = (value: string) =>
   `${addPlusIfPositive(Number(value).toFixed(TOFIXED_DIGITS))}%`;
