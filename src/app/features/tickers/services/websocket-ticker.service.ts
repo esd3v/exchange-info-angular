@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { WebsocketMessagesService } from 'src/app/websocket/services/websocket-messages.service';
+import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-messages.service';
 import { AppState } from 'src/app/store';
 import { WebsocketTicker } from '../models/websocket-ticker.model';
 import { tickersActions } from '../store';
@@ -15,7 +15,7 @@ export class WebsocketTickerService {
   private _subscribedIndividual = false;
 
   private createIndividualStreamMessage =
-    this.webSocketMessagesService.createStreamMessage<WebsocketTickerStreamParams>(
+    this.websocketSubscribeService.createStreamMessage<WebsocketTickerStreamParams>(
       ({ symbols }) => symbols.map((item) => `${item.toLowerCase()}@ticker`),
       1
     );
@@ -31,7 +31,7 @@ export class WebsocketTickerService {
   public constructor(
     private store: Store<AppState>,
     private webSocketService: WebsocketService,
-    private webSocketMessagesService: WebsocketMessagesService
+    private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
   public subscribeIndividual(params: WebsocketTickerStreamParams) {

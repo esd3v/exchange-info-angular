@@ -4,7 +4,7 @@ import { WebsocketMessageStreamParams } from '../models/websocket-message-stream
 @Injectable({
   providedIn: 'root',
 })
-export class WebsocketMessagesService {
+export class WebsocketSubscribeService {
   public constructor() {}
 
   public createStreamMessage<T extends Record<string, any>>(

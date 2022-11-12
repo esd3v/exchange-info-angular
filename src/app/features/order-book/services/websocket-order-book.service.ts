@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { WebsocketMessagesService } from 'src/app/websocket/services/websocket-messages.service';
+import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-messages.service';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketOrderBook } from '../models/websocket-order-book.model';
@@ -15,7 +15,7 @@ export class WebsocketOrderBookService {
   private _subscribed = false;
 
   private createStreamMessage =
-    this.webSocketMessagesService.createStreamMessage<WebsocketOrderBookStreamParams>(
+    this.websocketSubscribeService.createStreamMessage<WebsocketOrderBookStreamParams>(
       ({ symbol }) => [`${symbol.toLowerCase()}@depth20@1000ms`],
       2
     );
@@ -31,7 +31,7 @@ export class WebsocketOrderBookService {
   public constructor(
     private store: Store<AppState>,
     private webSocketService: WebsocketService,
-    private webSocketMessagesService: WebsocketMessagesService
+    private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
   public subscribe(params: WebsocketOrderBookStreamParams) {

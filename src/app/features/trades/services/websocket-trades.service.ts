@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { WebsocketMessagesService } from 'src/app/websocket/services/websocket-messages.service';
+import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-messages.service';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketTradesStreamParams } from '../models/websocket-trades-stream-params.model';
 import { WebsocketMessageService } from 'src/app/shared/services/websocket-message.service';
 import { WebsocketTrades } from '../models/websocket-trades.model';
-import { Trades } from '../models/trades.model';
 import { tradesActions } from '../store';
 import { TradesEntity } from '../store/trades.state';
 
@@ -15,7 +14,7 @@ import { TradesEntity } from '../store/trades.state';
 })
 export class WebsocketTradesService extends WebsocketMessageService {
   private createStreamMessage =
-    this.webSocketMessagesService.createStreamMessage<WebsocketTradesStreamParams>(
+    this.websocketSubscribeService.createStreamMessage<WebsocketTradesStreamParams>(
       ({ symbol }) => [`${symbol.toLowerCase()}@trade`],
       4
     );
@@ -23,7 +22,7 @@ export class WebsocketTradesService extends WebsocketMessageService {
   public constructor(
     private store: Store<AppState>,
     private webSocketService: WebsocketService,
-    private webSocketMessagesService: WebsocketMessagesService
+    private websocketSubscribeService: WebsocketSubscribeService
   ) {
     super();
   }

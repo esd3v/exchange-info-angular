@@ -1,10 +1,10 @@
 import { ModuleWithProviders, NgModule } from '@angular/core';
-import { WebsocketMessagesService } from './services/websocket-messages.service';
+import { WebsocketSubscribeService } from './services/websocket-messages.service';
 import { WebsocketService } from './services/websocket.service';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from './websocket-config';
 
 @NgModule({
-  providers: [WebsocketService, WebsocketMessagesService],
+  providers: [WebsocketService, WebsocketSubscribeService],
 })
 export class WebsocketModule {
   public static forRoot(

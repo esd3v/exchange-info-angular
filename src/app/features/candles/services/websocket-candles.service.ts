@@ -1,7 +1,7 @@
 import { Candle } from './../models/candle.model';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { WebsocketMessagesService } from 'src/app/websocket/services/websocket-messages.service';
+import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-messages.service';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketCandlesStreamParams } from '../models/websocket-candles-stream-params.model';
@@ -15,7 +15,7 @@ import { take } from 'rxjs';
 })
 export class WebsocketCandlesService extends WebsocketMessageService {
   private createStreamMessage =
-    this.webSocketMessagesService.createStreamMessage<WebsocketCandlesStreamParams>(
+    this.websocketSubscribeService.createStreamMessage<WebsocketCandlesStreamParams>(
       ({ symbol, interval }) => [`${symbol.toLowerCase()}@kline_${interval}`],
       3
     );
@@ -23,7 +23,7 @@ export class WebsocketCandlesService extends WebsocketMessageService {
   public constructor(
     private store: Store<AppState>,
     private webSocketService: WebsocketService,
-    private webSocketMessagesService: WebsocketMessagesService
+    private websocketSubscribeService: WebsocketSubscribeService
   ) {
     super();
   }
