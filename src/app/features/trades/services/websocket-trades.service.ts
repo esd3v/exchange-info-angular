@@ -47,8 +47,6 @@ export class WebsocketTradesService extends WebsocketMessageService {
       time: T,
     };
 
-    console.log(trades);
-
     this.store.dispatch(tradesActions.add({ trades }));
     this.store.dispatch(tradesActions.removeLast());
   }

@@ -1,6 +1,7 @@
 <mat-slide-toggle
   [disabled]="disabled$ | async"
   (change)="handleChange($event)"
+  [checked]="checked"
 >
   Live updates
 </mat-slide-toggle>
