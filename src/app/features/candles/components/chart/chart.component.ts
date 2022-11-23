@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { Store } from '@ngrx/store';
-import { EChartsOption } from 'echarts';
+import { EChartsOption, ECharts } from 'echarts';
 import { combineLatest, filter, map } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
@@ -14,6 +14,7 @@ import { candlesActions, candlesSelectors } from '../../store';
   styleUrls: ['./chart.component.scss'],
 })
 export class ChartComponent implements OnInit {
+  private chartInstance: ECharts | null = null;
   private upColor = '#00da3c';
   private downColor = '#ec0000';
   private barMinWidth = 6;
@@ -42,12 +43,131 @@ export class ChartComponent implements OnInit {
     .select(candlesSelectors.status)
     .pipe(map((status) => status === 'loading'));
 
-  public chartOptions!: EChartsOption;
+  public chartOptions: EChartsOption = {
+    backgroundColor: '#fff',
+    animation: false,
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross',
+      },
+      backgroundColor: 'rgba(245, 245, 245, 0.8)',
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 10,
+      textStyle: {
+        color: '#000',
+      },
+    },
+    axisPointer: {
+      label: {
+        backgroundColor: '#777',
+      },
+    },
+    grid: [
+      {
+        width: 'auto',
+        height: '70%',
+        top: 8,
+        left: 45,
+        right: this.barMinWidth,
+      },
+      {
+        width: 'auto',
+        height: '15%',
+        left: 40,
+        right: this.barMinWidth,
+        bottom: 19,
+      },
+    ],
+    dataZoom: {
+      type: 'inside',
+      xAxisIndex: [0, 1],
+      start: 75,
+      end: 100,
+      maxSpan: 25,
+      minSpan: 5,
+    },
+    xAxis: [
+      {
+        show: true,
+        type: 'category',
+        data: [],
+        gridIndex: 0,
+        boundaryGap: false,
+      },
+      {
+        show: true,
+        type: 'category',
+        gridIndex: 1,
+        data: [],
+        boundaryGap: false,
+        axisLabel: {
+          show: true,
+        },
+      },
+    ],
+    yAxis: [
+      {
+        show: true,
+        scale: true,
+        gridIndex: 0,
+        splitNumber: 7,
+        splitLine: {
+          show: true,
+          lineStyle: {
+            type: 'dashed',
+          },
+        },
+      },
+      {
+        show: true,
+        scale: true,
+        gridIndex: 1,
+        splitNumber: 2,
+        splitLine: {
+          show: false,
+        },
+      },
+    ],
+    series: [
+      {
+        name: 'OHLC',
+        type: 'candlestick',
+        data: [],
+        barMinWidth: this.barMinWidth,
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        itemStyle: {
+          color: this.upColor,
+          color0: this.downColor,
+          borderColor: undefined,
+          borderColor0: undefined,
+        },
+      },
+      {
+        name: 'Volume',
+        type: 'bar',
+        data: [],
+        barMinWidth: this.barMinWidth,
+        xAxisIndex: 1,
+        yAxisIndex: 1,
+        itemStyle: {
+          color: '#5e71ae',
+          opacity: 0.3,
+        },
+      },
+    ],
+  };
 
   public constructor(private store: Store<AppState>) {
     this.store.select(candlesSelectors.interval).subscribe((data) => {
       this.interval = data;
     });
+  }
+
+  public onChartInit($event: ECharts) {
+    this.chartInstance = $event;
   }
 
   public handleIntervalChange(event: MatSelectChange) {
@@ -81,122 +201,24 @@ export class ChartComponent implements OnInit {
         )
       )
       .subscribe(([ohlc, dates, volumes]) => {
-        this.chartOptions = {
-          backgroundColor: '#fff',
-          animation: false,
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-              type: 'cross',
-            },
-            backgroundColor: 'rgba(245, 245, 245, 0.8)',
-            borderWidth: 1,
-            borderColor: '#ccc',
-            padding: 10,
-            textStyle: {
-              color: '#000',
-            },
-          },
-          axisPointer: {
-            label: {
-              backgroundColor: '#777',
-            },
-          },
-          grid: [
-            {
-              width: 'auto',
-              height: '70%',
-              top: 8,
-              left: 45,
-              right: this.barMinWidth,
-            },
-            {
-              width: 'auto',
-              height: '15%',
-              left: 40,
-              right: this.barMinWidth,
-              bottom: 19,
-            },
-          ],
-          dataZoom: {
-            type: 'inside',
-            xAxisIndex: [0, 1],
-            start: 75,
-            end: 100,
-            maxSpan: 25,
-            minSpan: 5,
-          },
+        this.chartInstance?.setOption({
           xAxis: [
             {
-              show: true,
-              type: 'category',
               data: dates,
-              gridIndex: 0,
-              boundaryGap: false,
             },
             {
-              show: true,
-              type: 'category',
-              gridIndex: 1,
               data: volumes,
-              boundaryGap: false,
-              axisLabel: {
-                show: true,
-              },
-            },
-          ],
-          yAxis: [
-            {
-              show: true,
-              scale: true,
-              gridIndex: 0,
-              splitNumber: 7,
-              splitLine: {
-                show: true,
-                lineStyle: {
-                  type: 'dashed',
-                },
-              },
-            },
-            {
-              show: true,
-              scale: true,
-              gridIndex: 1,
-              splitNumber: 2,
-              splitLine: {
-                show: false,
-              },
             },
           ],
           series: [
             {
-              name: 'OHLC',
-              type: 'candlestick',
               data: ohlc,
-              barMinWidth: this.barMinWidth,
-              xAxisIndex: 0,
-              yAxisIndex: 0,
-              itemStyle: {
-                color: this.upColor,
-                color0: this.downColor,
-                borderColor: undefined,
-                borderColor0: undefined,
-              },
             },
             {
-              name: 'Volume',
-              type: 'bar',
               data: volumes,
-              barMinWidth: this.barMinWidth,
-              xAxisIndex: 1,
-              yAxisIndex: 1,
-              itemStyle: {
-                color: '#5e71ae',
-                opacity: 0.3,
-              },
             },
           ],
-        };
+        });
       });
   }
 }

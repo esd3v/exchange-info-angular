@@ -1,5 +1,10 @@
 <app-window title="Chart" [loading]="(loading$ | async) === true">
-  <div echarts [options]="chartOptions" class="chart"></div>
+  <div
+    echarts
+    [options]="chartOptions"
+    (chartInit)="onChartInit($event)"
+    class="chart"
+  ></div>
   <div role="actions">
     <span class="time">Time</span>
     <mat-form-field appearance="legacy" floatLabel="never">
