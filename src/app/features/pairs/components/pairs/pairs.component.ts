@@ -1,4 +1,4 @@
-import { debounceTime, filter } from 'rxjs/operators';
+import { debounceTime, filter, first } from 'rxjs/operators';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,7 +10,7 @@ import {
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
-import { combineLatest, interval, map, Subject, take } from 'rxjs';
+import { combineLatest, interval, map, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { tickersSelectors } from 'src/app/features/tickers/store';
 import { symbolsSelectors } from 'src/app/store/symbols';
@@ -25,20 +25,6 @@ import { Dictionary } from '@ngrx/entity';
 import { Router } from '@angular/router';
 import { Row } from 'src/app/shared/models/row.model';
 import { formatDecimal, parsePair } from 'src/app/shared/helpers';
-
-export function getPageSlice<T>({
-  page,
-  rows,
-  rowsPerPage,
-}: {
-  rows: T[];
-  page: number;
-  rowsPerPage: number;
-}) {
-  const rowsPassed = page * rowsPerPage;
-
-  return rows.slice(rowsPassed, rowsPassed + rowsPerPage);
-}
 
 @Component({
   selector: 'app-pairs',
@@ -112,31 +98,37 @@ export class PairsComponent implements OnDestroy, OnInit {
     this.unsubscribeFromWebsocket();
 
     interval(WEBSOCKET_UNSUBSCRIBEDELAY)
-      .pipe(take(1))
+      .pipe(first())
       .subscribe(() => {
-        this.subscribeToWebsocket();
+        this.pageData$.pipe(first()).subscribe((data) => {
+          const symbols$ = this.createSymbolsFromRows$(data);
+
+          symbols$.subscribe((symbols) => {
+            this.subscribeToWebsocket(symbols);
+          });
+        });
       });
   }
 
-  private subscribeToWebsocket() {
-    this.pageData$.pipe(take(1)).subscribe((data) => {
-      const symbols$ = this.createSymbolsFromRows(data);
-
-      symbols$.subscribe((symbols) => {
-        if (symbols.length) {
-          this.subscribedSymbols = symbols;
-          this.websocketTickerService.subscribeIndividual({ symbols });
-        }
-      });
-    });
+  private subscribeToWebsocket(symbols: string[]) {
+    if (symbols.length) {
+      this.subscribedSymbols = symbols;
+      this.websocketTickerService.subscribeIndividual({ symbols });
+    }
   }
 
   private unsubscribeFromWebsocket() {
-    this.websocketTickerService.unsubscribeIndividual({
-      symbols: this.subscribedSymbols,
-    });
+    this.globalSymbol$.pipe(first()).subscribe((globalSymbol) => {
+      const symbols = this.subscribedSymbols.filter(
+        (item) => item !== globalSymbol
+      );
 
-    this.subscribedSymbols = [];
+      this.websocketTickerService.unsubscribeIndividual({
+        symbols: symbols,
+      });
+
+      this.subscribedSymbols = [];
+    });
   }
 
   private createRows(
@@ -187,7 +179,7 @@ export class PairsComponent implements OnDestroy, OnInit {
   }
 
   // TODO Move globalSymbol filtering
-  private createSymbolsFromRows(rows: Row[]) {
+  private createSymbolsFromRows$(rows: Row[]) {
     return this.globalSymbol$.pipe(
       map((globalSymbol) =>
         rows
@@ -200,19 +192,6 @@ export class PairsComponent implements OnDestroy, OnInit {
           .filter((item) => item !== globalSymbol)
       )
     );
-  }
-
-  private handleWebsocketStart() {
-    this.websocketService.status$.subscribe((status) => {
-      if (status === 'open') {
-        this.subscribeToWebsocket();
-
-        // Start listening to page changes
-        this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {
-          this.handlePageChangeDebounced();
-        });
-      }
-    });
   }
 
   public getCellByColumnId(row: Row, id: PairColumn['id']) {
@@ -242,24 +221,63 @@ export class PairsComponent implements OnDestroy, OnInit {
     this.pageClicks$.next(event);
   }
 
-  public ngOnInit(): void {
-    this.handleWebsocketStart();
+  private handleDataUpdateInit() {
+    // Wait for tickers and tradingSymbols to load
+    const loadedData$ = combineLatest([
+      this.tradingSymbols$,
+      this.tickers$,
+    ]).pipe(
+      filter(
+        ([tradingSymbols, tickers]) =>
+          Boolean(tradingSymbols.length) && Boolean(Object.keys(tickers).length)
+      )
+    );
 
+    const createdRows$ = loadedData$.pipe(
+      map(([tradingSymbols, tickers]) =>
+        this.createRows(tradingSymbols, tickers)
+      )
+    );
+
+    // Update table data constantly
+    createdRows$.subscribe((rows) => {
+      this.dataSource.data = rows;
+    });
+
+    // Subscribe to ws only once when data is loaded and rows are created
+    createdRows$.pipe(first()).subscribe(() => {
+      // Get already sliced page data from this.pageData and used it ofr subscription
+      this.pageData$.pipe(first()).subscribe((rows) => {
+        const symbols$ = this.createSymbolsFromRows$(rows);
+
+        symbols$.pipe(first()).subscribe((symbols) => {
+          this.subscribeToWebsocket(symbols);
+        });
+      });
+    });
+  }
+
+  private handleWebsocketInit() {
+    const wsStatus$ = this.websocketService.status$;
+
+    wsStatus$.subscribe((wsStatus) => {
+      if (wsStatus === 'open') {
+        // Start listening to updates when ws opened
+        this.handleDataUpdateInit();
+
+        // Start listening to page changes
+        this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {
+          this.handlePageChangeDebounced();
+        });
+      }
+    });
+  }
+
+  public ngOnInit(): void {
     // Create paginator before setting dataSource, for optimization
     this.dataSource.paginator = this.paginator;
 
-    // React to tickers updates
-    combineLatest([this.tradingSymbols$, this.tickers$])
-      .pipe(
-        filter(
-          ([tradingSymbols, tickers]) =>
-            Boolean(tradingSymbols.length) &&
-            Boolean(Object.keys(tickers).length)
-        )
-      )
-      .subscribe(([tradingSymbols, tickers]) => {
-        this.dataSource.data = this.createRows(tradingSymbols, tickers);
-      });
+    this.handleWebsocketInit();
   }
 
   public ngOnDestroy(): void {
