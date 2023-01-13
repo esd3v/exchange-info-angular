@@ -23,8 +23,11 @@ export const parsePair = (pair: string, separator: '/' | '_') => {
 
 export const formatDecimal = (value: number | string) => {
   const number = new Decimal(value);
+  const formatted = number.valueOf();
 
-  return number.valueOf();
+  // If value is too small (e.g 0.00000041 and it formatted to 4.1e-7)...
+  // ...don't format it, just return the original string
+  return isScientific(formatted) ? value : formatted;
 };
 
 export const multiplyDecimal = (a: number | string, b: number | string) => {
