@@ -4,7 +4,13 @@ import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
 type Status = 'open' | 'connecting' | 'closed' | 'closing' | null;
 
-type Reason = 'failed' | 'terminated' | 'restoring' | 'restored' | null;
+type Reason =
+  | 'failed'
+  | 'terminated'
+  | 'restoring'
+  | 'restored'
+  | 'switch'
+  | null;
 
 @Injectable()
 export class WebsocketService implements OnDestroy {
@@ -24,16 +30,10 @@ export class WebsocketService implements OnDestroy {
     @Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig
   ) {
     this.status$.subscribe((status) => {
-      // TODO REMOVE
-      console.log('status', status);
-
       this.status = status;
     });
 
     this.reason$.subscribe((reason) => {
-      // TODO REMOVE
-      console.log('reason', reason);
-
       this.reason = reason;
     });
   }
@@ -77,9 +77,13 @@ export class WebsocketService implements OnDestroy {
     this.close();
   }
 
-  public connect(): void {
+  public connect(reason?: Reason): void {
     this.status$.next('connecting');
-    this.reason$.next(this.reason === 'terminated' ? 'restoring' : this.reason);
+
+    this.reason$.next(
+      reason || (this.reason === 'terminated' ? 'restoring' : this.reason)
+    );
+
     this.socket = new WebSocket(this.config.url);
 
     this.socket.onopen = () => {
