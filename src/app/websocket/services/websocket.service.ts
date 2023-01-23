@@ -4,7 +4,7 @@ import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
 type Status = 'open' | 'connecting' | 'closed' | 'closing' | null;
 
-type Reason =
+export type Reason =
   | 'failed'
   | 'terminated'
   | 'restoring'
@@ -77,7 +77,7 @@ export class WebsocketService implements OnDestroy {
     this.close();
   }
 
-  public connect(reason?: Reason): void {
+  public connect(reason?: Reason) {
     this.status$.next('connecting');
 
     this.reason$.next(
@@ -116,5 +116,7 @@ export class WebsocketService implements OnDestroy {
 
       this.status$.next('closed');
     };
+
+    return this.status$;
   }
 }

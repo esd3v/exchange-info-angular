@@ -7,7 +7,7 @@ const LOAD = `${PREFIX} LOAD`;
 const SUCCESS = `${PREFIX} SUCCESS`;
 const SET = `${PREFIX} SET`;
 
-export const load = createAction(LOAD, props<{ params: OrderBookGetParams }>());
+export const load = createAction(LOAD, props<OrderBookGetParams>());
 
 export const loadSuccess = createAction(SUCCESS, props<OrderBook>());
 

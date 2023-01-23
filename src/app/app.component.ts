@@ -9,15 +9,10 @@ export class AppComponent implements OnInit {
   public constructor(private appService: AppService) {}
 
   public ngOnInit(): void {
+    this.appService.watchRouterEvents();
     this.appService.watchCurrencyChange();
-    this.appService.loadTicker();
-    this.appService.loadExchangeInfo();
-    this.appService.loadOrderBook();
-    this.appService.loadCandles();
-    this.appService.loadTrades();
+    this.appService.watchWebsocketStatus();
+    this.appService.watchWebsocketMessage();
     this.appService.startWebSocket();
-    this.appService.handleEmptyPair();
-    this.appService.handleWebsocketStart();
-    this.appService.handleWebsocketMessage();
   }
 }

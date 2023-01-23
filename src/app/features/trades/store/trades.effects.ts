@@ -2,16 +2,16 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { switchMap, map } from 'rxjs';
 import { tradesActions } from '.';
-import { TradesService } from '../services/trades.service';
+import { TradesRestService } from '../services/trades-rest.service';
 
 @Injectable()
 export class TradesEffects {
   public loadTrades$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(tradesActions.load),
-      switchMap(({ params }) => {
-        return this.tradesService
-          .get(params)
+      switchMap(({ symbol, limit }) => {
+        return this.tradesRestService
+          .get({ symbol, limit })
           .pipe(map((data) => tradesActions.loadSuccess({ trades: data })));
       })
     );
@@ -19,6 +19,6 @@ export class TradesEffects {
 
   public constructor(
     private actions$: Actions,
-    private tradesService: TradesService
+    private tradesRestService: TradesRestService
   ) {}
 }

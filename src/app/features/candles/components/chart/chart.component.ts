@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { Store } from '@ngrx/store';
 import { EChartsOption, ECharts } from 'echarts';
-import { combineLatest, filter, map } from 'rxjs';
+import { combineLatest, delay, map, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
 import { CandleInterval } from '../../models/candle-interval.model';
 import { candlesActions, candlesSelectors } from '../../store';
 
@@ -14,7 +13,7 @@ import { candlesActions, candlesSelectors } from '../../store';
   styleUrls: ['./chart.component.scss'],
 })
 export class ChartComponent implements OnInit {
-  private chartInstance: ECharts | null = null;
+  private chartInstance$ = new Subject<ECharts>();
   private upColor = '#00da3c';
   private downColor = '#ec0000';
   private barMinWidth = 6;
@@ -160,65 +159,56 @@ export class ChartComponent implements OnInit {
     ],
   };
 
-  public constructor(private store: Store<AppState>) {
-    this.store.select(candlesSelectors.interval).subscribe((data) => {
-      this.interval = data;
-    });
-  }
+  public constructor(private store: Store<AppState>) {}
 
   public onChartInit($event: ECharts) {
-    this.chartInstance = $event;
+    this.chartInstance$.next($event);
   }
 
   public handleIntervalChange(event: MatSelectChange) {
-    const value = event.value as CandleInterval;
+    const interval = event.value as CandleInterval;
 
-    const globalSymbol$ = this.store
-      .select(globalSelectors.globalSymbol)
-      .pipe(filter(Boolean));
+    this.store.dispatch(candlesActions.setInterval({ interval }));
 
-    this.interval = value;
-
-    globalSymbol$.subscribe((data) => {
-      this.store.dispatch(
-        candlesActions.load({ params: { interval: value, symbol: data } })
-      );
-    });
+    this.interval = interval;
   }
 
   public ngOnInit(): void {
-    const ohlc$ = this.store.select(candlesSelectors.ohlc);
-    const dates$ = this.store.select(candlesSelectors.dates);
-    const volumes$ = this.store.select(candlesSelectors.volumes);
+    this.store.select(candlesSelectors.interval).subscribe((data) => {
+      this.interval = data;
+    });
 
-    combineLatest([ohlc$, dates$, volumes$])
-      .pipe(
-        filter(
-          ([ohlc, dates, volumes]) =>
-            Boolean(ohlc.length) &&
-            Boolean(dates.length) &&
-            Boolean(volumes.length)
-        )
-      )
-      .subscribe(([ohlc, dates, volumes]) => {
-        this.chartInstance?.setOption({
-          xAxis: [
-            {
-              data: dates,
-            },
-            {
-              data: volumes,
-            },
-          ],
-          series: [
-            {
-              data: ohlc,
-            },
-            {
-              data: volumes,
-            },
-          ],
+    this.chartInstance$.subscribe((instance) => {
+      const ohlc$ = this.store.select(candlesSelectors.ohlc);
+      const dates$ = this.store.select(candlesSelectors.dates);
+      const volumes$ = this.store.select(candlesSelectors.volumes);
+
+      combineLatest([ohlc$, dates$, volumes$])
+        .pipe(delay(1))
+        .subscribe(([ohlc, dates, volumes]) => {
+          if (ohlc.length && dates.length && volumes.length) {
+            console.log(instance);
+
+            instance.setOption({
+              xAxis: [
+                {
+                  data: dates,
+                },
+                {
+                  data: volumes,
+                },
+              ],
+              series: [
+                {
+                  data: ohlc,
+                },
+                {
+                  data: volumes,
+                },
+              ],
+            });
+          }
         });
-      });
+    });
   }
 }

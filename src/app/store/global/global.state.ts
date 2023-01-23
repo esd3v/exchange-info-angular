@@ -8,8 +8,8 @@ export interface GlobalState {
 
 export const initialState: GlobalState = {
   currency: {
-    base: null,
-    quote: null,
+    base: 'ETH',
+    quote: 'BTC',
   },
   notification: {
     type: 'info',

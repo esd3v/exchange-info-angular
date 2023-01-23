@@ -11,7 +11,7 @@ const ADD_CANDLE = `${PREFIX} ADD CANDLE`;
 const REMOVE_FIRST_CANDLE = `${PREFIX} REMOVE FIRST CANDLE`;
 const UPDATE_CANDLE = `${PREFIX} UPDATE CANDLE`;
 
-export const load = createAction(LOAD, props<{ params: CandlesGetParams }>());
+export const load = createAction(LOAD, props<CandlesGetParams>());
 
 export const loadSuccess = createAction(
   SUCCESS,

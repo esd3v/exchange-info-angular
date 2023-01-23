@@ -1,4 +1,4 @@
-import { TickerService } from '../services/ticker.service';
+import { TickerRestService } from '../services/ticker-rest.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { switchMap, map } from 'rxjs';
@@ -10,7 +10,7 @@ export class TickersEffects {
     return this.actions$.pipe(
       ofType(tickersActions.load),
       switchMap(() => {
-        return this.tickerService
+        return this.tickerRestService
           .get()
           .pipe(map((data) => tickersActions.loadSuccess({ data })));
       })
@@ -19,6 +19,6 @@ export class TickersEffects {
 
   public constructor(
     private actions$: Actions,
-    private tickerService: TickerService
+    private tickerRestService: TickerRestService
   ) {}
 }

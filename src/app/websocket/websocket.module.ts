@@ -1,5 +1,5 @@
 import { ModuleWithProviders, NgModule } from '@angular/core';
-import { WebsocketSubscribeService } from './services/websocket-messages.service';
+import { WebsocketSubscribeService } from './services/websocket-subscribe.service';
 import { WebsocketService } from './services/websocket.service';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from './websocket-config';
 

@@ -1,4 +1,4 @@
-import { debounceTime, filter, first } from 'rxjs/operators';
+import { debounceTime, delay, filter, first, takeUntil } from 'rxjs/operators';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,14 +10,13 @@ import {
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
-import { combineLatest, interval, map, Subject } from 'rxjs';
+import { combineLatest, EMPTY, interval, map, Subject, timer } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { tickersSelectors } from 'src/app/features/tickers/store';
 import { symbolsSelectors } from 'src/app/store/symbols';
 import { PairColumn } from '../../models/pair-column.model';
-import { WebsocketTickerService } from 'src/app/features/tickers/services/websocket-ticker.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { WEBSOCKET_UNSUBSCRIBEDELAY } from 'src/app/shared/config';
+import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { globalActions, globalSelectors } from 'src/app/store/global';
 import { TickerEntity } from 'src/app/features/tickers/store/tickers.state';
 import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
@@ -25,6 +24,15 @@ import { Dictionary } from '@ngrx/entity';
 import { Router } from '@angular/router';
 import { Row } from 'src/app/shared/models/row.model';
 import { formatDecimal, parsePair } from 'src/app/shared/helpers';
+import { candlesSelectors } from 'src/app/features/candles/store';
+import { CandlesRestService } from 'src/app/features/candles/services/candles-rest.service';
+import { OrderBookRestService } from 'src/app/features/order-book/services/order-book-rest.service';
+import { TickerRestService } from 'src/app/features/tickers/services/ticker-rest.service';
+import { TickerWebsocketService } from 'src/app/features/tickers/services/ticker.-websocket.service';
+import { TradesRestService } from 'src/app/features/trades/services/trades-rest.service';
+import { TradesWebsocketService } from 'src/app/features/trades/services/trades-websocket.service';
+import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
+import { OrderBookWebsocketService } from 'src/app/features/order-book/services/order-book-websocket.service';
 
 @Component({
   selector: 'app-pairs',
@@ -43,6 +51,8 @@ export class PairsComponent implements OnDestroy, OnInit {
   private pageClicks$ = new Subject<PageEvent>();
   private subscribedSymbols: string[] = [];
   private tickersStatus$ = this.store.select(tickersSelectors.status);
+  private websocketStatus$ = this.websocketService.status$;
+  private candlesInterval$ = this.store.select(candlesSelectors.interval);
   private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
@@ -85,7 +95,14 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public constructor(
     private websocketService: WebsocketService,
-    private websocketTickerService: WebsocketTickerService,
+    private tickerWebsocketService: TickerWebsocketService,
+    private tickerRestService: TickerRestService,
+    private orderBookRestService: OrderBookRestService,
+    private candlesRestService: CandlesRestService,
+    private tradesRestService: TradesRestService,
+    private orderBookWebsocketService: OrderBookWebsocketService,
+    private candlesWebsocketService: CandlesWebsocketService,
+    private tradesWebsocketService: TradesWebsocketService,
     private store: Store<AppState>,
     private router: Router
   ) {}
@@ -95,25 +112,33 @@ export class PairsComponent implements OnDestroy, OnInit {
   }
 
   private handlePageChangeDebounced() {
-    this.unsubscribeFromWebsocket();
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === 'open') {
+        this.unsubscribeFromWebsocket();
 
-    interval(WEBSOCKET_UNSUBSCRIBEDELAY)
-      .pipe(first())
-      .subscribe(() => {
-        this.pageData$.pipe(first()).subscribe((data) => {
-          const symbols$ = this.createSymbolsFromRows$(data);
+        interval(WEBSOCKET_SUBSCRIPTION_DELAY)
+          .pipe(first())
+          .subscribe(() => {
+            this.pageData$.pipe(first()).subscribe((data) => {
+              const symbols$ = this.createSymbolsFromRows$(data);
 
-          symbols$.subscribe((symbols) => {
-            this.subscribeToWebsocket(symbols);
+              symbols$.pipe(first()).subscribe((symbols) => {
+                this.subscribeToWebsocket(symbols);
+              });
+            });
           });
-        });
-      });
+      }
+    });
   }
 
   private subscribeToWebsocket(symbols: string[]) {
     if (symbols.length) {
       this.subscribedSymbols = symbols;
-      this.websocketTickerService.subscribeIndividual({ symbols });
+
+      this.tickerWebsocketService.subscribeToWebsocket(
+        { symbols },
+        this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
+      );
     }
   }
 
@@ -123,9 +148,12 @@ export class PairsComponent implements OnDestroy, OnInit {
         (item) => item !== globalSymbol
       );
 
-      this.websocketTickerService.unsubscribeIndividual({
-        symbols: symbols,
-      });
+      this.tickerWebsocketService.unsubscribeFromWebsocket(
+        {
+          symbols: symbols,
+        },
+        this.tickerWebsocketService.websocketSubscriptionId.unsubscribe.multiple
+      );
 
       this.subscribedSymbols = [];
     });
@@ -206,6 +234,109 @@ export class PairsComponent implements OnDestroy, OnInit {
 
     if (base && quote) {
       const pair = `${base}_${quote}`;
+      const symbol = `${base}${quote}`;
+
+      this.globalSymbol$
+        .pipe(first(), filter(Boolean))
+        .subscribe((globalSymbol) => {
+          this.candlesInterval$.pipe(first()).subscribe((interval) => {
+            this.websocketStatus$
+              .pipe(
+                first(),
+                filter((status) => status === 'open')
+              )
+              .subscribe(() => {
+                const stopTrades$ = new Subject<void>();
+                const stopOrderBook$ = new Subject<void>();
+                const stopCandles$ = new Subject<void>();
+
+                this.orderBookWebsocketService.unsubscribeFromWebsocket(
+                  {
+                    symbol: globalSymbol,
+                  },
+                  this.orderBookWebsocketService.websocketSubscriptionId
+                    .unsubscribe
+                );
+
+                this.tradesWebsocketService.unsubscribeFromWebsocket(
+                  {
+                    symbol: globalSymbol,
+                  },
+                  this.tradesWebsocketService.websocketSubscriptionId
+                    .unsubscribe
+                );
+
+                this.candlesWebsocketService.unsubscribeFromWebsocket(
+                  {
+                    symbol: globalSymbol,
+                    interval,
+                  },
+                  this.candlesWebsocketService.websocketSubscriptionId
+                    .unsubscribe
+                );
+
+                this.orderBookRestService
+                  .loadData({ symbol })
+                  .pipe(
+                    takeUntil(stopOrderBook$),
+                    filter((status) => status === 'success')
+                  )
+                  .subscribe(() => {
+                    timer(WEBSOCKET_SUBSCRIPTION_DELAY).subscribe(() => {
+                      this.orderBookWebsocketService.subscribeToWebsocket(
+                        { symbol },
+                        this.orderBookWebsocketService.websocketSubscriptionId
+                          .subscribe
+                      );
+
+                      stopOrderBook$.next();
+                    });
+                  });
+
+                this.tradesRestService
+                  .loadData({ symbol })
+                  .pipe(
+                    takeUntil(stopTrades$),
+                    filter((status) => status === 'success')
+                  )
+                  .subscribe(() => {
+                    timer(WEBSOCKET_SUBSCRIPTION_DELAY).subscribe(() => {
+                      this.tradesWebsocketService.subscribeToWebsocket(
+                        { symbol },
+                        this.tradesWebsocketService.websocketSubscriptionId
+                          .subscribe
+                      );
+
+                      stopTrades$.next();
+                    });
+                  });
+
+                this.candlesRestService
+                  .loadData({
+                    symbol,
+                    interval,
+                  })
+                  .pipe(
+                    takeUntil(stopCandles$),
+                    filter((status) => status === 'success')
+                  )
+                  .subscribe(() => {
+                    timer(WEBSOCKET_SUBSCRIPTION_DELAY).subscribe(() => {
+                      this.candlesWebsocketService.subscribeToWebsocket(
+                        {
+                          symbol,
+                          interval,
+                        },
+                        this.candlesWebsocketService.websocketSubscriptionId
+                          .subscribe
+                      );
+
+                      stopCandles$.next();
+                    });
+                  });
+              });
+          });
+        });
 
       this.store.dispatch(
         globalActions.setCurrency({
@@ -251,25 +382,13 @@ export class PairsComponent implements OnDestroy, OnInit {
         const symbols$ = this.createSymbolsFromRows$(rows);
 
         symbols$.pipe(first()).subscribe((symbols) => {
-          this.subscribeToWebsocket(symbols);
+          this.websocketService.status$.subscribe((status) => {
+            if (status === 'open') {
+              this.subscribeToWebsocket(symbols);
+            }
+          });
         });
       });
-    });
-  }
-
-  private handleWebsocketInit() {
-    const wsStatus$ = this.websocketService.status$;
-
-    wsStatus$.subscribe((wsStatus) => {
-      if (wsStatus === 'open') {
-        // Start listening to updates when ws opened
-        this.handleDataUpdateInit();
-
-        // Start listening to page changes
-        this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {
-          this.handlePageChangeDebounced();
-        });
-      }
     });
   }
 
@@ -277,7 +396,12 @@ export class PairsComponent implements OnDestroy, OnInit {
     // Create paginator before setting dataSource, for optimization
     this.dataSource.paginator = this.paginator;
 
-    this.handleWebsocketInit();
+    this.handleDataUpdateInit();
+
+    // Start listening to page changes
+    this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {
+      this.handlePageChangeDebounced();
+    });
   }
 
   public ngOnDestroy(): void {

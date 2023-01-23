@@ -9,7 +9,7 @@ const SUCCESS = `${PREFIX} SUCCESS`;
 const ADD = `${PREFIX} ADD`;
 const REMOVE_LAST = `${PREFIX} REMOVE LAST`;
 
-export const load = createAction(LOAD, props<{ params: TradesGetParams }>());
+export const load = createAction(LOAD, props<TradesGetParams>());
 
 export const loadSuccess = createAction(SUCCESS, props<{ trades: Trades[] }>());
 
