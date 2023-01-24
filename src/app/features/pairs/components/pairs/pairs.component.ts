@@ -23,16 +23,21 @@ import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
 import { Dictionary } from '@ngrx/entity';
 import { Router } from '@angular/router';
 import { Row } from 'src/app/shared/models/row.model';
-import { formatDecimal, parsePair } from 'src/app/shared/helpers';
+import {
+  formatDecimal,
+  getCellByColumnId,
+  parsePair,
+} from 'src/app/shared/helpers';
 import { candlesSelectors } from 'src/app/features/candles/store';
 import { CandlesRestService } from 'src/app/features/candles/services/candles-rest.service';
 import { OrderBookRestService } from 'src/app/features/order-book/services/order-book-rest.service';
 import { TickerRestService } from 'src/app/features/tickers/services/ticker-rest.service';
-import { TickerWebsocketService } from 'src/app/features/tickers/services/ticker.-websocket.service';
 import { TradesRestService } from 'src/app/features/trades/services/trades-rest.service';
 import { TradesWebsocketService } from 'src/app/features/trades/services/trades-websocket.service';
 import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
 import { OrderBookWebsocketService } from 'src/app/features/order-book/services/order-book-websocket.service';
+import { PairsService } from '../../services/pairs.service';
+import { Column } from 'src/app/shared/models/column';
 
 @Component({
   selector: 'app-pairs',
@@ -95,7 +100,7 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public constructor(
     private websocketService: WebsocketService,
-    private tickerWebsocketService: TickerWebsocketService,
+    private pairsService: PairsService,
     private tickerRestService: TickerRestService,
     private orderBookRestService: OrderBookRestService,
     private candlesRestService: CandlesRestService,
@@ -114,48 +119,17 @@ export class PairsComponent implements OnDestroy, OnInit {
   private handlePageChangeDebounced() {
     this.websocketService.status$.pipe(first()).subscribe((status) => {
       if (status === 'open') {
-        this.unsubscribeFromWebsocket();
+        this.pairsService.unsubscribeFromPageSymbols();
 
         interval(WEBSOCKET_SUBSCRIPTION_DELAY)
           .pipe(first())
           .subscribe(() => {
-            this.pageData$.pipe(first()).subscribe((data) => {
-              const symbols$ = this.createSymbolsFromRows$(data);
-
-              symbols$.pipe(first()).subscribe((symbols) => {
-                this.subscribeToWebsocket(symbols);
-              });
-            });
+            this.pairsService.subscribeToPageSymbols(
+              this.columns,
+              this.pageData$
+            );
           });
       }
-    });
-  }
-
-  private subscribeToWebsocket(symbols: string[]) {
-    if (symbols.length) {
-      this.subscribedSymbols = symbols;
-
-      this.tickerWebsocketService.subscribeToWebsocket(
-        { symbols },
-        this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
-      );
-    }
-  }
-
-  private unsubscribeFromWebsocket() {
-    this.globalSymbol$.pipe(first()).subscribe((globalSymbol) => {
-      const symbols = this.subscribedSymbols.filter(
-        (item) => item !== globalSymbol
-      );
-
-      this.tickerWebsocketService.unsubscribeFromWebsocket(
-        {
-          symbols: symbols,
-        },
-        this.tickerWebsocketService.websocketSubscriptionId.unsubscribe.multiple
-      );
-
-      this.subscribedSymbols = [];
     });
   }
 
@@ -206,30 +180,13 @@ export class PairsComponent implements OnDestroy, OnInit {
     return rows;
   }
 
-  // TODO Move globalSymbol filtering
-  private createSymbolsFromRows$(rows: Row[]) {
-    return this.globalSymbol$.pipe(
-      map((globalSymbol) =>
-        rows
-          .map((row) => {
-            const pairCell = this.getCellByColumnId(row, 'pair');
-            const { base, quote } = parsePair(pairCell.value as string, '/');
-
-            return `${base}${quote}`;
-          })
-          .filter((item) => item !== globalSymbol)
-      )
-    );
-  }
-
-  public getCellByColumnId(row: Row, id: PairColumn['id']) {
-    const columnId = this.columns.findIndex((item) => item.id === id);
-
-    return row[columnId];
-  }
-
   public handleRowClick(row: Row) {
-    const pairCell = this.getCellByColumnId(row, 'pair');
+    const pairCell = getCellByColumnId({
+      columns: this.columns,
+      id: 'pair',
+      row,
+    });
+
     const { base, quote } = parsePair(pairCell.value as string, '/');
 
     if (base && quote) {
@@ -352,7 +309,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     this.pageClicks$.next(event);
   }
 
-  private handleDataUpdateInit() {
+  private watchDataUpdate() {
     // Wait for tickers and tradingSymbols to load
     const loadedData$ = combineLatest([
       this.tradingSymbols$,
@@ -377,17 +334,15 @@ export class PairsComponent implements OnDestroy, OnInit {
 
     // Subscribe to ws only once when data is loaded and rows are created
     createdRows$.pipe(first()).subscribe(() => {
-      // Get already sliced page data from this.pageData and used it ofr subscription
-      this.pageData$.pipe(first()).subscribe((rows) => {
-        const symbols$ = this.createSymbolsFromRows$(rows);
+      // Get already sliced page data from this.pageData and used it for subscription
 
-        symbols$.pipe(first()).subscribe((symbols) => {
-          this.websocketService.status$.subscribe((status) => {
-            if (status === 'open') {
-              this.subscribeToWebsocket(symbols);
-            }
-          });
-        });
+      this.websocketService.status$.subscribe((status) => {
+        if (status === 'open') {
+          this.pairsService.subscribeToPageSymbols(
+            this.columns,
+            this.pageData$
+          );
+        }
       });
     });
   }
@@ -396,7 +351,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     // Create paginator before setting dataSource, for optimization
     this.dataSource.paginator = this.paginator;
 
-    this.handleDataUpdateInit();
+    this.watchDataUpdate();
 
     // Start listening to page changes
     this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {

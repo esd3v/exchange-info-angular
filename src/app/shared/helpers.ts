@@ -4,6 +4,7 @@ import * as utc from 'dayjs/plugin/utc';
 import { SortOrder } from './models/sort-order.model';
 import { Row } from './models/row.model';
 import { Decimal } from 'decimal.js';
+import { Column } from './models/column';
 
 dayjs.extend(utc);
 
@@ -121,3 +122,17 @@ export function sortRows<T extends Row[]>({
 
   return applyColumn(rows, column, headCellIndex);
 }
+
+export const getCellByColumnId = ({
+  columns,
+  id,
+  row,
+}: {
+  columns: Column[];
+  row: Row;
+  id: Column['id'];
+}) => {
+  const columnId = columns.findIndex((item) => item.id === id);
+
+  return row[columnId];
+};

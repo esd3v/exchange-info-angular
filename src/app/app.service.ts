@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, timer } from 'rxjs';
 import { CandlesWebsocketService } from './features/candles/services/candles-websocket.service';
 import { OrderBookWebsocketService } from './features/order-book/services/order-book-websocket.service';
-import { TickerWebsocketService } from './features/tickers/services/ticker.-websocket.service';
+import { TickerWebsocketService } from './features/tickers/services/ticker-websocket.service';
 import { tickersSelectors } from './features/tickers/store';
 import { TradesWebsocketService } from './features/trades/services/trades-websocket.service';
 import {
@@ -128,6 +128,12 @@ export class AppService {
               this.orderBookWebsocketService.handleWebsocketData(data);
             }
           }
+        },
+        onSubscribe(id) {
+          console.log('subscribed', id);
+        },
+        onUnsubscribe(id) {
+          console.log('unsubscribed', id);
         },
       });
     });
