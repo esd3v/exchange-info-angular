@@ -1,16 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { first } from 'rxjs';
+import { timer } from 'rxjs';
 import { CandlesRestService } from 'src/app/features/candles/services/candles-rest.service';
-import { candlesSelectors } from 'src/app/features/candles/store';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { OrderBookRestService } from 'src/app/features/order-book/services/order-book-rest.service';
 import { TickerRestService } from 'src/app/features/tickers/services/ticker-rest.service';
 import { TradesRestService } from 'src/app/features/trades/services/trades-rest.service';
+import { REST_START_DELAY } from 'src/app/shared/config';
 import { parsePair } from 'src/app/shared/helpers';
 import { AppState } from 'src/app/store';
 import { globalActions } from 'src/app/store/global';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 
 @Component({
   selector: 'app-home',
@@ -18,11 +19,10 @@ import { globalActions } from 'src/app/store/global';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  private candlesInterval$ = this.store.select(candlesSelectors.interval);
-
   public constructor(
     private store: Store<AppState>,
     private route: ActivatedRoute,
+    private websocketService: WebsocketService,
     private exchangeInfoRestService: ExchangeInfoRestService,
     private tickerRestService: TickerRestService,
     private orderBookRestService: OrderBookRestService,
@@ -34,22 +34,20 @@ export class HomeComponent implements OnInit {
     this.exchangeInfoRestService.loadData();
   }
 
-  private loadTicker() {
-    this.tickerRestService.loadData();
+  private loadTicker(symbol: string) {
+    this.tickerRestService.loadDataOnAppInit(symbol);
   }
 
   private loadCandles(symbol: string) {
-    this.candlesInterval$.pipe(first()).subscribe((interval) => {
-      this.candlesRestService.loadData({ symbol, interval });
-    });
+    this.candlesRestService.loadDataOnAppInit({ symbol });
   }
 
-  private loadOrderBookAndSubscribeToWebsocket(symbol: string) {
-    this.orderBookRestService.loadData({ symbol });
+  private loadOrderBook(symbol: string) {
+    this.orderBookRestService.loadDataOnAppInit({ symbol });
   }
 
   private loadTrades(symbol: string) {
-    this.tradesRestService.loadData({ symbol });
+    this.tradesRestService.loadDataOnAppInit({ symbol });
   }
 
   private getParsedRoutePair() {
@@ -75,11 +73,13 @@ export class HomeComponent implements OnInit {
       const { base, quote } = parsedRoutePair;
       const symbol = `${base}${quote}`;
 
-      this.loadExchangeInfo();
-      this.loadTicker();
-      this.loadCandles(symbol);
-      this.loadOrderBookAndSubscribeToWebsocket(symbol);
-      this.loadTrades(symbol);
+      timer(REST_START_DELAY).subscribe(() => {
+        this.loadExchangeInfo();
+        this.loadTicker(symbol);
+        this.loadCandles(symbol);
+        this.loadOrderBook(symbol);
+        this.loadTrades(symbol);
+      });
 
       this.store.dispatch(
         globalActions.setCurrency({ payload: { base, quote } })

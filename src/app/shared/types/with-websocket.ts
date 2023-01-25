@@ -9,6 +9,5 @@ export interface WithWebsocket<T, U> {
   websocketSubscription(params: T, id: number): WebsocketSubscription;
   subscribeToWebsocket(params: T, id: number): void;
   unsubscribeFromWebsocket?(params: T, id: number): void;
-  onWebsocketOpen(params: any): void;
   handleWebsocketData?(params: U): void;
 }
