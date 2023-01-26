@@ -2,7 +2,7 @@ import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, interval, Subject, takeWhile } from 'rxjs';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
-type Status = 'open' | 'connecting' | 'closed' | 'closing' | null;
+type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing' | null;
 
 export type Reason =
   | 'failed'
@@ -16,11 +16,11 @@ export type Reason =
 export class WebsocketService implements OnDestroy {
   private socket!: WebSocket | null;
   private _messages$ = new Subject<MessageEvent<string>>();
-  private status!: Status;
+  private status!: WebsocketStatus;
   private reason!: Reason;
 
   public reason$ = new BehaviorSubject<Reason>(null);
-  public status$ = new BehaviorSubject<Status>(null);
+  public status$ = new BehaviorSubject<WebsocketStatus>(null);
 
   public get messages$() {
     return this._messages$;
