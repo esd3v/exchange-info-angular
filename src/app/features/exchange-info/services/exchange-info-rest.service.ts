@@ -1,10 +1,10 @@
-import { ExchangeInfo } from '../models/exchange-info.model';
-import { Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { exchangeInfoActions, exchangeInfoSelectors } from '../store';
-import { AppState } from 'src/app/store';
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { AppState } from 'src/app/store';
+import { ExchangeInfo } from '../models/exchange-info.model';
+import { exchangeInfoActions, exchangeInfoSelectors } from '../store';
 
 @Injectable({
   providedIn: 'root',

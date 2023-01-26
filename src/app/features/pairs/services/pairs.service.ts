@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
+  combineLatest,
   filter,
   first,
   map,
-  Subject,
+  mergeMap,
   takeUntil,
   timer,
 } from 'rxjs';
@@ -31,6 +32,19 @@ export class PairsService {
   public subscribedSymbols: string[] = [];
   private candlesInterval$ = this.store.select(candlesSelectors.interval);
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
+  private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
+
+  private currentCandlesInterval$ = this.candlesInterval$.pipe(first());
+
+  private currentGlobalSymbol$ = this.globalSymbol$.pipe(
+    first(),
+    filter(Boolean)
+  );
+
+  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
+    first(),
+    filter((status) => status === 'open')
+  );
 
   public constructor(
     private store: Store<AppState>,
@@ -72,189 +86,146 @@ export class PairsService {
       pageData$
     ).pipe(filter((symbols) => Boolean(symbols.length)));
 
-    this.globalSymbol$
-      .pipe(first(), filter(Boolean))
-      .subscribe((globalSymbol) => {
-        symbols$
-          .pipe(
-            // Exclude globalSymbol because we already subscribed to it
-            map((symbols) =>
-              symbols.filter((symbol) => symbol !== globalSymbol)
-            )
-          )
-          .subscribe((symbols) => {
-            this.subscribedSymbols = symbols;
+    this.currentGlobalSymbol$.subscribe((globalSymbol) => {
+      symbols$
+        .pipe(
+          // Exclude globalSymbol because we already subscribed to it
+          map((symbols) => symbols.filter((symbol) => symbol !== globalSymbol))
+        )
+        .subscribe((symbols) => {
+          this.subscribedSymbols = symbols;
 
-            this.tickerWebsocketService.subscribeToWebsocket(
-              { symbols },
-              this.tickerWebsocketService.websocketSubscriptionId.subscribe
-                .multiple
-            );
-          });
-      });
+          this.tickerWebsocketService.subscribeToWebsocket(
+            { symbols },
+            this.tickerWebsocketService.websocketSubscriptionId.subscribe
+              .multiple
+          );
+        });
+    });
   }
 
+  // FIXME
   public unsubscribeFromPageSymbols() {
     console.log('this.subscribedSymbols', this.subscribedSymbols);
 
-    this.globalSymbol$
-      .pipe(first(), filter(Boolean))
-      .subscribe((globalSymbol) => {
-        this.tickerWebsocketService.unsubscribeFromWebsocket(
-          {
-            symbols: this.subscribedSymbols.filter(
-              (symbol) => symbol !== globalSymbol
-            ),
-          },
-          this.tickerWebsocketService.websocketSubscriptionId.unsubscribe
-            .multiple
-        );
+    this.currentGlobalSymbol$.subscribe((globalSymbol) => {
+      this.tickerWebsocketService.unsubscribeFromWebsocket(
+        {
+          symbols: this.subscribedSymbols.filter(
+            (symbol) => symbol !== globalSymbol
+          ),
+        },
+        this.tickerWebsocketService.websocketSubscriptionId.unsubscribe.multiple
+      );
 
-        this.subscribedSymbols = [];
-      });
+      this.subscribedSymbols = [];
+    });
   }
 
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesRestService.loadData>[0], 'symbol'>) {
-    const stop$ = new Subject<void>();
+    combineLatest([this.currentGlobalSymbol$, this.currentCandlesInterval$])
+      .pipe(
+        mergeMap(([globalSymbol, interval]) => {
+          // Unsubscribe from global symbol first
+          this.candlesWebsocketService.unsubscribeFromWebsocket(
+            {
+              symbol: globalSymbol,
+              interval,
+            },
+            this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
+          );
 
-    this.candlesInterval$.pipe(first()).subscribe((interval) => {
-      this.globalSymbol$.pipe(first(), filter(Boolean)).subscribe((symbol) => {
-        this.websocketStatus$
-          .pipe(
-            first(),
-            filter((status) => status === 'open')
-          )
-          .subscribe(() => {
-            this.candlesWebsocketService.unsubscribeFromWebsocket(
-              {
-                symbol,
-                interval,
-              },
-              this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
-            );
+          // Load data and get status
+          const status$ = this.candlesRestService.loadData({
+            interval,
+            symbol,
           });
+
+          const stop$ = status$.pipe(filter((status) => status === 'success'));
+          const success$ = status$.pipe(takeUntil(stop$));
+
+          return combineLatest([
+            success$,
+            this.currentWebsocketOpened$,
+            this.delay$,
+          ]).pipe(map(() => interval));
+        })
+      )
+
+      .subscribe((interval) => {
+        this.candlesWebsocketService.subscribeToWebsocket(
+          {
+            symbol,
+            interval,
+          },
+          this.candlesWebsocketService.websocketSubscriptionId.subscribe
+        );
       });
-
-      this.candlesRestService
-        .loadData({ interval, symbol })
-        .pipe(
-          takeUntil(stop$),
-          filter((status) => status === 'success')
-        )
-        .subscribe(() => {
-          this.websocketStatus$
-            .pipe(
-              first(),
-              filter((status) => status === 'open')
-            )
-            .subscribe(() => {
-              stop$.next();
-
-              timer(WEBSOCKET_SUBSCRIPTION_DELAY).subscribe(() => {
-                this.candlesWebsocketService.subscribeToWebsocket(
-                  {
-                    symbol,
-                    interval,
-                  },
-                  this.candlesWebsocketService.websocketSubscriptionId.subscribe
-                );
-              });
-            });
-        });
-    });
   }
 
   public handleOrderBookOnRowClick({
     symbol,
   }: Parameters<typeof this.orderBookRestService.loadData>[0]) {
-    const stop$ = new Subject<void>();
-
-    this.globalSymbol$.pipe(first(), filter(Boolean)).subscribe((symbol) => {
-      this.websocketStatus$
-        .pipe(
-          first(),
-          filter((status) => status === 'open')
-        )
-        .subscribe(() => {
+    combineLatest([this.currentGlobalSymbol$, this.currentWebsocketOpened$])
+      .pipe(
+        mergeMap(([globalSymbol]) => {
+          // Unsubscribe from global symbol first
           this.orderBookWebsocketService.unsubscribeFromWebsocket(
             {
-              symbol,
+              symbol: globalSymbol,
             },
             this.orderBookWebsocketService.websocketSubscriptionId.unsubscribe
           );
-        });
-    });
 
-    this.orderBookRestService
-      .loadData({ symbol })
-      .pipe(
-        takeUntil(stop$),
-        filter((status) => status === 'success')
+          // Load data and get status
+          const status$ = this.orderBookRestService.loadData({ symbol });
+          const stop$ = status$.pipe(filter((status) => status === 'success'));
+          const success$ = status$.pipe(takeUntil(stop$));
+
+          return combineLatest([success$, this.delay$]);
+        })
       )
       .subscribe(() => {
-        this.websocketStatus$
-          .pipe(
-            first(),
-            filter((status) => status === 'open')
-          )
-          .subscribe(() => {
-            stop$.next();
-
-            timer(WEBSOCKET_SUBSCRIPTION_DELAY).subscribe(() => {
-              this.orderBookWebsocketService.subscribeToWebsocket(
-                {
-                  symbol,
-                },
-                this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-              );
-            });
-          });
+        this.orderBookWebsocketService.subscribeToWebsocket(
+          {
+            symbol,
+          },
+          this.orderBookWebsocketService.websocketSubscriptionId.subscribe
+        );
       });
   }
 
   public handleTradesOnRowClick({
     symbol,
   }: Parameters<typeof this.tradesRestService.loadData>[0]) {
-    const stop$ = new Subject<void>();
-    const globalSymbol$ = this.globalSymbol$.pipe(first(), filter(Boolean));
+    combineLatest([this.currentGlobalSymbol$, this.currentWebsocketOpened$])
+      .pipe(
+        mergeMap(([globalSymbol]) => {
+          // Unsubscribe from global symbol first
+          this.tradesWebsocketService.unsubscribeFromWebsocket(
+            {
+              symbol: globalSymbol,
+            },
+            this.tradesWebsocketService.websocketSubscriptionId.unsubscribe
+          );
 
-    const openedWebsocket$ = this.websocketStatus$.pipe(
-      first(),
-      filter((status) => status === 'open')
-    );
+          // Load data and get status
+          const status$ = this.tradesRestService.loadData({ symbol });
+          const stop$ = status$.pipe(filter((status) => status === 'success'));
+          const success$ = status$.pipe(takeUntil(stop$));
 
-    globalSymbol$.subscribe((symbol) => {
-      openedWebsocket$.subscribe(() => {
-        this.tradesWebsocketService.unsubscribeFromWebsocket(
+          return combineLatest([success$, this.delay$]);
+        })
+      )
+      .subscribe(() => {
+        this.tradesWebsocketService.subscribeToWebsocket(
           {
             symbol,
           },
-          this.tradesWebsocketService.websocketSubscriptionId.unsubscribe
+          this.tradesWebsocketService.websocketSubscriptionId.subscribe
         );
-      });
-    });
-
-    this.tradesRestService
-      .loadData({ symbol })
-      .pipe(
-        takeUntil(stop$),
-        filter((status) => status === 'success')
-      )
-      .subscribe(() => {
-        stop$.next();
-
-        openedWebsocket$.subscribe(() => {
-          timer(WEBSOCKET_SUBSCRIPTION_DELAY).subscribe(() => {
-            this.tradesWebsocketService.subscribeToWebsocket(
-              {
-                symbol,
-              },
-              this.tradesWebsocketService.websocketSubscriptionId.subscribe
-            );
-          });
-        });
       });
   }
 }

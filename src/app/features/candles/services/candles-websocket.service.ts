@@ -53,24 +53,21 @@ export class CandlesWebsocketService
           .subscribe((symbol) => {
             this.candlesInterval$.pipe(first()).subscribe((interval) => {
               // If app loaded with ws disabled
-              // ws re-enabled after disabling it manually before
-              // reload AND it will also be subscribed to ws in loadData
+              // or ws re-enabled after disabling it manually before
               if (reason === 'switch' || reason === 'restored') {
                 const candlesRestService =
                   this.injector.get(CandlesRestService);
 
                 candlesRestService.loadData({ symbol, interval });
-              } else {
-                // If app loaded with ws enabled
-                // don't reload and just subscribe
-                this.subscribeToWebsocket(
-                  {
-                    symbol,
-                    interval,
-                  },
-                  this.websocketSubscriptionId.subscribe
-                );
               }
+
+              this.subscribeToWebsocket(
+                {
+                  symbol,
+                  interval,
+                },
+                this.websocketSubscriptionId.subscribe
+              );
             });
           });
       });
