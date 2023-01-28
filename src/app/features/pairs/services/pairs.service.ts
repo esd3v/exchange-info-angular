@@ -29,7 +29,7 @@ import { TradesWebsocketService } from '../../trades/services/trades-websocket.s
 @Injectable({ providedIn: 'root' })
 export class PairsService {
   private websocketStatus$ = this.websocketService.status$;
-  public subscribedSymbols: string[] = [];
+  public pageSymbols: string[] = [];
   private candlesInterval$ = this.store.select(candlesSelectors.interval);
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
   private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
@@ -81,44 +81,48 @@ export class PairsService {
     columns: Column[],
     pageData$: BehaviorSubject<Row[]>
   ) {
-    const symbols$ = this.createSymbolsFromCurrentPageRows$(
+    const pageSymbols$ = this.createSymbolsFromCurrentPageRows$(
       columns,
       pageData$
     ).pipe(filter((symbols) => Boolean(symbols.length)));
 
-    this.currentGlobalSymbol$.subscribe((globalSymbol) => {
-      symbols$
-        .pipe(
-          // Exclude globalSymbol because we already subscribed to it
-          map((symbols) => symbols.filter((symbol) => symbol !== globalSymbol))
-        )
-        .subscribe((symbols) => {
-          this.subscribedSymbols = symbols;
+    // Save page symbols for this page
+    // To unsubscribe from them on the next page
+    pageSymbols$.subscribe((pageSymbols) => {
+      this.pageSymbols = pageSymbols;
+    });
 
-          this.tickerWebsocketService.subscribeToWebsocket(
-            { symbols },
-            this.tickerWebsocketService.websocketSubscriptionId.subscribe
-              .multiple
-          );
-        });
+    // Exclude globalSymbol because we already subscribed to it
+    const pageSymbolsWithoutGlobalSymbol$ = combineLatest([
+      pageSymbols$,
+      this.currentGlobalSymbol$,
+    ]).pipe(
+      map(([pageSymbols, globalSymbol]) =>
+        pageSymbols.filter((symbol) => symbol !== globalSymbol)
+      )
+    );
+
+    pageSymbolsWithoutGlobalSymbol$.subscribe((symbols) => {
+      this.tickerWebsocketService.subscribeToWebsocket(
+        { symbols },
+        this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
+      );
     });
   }
 
-  // FIXME
   public unsubscribeFromPageSymbols() {
-    console.log('this.subscribedSymbols', this.subscribedSymbols);
+    // Exclude globalSymbol because we already subscribed to it
+    const pageSymbolsWithoutGlobalSymbol$ = this.currentGlobalSymbol$.pipe(
+      map((globalSymbol) =>
+        this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
+      )
+    );
 
-    this.currentGlobalSymbol$.subscribe((globalSymbol) => {
+    pageSymbolsWithoutGlobalSymbol$.subscribe((symbols) => {
       this.tickerWebsocketService.unsubscribeFromWebsocket(
-        {
-          symbols: this.subscribedSymbols.filter(
-            (symbol) => symbol !== globalSymbol
-          ),
-        },
+        { symbols },
         this.tickerWebsocketService.websocketSubscriptionId.unsubscribe.multiple
       );
-
-      this.subscribedSymbols = [];
     });
   }
 
