@@ -7,6 +7,7 @@ import {
   first,
   map,
   mergeMap,
+  switchMap,
   takeUntil,
   timer,
 } from 'rxjs';
@@ -41,6 +42,13 @@ export class PairsService {
     filter(Boolean)
   );
 
+  // Exclude globalSymbol because we already subscribed to it
+  private pageSymbolsWithoutGlobalSymbol$ = this.currentGlobalSymbol$.pipe(
+    map((globalSymbol) =>
+      this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
+    )
+  );
+
   private currentWebsocketOpened$ = this.websocketStatus$.pipe(
     first(),
     filter((status) => status === 'open')
@@ -58,7 +66,7 @@ export class PairsService {
     private tickerWebsocketService: TickerWebsocketService
   ) {}
 
-  private createSymbolsFromRows = (columns: Column[], rows: Row[]) => {
+  public createSymbolsFromRows = (columns: Column[], rows: Row[]) => {
     return rows.map((row) => {
       const pairCell = getCellByColumnId({ columns, id: 'pair', row });
       const { base, quote } = parsePair(pairCell.value as string, '/');
@@ -67,63 +75,35 @@ export class PairsService {
     });
   };
 
-  private createSymbolsFromCurrentPageRows$(
-    columns: Column[],
-    pageData$: BehaviorSubject<Row[]>
-  ) {
-    return pageData$.pipe(
-      first(),
-      map((rows) => this.createSymbolsFromRows(columns, rows))
-    );
-  }
-
-  public subscribeToPageSymbols(
-    columns: Column[],
-    pageData$: BehaviorSubject<Row[]>
-  ) {
-    const pageSymbols$ = this.createSymbolsFromCurrentPageRows$(
-      columns,
-      pageData$
-    ).pipe(filter((symbols) => Boolean(symbols.length)));
-
-    // Save page symbols for this page
-    // To unsubscribe from them on the next page
-    pageSymbols$.subscribe((pageSymbols) => {
-      this.pageSymbols = pageSymbols;
-    });
-
-    // Exclude globalSymbol because we already subscribed to it
-    const pageSymbolsWithoutGlobalSymbol$ = combineLatest([
-      pageSymbols$,
-      this.currentGlobalSymbol$,
-    ]).pipe(
-      map(([pageSymbols, globalSymbol]) =>
-        pageSymbols.filter((symbol) => symbol !== globalSymbol)
+  public subscribeToPageSymbols() {
+    this.websocketStatus$
+      .pipe(
+        filter((status) => status === 'open'),
+        first(),
+        mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$)
       )
-    );
-
-    pageSymbolsWithoutGlobalSymbol$.subscribe((symbols) => {
-      this.tickerWebsocketService.subscribeToWebsocket(
-        { symbols },
-        this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
-      );
-    });
+      .subscribe((symbols) => {
+        this.tickerWebsocketService.subscribeToWebsocket(
+          { symbols },
+          this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
+        );
+      });
   }
 
   public unsubscribeFromPageSymbols() {
-    // Exclude globalSymbol because we already subscribed to it
-    const pageSymbolsWithoutGlobalSymbol$ = this.currentGlobalSymbol$.pipe(
-      map((globalSymbol) =>
-        this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
+    this.websocketStatus$
+      .pipe(
+        filter((status) => status === 'open'),
+        first(),
+        mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$)
       )
-    );
-
-    pageSymbolsWithoutGlobalSymbol$.subscribe((symbols) => {
-      this.tickerWebsocketService.unsubscribeFromWebsocket(
-        { symbols },
-        this.tickerWebsocketService.websocketSubscriptionId.unsubscribe.multiple
-      );
-    });
+      .subscribe((symbols) => {
+        this.tickerWebsocketService.unsubscribeFromWebsocket(
+          { symbols },
+          this.tickerWebsocketService.websocketSubscriptionId.unsubscribe
+            .multiple
+        );
+      });
   }
 
   public handleCandlesOnRowClick({
@@ -157,7 +137,6 @@ export class PairsService {
           ]).pipe(map(() => interval));
         })
       )
-
       .subscribe((interval) => {
         this.candlesWebsocketService.subscribeToWebsocket(
           {
@@ -230,6 +209,17 @@ export class PairsService {
           },
           this.tradesWebsocketService.websocketSubscriptionId.subscribe
         );
+      });
+  }
+
+  public setPageSymbols$(columns: Column[], pageData$: BehaviorSubject<Row[]>) {
+    pageData$
+      .pipe(
+        first(),
+        map((data) => this.createSymbolsFromRows(columns, data))
+      )
+      .subscribe((data) => {
+        this.pageSymbols = data;
       });
   }
 }
