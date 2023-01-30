@@ -3,11 +3,11 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, timer } from 'rxjs';
-import { CandlesWebsocketService } from './features/candles/services/candles-websocket.service';
-import { OrderBookWebsocketService } from './features/order-book/services/order-book-websocket.service';
-import { TickerWebsocketService } from './features/tickers/services/ticker-websocket.service';
+import { CandlesService } from './features/candles/services/candles.service';
+import { OrderBookService } from './features/order-book/services/order-book.service';
+import { TickerService } from './features/tickers/services/ticker.service';
 import { tickersSelectors } from './features/tickers/store';
-import { TradesWebsocketService } from './features/trades/services/trades-websocket.service';
+import { TradesService } from './features/trades/services/trades.service';
 import {
   SITE_NAME,
   WEBSOCKET_ENABLED_AT_START,
@@ -33,10 +33,10 @@ export class AppService {
     private websocketService: WebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
     private store: Store<AppState>,
-    private orderBookWebsocketService: OrderBookWebsocketService,
-    private candlesWebsocketService: CandlesWebsocketService,
-    private tickerWebsocketService: TickerWebsocketService,
-    private tradesWebsocketService: TradesWebsocketService
+    private orderBookService: OrderBookService,
+    private tradesService: TradesService,
+    private candlesService: CandlesService,
+    private tickerService: TickerService
   ) {}
 
   public watchCurrencyChange() {
@@ -103,10 +103,10 @@ export class AppService {
       .pipe(filter((status) => status === 'open'))
       .subscribe(() => {
         this.websocketReason$.pipe(first()).subscribe((reason) => {
-          this.candlesWebsocketService.onWebsocketOpen(reason);
-          this.tickerWebsocketService.onWebsocketOpen();
-          this.tradesWebsocketService.onWebsocketOpen();
-          this.orderBookWebsocketService.onWebsocketOpen();
+          this.candlesService.onWebsocketOpen(reason);
+          this.tickerService.onWebsocketOpen();
+          this.tradesService.onWebsocketOpen();
+          this.orderBookService.onWebsocketOpen();
         });
       });
   }
@@ -117,15 +117,15 @@ export class AppService {
         onData: (data) => {
           if ('e' in data) {
             if (data.e === 'kline') {
-              this.candlesWebsocketService.handleWebsocketData(data);
+              this.candlesService.handleWebsocketData(data);
             } else if (data.e === '24hrTicker') {
-              this.tickerWebsocketService.handleWebsocketData(data);
+              this.tickerService.handleWebsocketData(data);
             } else if (data.e === 'trade') {
-              this.tradesWebsocketService.handleWebsocketData(data);
+              this.tradesService.handleWebsocketData(data);
             }
           } else {
             if ('lastUpdateId' in data) {
-              this.orderBookWebsocketService.handleWebsocketData(data);
+              this.orderBookService.handleWebsocketData(data);
             }
           }
         },

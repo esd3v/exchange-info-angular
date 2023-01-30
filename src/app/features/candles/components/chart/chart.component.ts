@@ -187,8 +187,6 @@ export class ChartComponent implements OnInit {
         .pipe(delay(1))
         .subscribe(([ohlc, dates, volumes]) => {
           if (ohlc.length && dates.length && volumes.length) {
-            console.log(instance);
-
             instance.setOption({
               xAxis: [
                 {
