@@ -38,7 +38,7 @@ export class ChartComponent implements OnInit {
 
   public interval!: CandleInterval;
 
-  public loading$ = this.store
+  public loading$ = this.store$
     .select(candlesSelectors.status)
     .pipe(map((status) => status === 'loading'));
 
@@ -159,7 +159,7 @@ export class ChartComponent implements OnInit {
     ],
   };
 
-  public constructor(private store: Store<AppState>) {}
+  public constructor(private store$: Store<AppState>) {}
 
   public onChartInit($event: ECharts) {
     this.chartInstance$.next($event);
@@ -168,17 +168,17 @@ export class ChartComponent implements OnInit {
   public handleIntervalChange(event: MatSelectChange) {
     const interval = event.value as CandleInterval;
 
-    this.store.dispatch(candlesActions.setInterval({ interval }));
+    this.store$.dispatch(candlesActions.setInterval({ interval }));
 
     this.interval = interval;
   }
 
   public ngOnInit(): void {
-    const ohlc$ = this.store.select(candlesSelectors.ohlc);
-    const dates$ = this.store.select(candlesSelectors.dates);
-    const volumes$ = this.store.select(candlesSelectors.volumes);
+    const ohlc$ = this.store$.select(candlesSelectors.ohlc);
+    const dates$ = this.store$.select(candlesSelectors.dates);
+    const volumes$ = this.store$.select(candlesSelectors.volumes);
 
-    this.store.select(candlesSelectors.interval).subscribe((data) => {
+    this.store$.select(candlesSelectors.interval).subscribe((data) => {
       this.interval = data;
     });
 

@@ -29,7 +29,7 @@ export class AppService {
     private titleService: Title,
     private websocketService: WebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private store: Store<AppState>,
+    private store$: Store<AppState>,
     private orderBookService: OrderBookService,
     private tradesService: TradesService,
     private candlesService: CandlesService,
@@ -37,8 +37,8 @@ export class AppService {
   ) {}
 
   public setLastTitle() {
-    const globalPair$ = this.store.select(globalSelectors.globalPair);
-    const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
+    const globalPair$ = this.store$.select(globalSelectors.globalPair);
+    const lastPrice$ = this.store$.select(tickersSelectors.lastPrice);
 
     combineLatest([globalPair$, lastPrice$]).subscribe(
       ([globalPair, lastPrice]) => {
@@ -70,7 +70,7 @@ export class AppService {
   }
 
   private navigateToDefaultPair() {
-    this.store
+    this.store$
       .select(globalSelectors.globalPairUnderscore)
       .pipe(first(), filter(Boolean))
       .subscribe((pair) => {

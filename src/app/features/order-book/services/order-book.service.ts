@@ -11,12 +11,12 @@ import { OrderBookWebsocketService } from './order-book-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderBookService {
-  private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
+  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
   private websocketStatus$ = this.websocketService.status$;
-  private orderBookStatus$ = this.store.select(orderBookSelectors.status);
+  private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
 
   public constructor(
-    private store: Store<AppState>,
+    private store$: Store<AppState>,
     private websocketService: WebsocketService,
     private orderBookWebsocketService: OrderBookWebsocketService
   ) {}
@@ -30,10 +30,10 @@ export class OrderBookService {
         mergeMap(() => {
           return combineLatest([
             this.orderBookStatus$.pipe(
-              takeUntil(stop$),
-              filter((status) => status === 'success')
+              filter((status) => status === 'success'),
+              takeUntil(stop$)
             ),
-            this.globalSymbol$.pipe(takeUntil(stop$), filter(Boolean)),
+            this.globalSymbol$.pipe(filter(Boolean), takeUntil(stop$)),
           ]);
         }),
         tap(() => {
@@ -57,6 +57,6 @@ export class OrderBookService {
       lastUpdateId,
     };
 
-    this.store.dispatch(orderBookActions.set(orderBook));
+    this.store$.dispatch(orderBookActions.set(orderBook));
   }
 }

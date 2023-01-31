@@ -11,7 +11,7 @@ export class OrderBookEffects {
       ofType(orderBookActions.load),
       switchMap(({ symbol, limit }) => {
         return this.orderBookRestService
-          .get({ symbol, limit })
+          .get$({ symbol, limit })
           .pipe(map((data) => orderBookActions.loadSuccess(data)));
       })
     );

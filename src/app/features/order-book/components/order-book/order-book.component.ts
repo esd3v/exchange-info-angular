@@ -32,7 +32,7 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public title = this.getTitle(this.type);
 
-  public columns$: Observable<OrderBookColumn[]> = this.store
+  public columns$: Observable<OrderBookColumn[]> = this.store$
     .select(globalSelectors.currency)
     .pipe(
       map(({ base, quote }) => {
@@ -62,13 +62,13 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public columnLabels: string[] = [];
 
-  private orderBookStatus$ = this.store.select(orderBookSelectors.status);
+  private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
 
   public loading$ = this.orderBookStatus$.pipe(
     map((status) => status === 'loading')
   );
 
-  public constructor(private store: Store<AppState>) {}
+  public constructor(private store$: Store<AppState>) {}
 
   public trackRow(_index: number, _item: Row) {
     return _index;
@@ -79,8 +79,8 @@ export class OrderBookComponent implements OnInit, OnChanges {
   }
 
   private getOrderBook$() {
-    const asks$ = this.store.select(orderBookSelectors.asks);
-    const bids$ = this.store.select(orderBookSelectors.bids);
+    const asks$ = this.store$.select(orderBookSelectors.asks);
+    const bids$ = this.store$.select(orderBookSelectors.bids);
 
     return combineLatest([asks$, bids$]).pipe(
       map(([asks, bids]) => (this.type === 'asks' ? asks : bids))

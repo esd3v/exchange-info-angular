@@ -19,7 +19,7 @@ import { tradesActions } from '../../trades/store';
 @Injectable({ providedIn: 'root' })
 export class HomerService {
   private websocketStatus$ = this.websocketService.status$;
-  private candlesInterval$ = this.store.select(candlesSelectors.interval);
+  private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private currentCandlesInterval$ = this.candlesInterval$.pipe(first());
 
   private websocketOpened$ = this.websocketStatus$.pipe(
@@ -28,7 +28,7 @@ export class HomerService {
   );
 
   public constructor(
-    private store: Store<AppState>,
+    private store$: Store<AppState>,
     private websocketService: WebsocketService,
     private exchangeInfoRestService: ExchangeInfoRestService,
     private tradesRestService: TradesRestService,

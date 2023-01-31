@@ -39,12 +39,12 @@ import { PairsService } from '../../services/pairs.service';
 export class PairsComponent implements OnDestroy, OnInit {
   @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
 
-  private tickers$ = this.store.select(tickersSelectors.tickers);
-  private tradingSymbols$ = this.store.select(symbolsSelectors.tradingSymbols);
+  private tickers$ = this.store$.select(tickersSelectors.tickers);
+  private tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
   private debounceTime = 1000;
   private pageClicks$ = new Subject<PageEvent>();
-  private tickersStatus$ = this.store.select(tickersSelectors.status);
-  private tradingSymbolsStatus$ = this.store.select(symbolsSelectors.status);
+  private tickersStatus$ = this.store$.select(tickersSelectors.status);
+  private tradingSymbolsStatus$ = this.store$.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
@@ -76,7 +76,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     return this.paginator?.pageSize || this.pageSizeOptions[0];
   }
 
-  public get length() {
+  public get length$() {
     return this.tradingSymbols$.pipe(map((data) => data.length));
   }
 
@@ -86,7 +86,7 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public constructor(
     private pairsService: PairsService,
-    private store: Store<AppState>,
+    private store$: Store<AppState>,
     private router: Router
   ) {}
 
@@ -169,7 +169,7 @@ export class PairsComponent implements OnDestroy, OnInit {
       this.pairsService.handleOrderBookOnRowClick({ symbol });
       this.pairsService.handleTradesOnRowClick({ symbol });
 
-      this.store.dispatch(
+      this.store$.dispatch(
         globalActions.setCurrency({
           payload: { base, quote },
         })

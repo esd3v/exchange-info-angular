@@ -12,11 +12,11 @@ import { TradesWebsocketService } from './trades-websocket.service';
 @Injectable({ providedIn: 'root' })
 export class TradesService {
   private websocketStatus$ = this.websocketService.status$;
-  private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
-  private tradesStatus$ = this.store.select(tradesSelectors.status);
+  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
+  private tradesStatus$ = this.store$.select(tradesSelectors.status);
 
   public constructor(
-    private store: Store<AppState>,
+    private store$: Store<AppState>,
     private websocketService: WebsocketService,
     private tradesWebsocketService: TradesWebsocketService
   ) {}
@@ -30,10 +30,10 @@ export class TradesService {
         mergeMap(() => {
           return combineLatest([
             this.tradesStatus$.pipe(
-              takeUntil(stop$),
-              filter((status) => status === 'success')
+              filter((status) => status === 'success'),
+              takeUntil(stop$)
             ),
-            this.globalSymbol$.pipe(takeUntil(stop$), filter(Boolean)),
+            this.globalSymbol$.pipe(filter(Boolean), takeUntil(stop$)),
           ]);
         }),
         tap(() => {
@@ -58,7 +58,7 @@ export class TradesService {
       time: T,
     };
 
-    this.store.dispatch(tradesActions.add({ trades }));
-    this.store.dispatch(tradesActions.removeLast());
+    this.store$.dispatch(tradesActions.add({ trades }));
+    this.store$.dispatch(tradesActions.removeLast());
   }
 }

@@ -14,13 +14,13 @@ import { TickerWebsocketService } from './ticker-websocket.service';
 })
 export class TickerService {
   private websocketStatus$ = this.websocketService.status$;
-  private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
-  private tickerStatus$ = this.store.select(tickersSelectors.status);
+  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
+  private tickerStatus$ = this.store$.select(tickersSelectors.status);
 
   public constructor(
     private tickerWebsocketService: TickerWebsocketService,
     private websocketService: WebsocketService,
-    private store: Store<AppState>
+    private store$: Store<AppState>
   ) {}
 
   // Runs once when websocket is opened
@@ -34,10 +34,10 @@ export class TickerService {
         mergeMap(() => {
           return combineLatest([
             this.tickerStatus$.pipe(
-              takeUntil(stop$),
-              filter((status) => status === 'success')
+              filter((status) => status === 'success'),
+              takeUntil(stop$)
             ),
-            this.globalSymbol$.pipe(takeUntil(stop$), filter(Boolean)),
+            this.globalSymbol$.pipe(filter(Boolean), takeUntil(stop$)),
           ]);
         }),
         tap(() => {
@@ -64,6 +64,6 @@ export class TickerService {
       count: n,
     };
 
-    this.store.dispatch(tickersActions.update({ data: ticker }));
+    this.store$.dispatch(tickersActions.update({ data: ticker }));
   }
 }

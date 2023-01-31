@@ -49,7 +49,7 @@
     [pageSizeOptions]="pageSizeOptions"
     showFirstLastButtons
     aria-label="Select page"
-    [length]="length | async"
+    [length]="length$ | async"
     (page)="handlePageChange($event)"
   >
   </mat-paginator>

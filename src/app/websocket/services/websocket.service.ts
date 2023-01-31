@@ -1,5 +1,5 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, interval, Subject, takeWhile } from 'rxjs';
+import { BehaviorSubject, filter, interval, Subject, takeUntil } from 'rxjs';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
 type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing' | null;
@@ -40,8 +40,10 @@ export class WebsocketService implements OnDestroy {
 
   private keepAlive() {
     if (this.config.keepAlive?.msec) {
+      const stop$ = this.status$.pipe(filter((status) => status === 'open'));
+
       interval(this.config.keepAlive.msec)
-        .pipe(takeWhile(() => this.status === 'open'))
+        .pipe(takeUntil(stop$))
         .subscribe(() => {
           if (this.config.keepAlive?.message) {
             this.send(this.config.keepAlive.message);
@@ -52,12 +54,10 @@ export class WebsocketService implements OnDestroy {
 
   private reconnect() {
     if (this.config.reconnect) {
+      const stop$ = this.status$.pipe(filter((status) => status === 'open'));
+
       interval(this.config.reconnect)
-        .pipe(
-          takeWhile(
-            () => this.status === 'closed' && this.reason === 'terminated'
-          )
-        )
+        .pipe(takeUntil(stop$))
         .subscribe(() => {
           this.connect();
         });

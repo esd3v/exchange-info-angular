@@ -11,7 +11,7 @@ export class CandlesEffects {
       ofType(candlesActions.load),
       switchMap(({ interval, symbol }) => {
         return this.candlesRestService
-          .get({ interval, symbol })
+          .get$({ interval, symbol })
           .pipe(
             map((data) =>
               candlesActions.loadSuccess({ candles: data, interval })

@@ -11,14 +11,14 @@ import { tradesActions, tradesSelectors } from '../store';
   providedIn: 'root',
 })
 export class TradesRestService {
-  private tradesStatus$ = this.store.select(tradesSelectors.status);
+  private tradesStatus$ = this.store$.select(tradesSelectors.status);
 
   public constructor(
     private http: HttpClient,
-    private store: Store<AppState>
+    private store$: Store<AppState>
   ) {}
 
-  public get(params: TradesGetParams): Observable<Trades[]> {
+  public get$(params: TradesGetParams): Observable<Trades[]> {
     return this.http.get<Trades[]>('trades', { params });
   }
 
@@ -26,7 +26,7 @@ export class TradesRestService {
     symbol,
     limit = 20,
   }: Parameters<typeof tradesActions.load>[0]) {
-    this.store.dispatch(tradesActions.load({ symbol, limit }));
+    this.store$.dispatch(tradesActions.load({ symbol, limit }));
 
     return this.tradesStatus$;
   }

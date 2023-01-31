@@ -10,16 +10,16 @@ import { tickersSelectors } from 'src/app/features/tickers/store';
   templateUrl: './ticker-change-percent.component.html',
 })
 export class TickerChangePercentComponent {
-  public loading$ = this.store.select(tickersSelectors.loading);
+  public loading$ = this.store$.select(tickersSelectors.loading);
 
-  public priceChangePercent$ = this.store
+  public priceChangePercent$ = this.store$
     .select(tickersSelectors.priceChangePercent)
     .pipe(filter(Boolean));
 
-  public positive = this.priceChangePercent$.pipe(
+  public positive$ = this.priceChangePercent$.pipe(
     filter(Boolean),
     map(isPositive)
   );
 
-  public constructor(private store: Store<AppState>) {}
+  public constructor(private store$: Store<AppState>) {}
 }

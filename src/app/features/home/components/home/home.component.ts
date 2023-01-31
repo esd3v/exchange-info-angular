@@ -15,7 +15,7 @@ import { HomerService } from '../../services/home.service';
 })
 export class HomeComponent implements OnInit {
   public constructor(
-    private store: Store<AppState>,
+    private store$: Store<AppState>,
     private route: ActivatedRoute,
     private homeService: HomerService
   ) {}
@@ -51,7 +51,7 @@ export class HomeComponent implements OnInit {
         this.homeService.handleTradesOnAppInit({ symbol });
       });
 
-      this.store.dispatch(
+      this.store$.dispatch(
         globalActions.setCurrency({ payload: { base, quote } })
       );
     }

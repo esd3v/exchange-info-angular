@@ -2,14 +2,13 @@ import { Injectable } from '@angular/core';
 import { WEBSOCKET_UNSUBSCRIBE_BASE_ID } from 'src/app/shared/config';
 import { WithWebsocket } from 'src/app/shared/types/with-websocket';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
-import { WebsocketCandle } from '../models/websocket-candle.model';
 import { WebsocketCandlesStreamParams } from '../models/websocket-candles-stream-params.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CandlesWebsocketService
-  implements WithWebsocket<WebsocketCandlesStreamParams, WebsocketCandle>
+  implements WithWebsocket<WebsocketCandlesStreamParams>
 {
   public websocketSubscriptionId = {
     subscribe: 5,

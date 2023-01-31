@@ -11,7 +11,7 @@ export class TickersEffects {
       ofType(tickersActions.load),
       switchMap(() => {
         return this.tickerRestService
-          .get()
+          .get$()
           .pipe(map((data) => tickersActions.loadSuccess({ data })));
       })
     );

@@ -24,7 +24,7 @@ export class TradesComponent implements OnInit {
 
   public placeholderRows = Array<Row>(20).fill([{ value: '' }]);
 
-  public columns$: Observable<TradesColumn[]> = this.store
+  public columns$: Observable<TradesColumn[]> = this.store$
     .select(globalSelectors.currency)
     .pipe(
       map(({ base, quote }) => {
@@ -59,20 +59,20 @@ export class TradesComponent implements OnInit {
 
   public columnLabels: string[] = [];
 
-  private tradesStatus$ = this.store.select(tradesSelectors.status);
+  private tradesStatus$ = this.store$.select(tradesSelectors.status);
 
   public loading$ = this.tradesStatus$.pipe(
     map((status) => status === 'loading')
   );
 
-  public constructor(private store: Store<AppState>) {}
+  public constructor(private store$: Store<AppState>) {}
 
   public trackRow(_index: number, _item: Row) {
     return _index;
   }
 
   private getTrades$() {
-    const trades$ = this.store.select(tradesSelectors.data);
+    const trades$ = this.store$.select(tradesSelectors.data);
 
     return trades$;
   }

@@ -22,9 +22,9 @@ import { CandlesWebsocketService } from './candles-websocket.service';
   providedIn: 'root',
 })
 export class CandlesService {
-  private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
-  private candlesStatus$ = this.store.select(candlesSelectors.status);
-  private candlesInterval$ = this.store.select(candlesSelectors.interval);
+  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
+  private candlesStatus$ = this.store$.select(candlesSelectors.status);
+  private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private websocketStatus$ = this.websocketService.status$;
   private websocketReason$ = this.websocketService.reason$;
 
@@ -32,7 +32,7 @@ export class CandlesService {
     private websocketService: WebsocketService,
     private candlesWebsocketService: CandlesWebsocketService,
     private candlesRestService: CandlesRestService,
-    private store: Store<AppState>
+    private store$: Store<AppState>
   ) {}
 
   // Runs every time when websocket is opened
@@ -47,10 +47,10 @@ export class CandlesService {
           return combineLatest([
             this.websocketReason$.pipe(takeUntil(stop$)),
             this.candlesStatus$.pipe(
-              takeUntil(stop$),
-              filter((status) => status === 'success')
+              filter((status) => status === 'success'),
+              takeUntil(stop$)
             ),
-            this.globalSymbol$.pipe(takeUntil(stop$), filter(Boolean)),
+            this.globalSymbol$.pipe(filter(Boolean), takeUntil(stop$)),
             this.candlesInterval$.pipe(takeUntil(stop$)),
           ]);
         }),
@@ -77,7 +77,7 @@ export class CandlesService {
   public handleWebsocketData({
     k: { t, o, h, l, c, v, T, B, n, q, V, Q },
   }: WebsocketCandle) {
-    const ohlc$ = this.store.select(candlesSelectors.ohlc);
+    const ohlc$ = this.store$.select(candlesSelectors.ohlc);
 
     ohlc$.pipe(take(1)).subscribe((data) => {
       const candle: Candle = [t, o, h, l, c, v, T, q, n, V, Q, B];
@@ -85,10 +85,10 @@ export class CandlesService {
       const ohlcExists = data.some((item) => candle[0] === item[4]);
 
       if (ohlcExists) {
-        this.store.dispatch(candlesActions.updateCandle({ candle }));
+        this.store$.dispatch(candlesActions.updateCandle({ candle }));
       } else {
-        this.store.dispatch(candlesActions.addCandle({ candle }));
-        this.store.dispatch(candlesActions.removeFirstCandle());
+        this.store$.dispatch(candlesActions.addCandle({ candle }));
+        this.store$.dispatch(candlesActions.removeFirstCandle());
       }
     });
   }

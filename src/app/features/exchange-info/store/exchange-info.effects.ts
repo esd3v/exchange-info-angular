@@ -12,7 +12,7 @@ export class ExchangeInfoEffects {
       ofType(exchangeInfoActions.load),
       switchMap(() => {
         return this.exchangeInfoRestService
-          .get()
+          .get$()
           .pipe(map((data) => exchangeInfoActions.loadSuccess(data)));
       })
     );

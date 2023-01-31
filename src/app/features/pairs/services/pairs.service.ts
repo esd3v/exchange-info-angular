@@ -7,7 +7,6 @@ import {
   first,
   map,
   mergeMap,
-  switchMap,
   takeUntil,
   timer,
 } from 'rxjs';
@@ -31,8 +30,8 @@ import { TradesWebsocketService } from '../../trades/services/trades-websocket.s
 export class PairsService {
   private websocketStatus$ = this.websocketService.status$;
   public pageSymbols: string[] = [];
-  private candlesInterval$ = this.store.select(candlesSelectors.interval);
-  private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
+  private candlesInterval$ = this.store$.select(candlesSelectors.interval);
+  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
   private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
 
   private currentCandlesInterval$ = this.candlesInterval$.pipe(first());
@@ -56,7 +55,7 @@ export class PairsService {
   private currentWebsocketOpened$ = this.websocketOpened$.pipe(first());
 
   public constructor(
-    private store: Store<AppState>,
+    private store$: Store<AppState>,
     private websocketService: WebsocketService,
     private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService,

@@ -10,18 +10,17 @@ import { tickersSelectors } from 'src/app/features/tickers/store';
 })
 export class TickerLastPriceComponent implements OnInit {
   public positive: boolean | null = null;
-  public loading$ = this.store.select(tickersSelectors.loading);
+  public loading$ = this.store$.select(tickersSelectors.loading);
 
-  public lastPrice$ = this.store
+  public lastPrice$ = this.store$
     .select(tickersSelectors.lastPrice)
     .pipe(filter(Boolean));
 
-  public prevLastPrice$ = this.store
+  public prevLastPrice$ = this.store$
     .select(tickersSelectors.prevLastPrice)
     .pipe(filter(Boolean));
 
-
-  public constructor(private store: Store<AppState>) {}
+  public constructor(private store$: Store<AppState>) {}
 
   public ngOnInit(): void {
     this.lastPrice$

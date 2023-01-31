@@ -3,13 +3,12 @@ import { WEBSOCKET_UNSUBSCRIBE_BASE_ID } from 'src/app/shared/config';
 import { WithWebsocket } from 'src/app/shared/types/with-websocket';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketTradesStreamParams } from '../models/websocket-trades-stream-params.model';
-import { WebsocketTrades } from '../models/websocket-trades.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TradesWebsocketService
-  implements WithWebsocket<WebsocketTradesStreamParams, WebsocketTrades>
+  implements WithWebsocket<WebsocketTradesStreamParams>
 {
   public websocketSubscriptionId = {
     subscribe: 3,
