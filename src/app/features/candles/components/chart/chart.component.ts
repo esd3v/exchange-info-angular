@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { Store } from '@ngrx/store';
-import { EChartsOption, ECharts } from 'echarts';
-import { combineLatest, delay, map, Subject } from 'rxjs';
+import { ECharts, EChartsOption } from 'echarts';
+import { combineLatest, filter, map, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { CandleInterval } from '../../models/candle-interval.model';
 import { candlesActions, candlesSelectors } from '../../store';
@@ -13,7 +13,7 @@ import { candlesActions, candlesSelectors } from '../../store';
   styleUrls: ['./chart.component.scss'],
 })
 export class ChartComponent implements OnInit {
-  private chartInstance$ = new Subject<ECharts>();
+  private chartInstance$ = new Subject<ECharts | null>();
   private upColor = '#00da3c';
   private downColor = '#ec0000';
   private barMinWidth = 6;
@@ -174,39 +174,38 @@ export class ChartComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    const ohlc$ = this.store.select(candlesSelectors.ohlc);
+    const dates$ = this.store.select(candlesSelectors.dates);
+    const volumes$ = this.store.select(candlesSelectors.volumes);
+
     this.store.select(candlesSelectors.interval).subscribe((data) => {
       this.interval = data;
     });
 
-    this.chartInstance$.subscribe((instance) => {
-      const ohlc$ = this.store.select(candlesSelectors.ohlc);
-      const dates$ = this.store.select(candlesSelectors.dates);
-      const volumes$ = this.store.select(candlesSelectors.volumes);
-
-      combineLatest([ohlc$, dates$, volumes$])
-        .pipe(delay(1))
-        .subscribe(([ohlc, dates, volumes]) => {
-          if (ohlc.length && dates.length && volumes.length) {
-            instance.setOption({
-              xAxis: [
-                {
-                  data: dates,
-                },
-                {
-                  data: volumes,
-                },
-              ],
-              series: [
-                {
-                  data: ohlc,
-                },
-                {
-                  data: volumes,
-                },
-              ],
-            });
-          }
-        });
+    combineLatest([
+      this.chartInstance$.pipe(filter(Boolean)),
+      ohlc$.pipe(filter((item) => Boolean(item.length))),
+      dates$.pipe(filter((item) => Boolean(item.length))),
+      volumes$.pipe(filter((item) => Boolean(item.length))),
+    ]).subscribe(([instance, ohlc, dates, volumes]) => {
+      instance.setOption({
+        xAxis: [
+          {
+            data: dates,
+          },
+          {
+            data: volumes,
+          },
+        ],
+        series: [
+          {
+            data: ohlc,
+          },
+          {
+            data: volumes,
+          },
+        ],
+      });
     });
   }
 }
