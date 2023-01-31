@@ -49,10 +49,11 @@ export class PairsService {
     )
   );
 
-  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
-    first(),
+  private websocketOpened$ = this.websocketStatus$.pipe(
     filter((status) => status === 'open')
   );
+
+  private currentWebsocketOpened$ = this.websocketOpened$.pipe(first());
 
   public constructor(
     private store: Store<AppState>,
@@ -76,12 +77,8 @@ export class PairsService {
   };
 
   public subscribeToPageSymbols() {
-    this.websocketStatus$
-      .pipe(
-        filter((status) => status === 'open'),
-        first(),
-        mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$)
-      )
+    this.websocketOpened$
+      .pipe(mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$))
       .subscribe((symbols) => {
         this.tickerWebsocketService.subscribeToWebsocket(
           { symbols },
@@ -91,12 +88,8 @@ export class PairsService {
   }
 
   public unsubscribeFromPageSymbols() {
-    this.websocketStatus$
-      .pipe(
-        filter((status) => status === 'open'),
-        first(),
-        mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$)
-      )
+    this.currentWebsocketOpened$
+      .pipe(mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$))
       .subscribe((symbols) => {
         this.tickerWebsocketService.unsubscribeFromWebsocket(
           { symbols },

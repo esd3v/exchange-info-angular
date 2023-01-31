@@ -1,9 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter, first, take } from 'rxjs';
+import {
+  combineLatest,
+  filter,
+  mergeMap,
+  Subject,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
-import { Reason } from 'src/app/websocket/services/websocket.service';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Candle } from '../models/candle.model';
 import { WebsocketCandle } from '../models/websocket-candle.model';
 import { candlesActions, candlesSelectors } from '../store';
@@ -17,41 +25,52 @@ export class CandlesService {
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
   private candlesStatus$ = this.store.select(candlesSelectors.status);
   private candlesInterval$ = this.store.select(candlesSelectors.interval);
+  private websocketStatus$ = this.websocketService.status$;
+  private websocketReason$ = this.websocketService.reason$;
 
   public constructor(
+    private websocketService: WebsocketService,
     private candlesWebsocketService: CandlesWebsocketService,
     private candlesRestService: CandlesRestService,
     private store: Store<AppState>
   ) {}
 
-  // Runs once when websocket is opened
+  // Runs every time when websocket is opened
   // Then subscribe if data is loaded at this moment
-  public onWebsocketOpen(reason: Reason) {
-    this.candlesStatus$
-      .pipe(
-        first(),
-        filter((status) => status === 'success')
-      )
-      .subscribe(() => {
-        this.globalSymbol$
-          .pipe(first(), filter(Boolean))
-          .subscribe((symbol) => {
-            this.candlesInterval$.pipe(first()).subscribe((interval) => {
-              // If app loaded with ws disabled
-              // or ws re-enabled after disabling it manually before
-              if (reason === 'switch' || reason === 'restored') {
-                this.candlesRestService.loadData({ symbol, interval });
-              }
+  public onWebsocketOpen() {
+    const stop$ = new Subject<void>();
 
-              this.candlesWebsocketService.subscribeToWebsocket(
-                {
-                  symbol,
-                  interval,
-                },
-                this.candlesWebsocketService.websocketSubscriptionId.subscribe
-              );
-            });
-          });
+    this.websocketStatus$
+      .pipe(filter((status) => status === 'open'))
+      .pipe(
+        mergeMap(() => {
+          return combineLatest([
+            this.websocketReason$.pipe(takeUntil(stop$)),
+            this.candlesStatus$.pipe(
+              takeUntil(stop$),
+              filter((status) => status === 'success')
+            ),
+            this.globalSymbol$.pipe(takeUntil(stop$), filter(Boolean)),
+            this.candlesInterval$.pipe(takeUntil(stop$)),
+          ]);
+        }),
+        tap(() => {
+          stop$.next();
+        })
+      )
+      .subscribe(([websocketReason, _candlesStatus, symbol, interval]) => {
+        // If we enable ws by switch for the first time or re-enable it
+        if (websocketReason === 'switch' || websocketReason === 'restored') {
+          this.candlesRestService.loadData({ symbol, interval });
+        }
+
+        this.candlesWebsocketService.subscribeToWebsocket(
+          {
+            symbol,
+            interval,
+          },
+          this.candlesWebsocketService.websocketSubscriptionId.subscribe
+        );
       });
   }
 

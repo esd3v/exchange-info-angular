@@ -23,9 +23,6 @@ import { WebsocketService } from './websocket/services/websocket.service';
   providedIn: 'root',
 })
 export class AppService {
-  private websocketStatus$ = this.websocketService.status$;
-  private websocketReason$ = this.websocketService.reason$;
-
   public constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -39,7 +36,7 @@ export class AppService {
     private tickerService: TickerService
   ) {}
 
-  public watchCurrencyChange() {
+  public onCurrenctChange() {
     const currency$ = this.store.select(globalSelectors.currency);
 
     currency$.subscribe(() => {
@@ -66,7 +63,7 @@ export class AppService {
     });
   }
 
-  public watchRouterEvents() {
+  public onRouteEvent() {
     this.router.events.subscribe((data: unknown) => {
       const { type } = data as Event;
 
@@ -98,20 +95,14 @@ export class AppService {
   }
 
   // App start / switch
-  public watchWebsocketStatus() {
-    this.websocketStatus$
-      .pipe(filter((status) => status === 'open'))
-      .subscribe(() => {
-        this.websocketReason$.pipe(first()).subscribe((reason) => {
-          this.candlesService.onWebsocketOpen(reason);
-          this.tickerService.onWebsocketOpen();
-          this.tradesService.onWebsocketOpen();
-          this.orderBookService.onWebsocketOpen();
-        });
-      });
+  public onWebsocketOpen() {
+    this.candlesService.onWebsocketOpen();
+    this.tickerService.onWebsocketOpen();
+    this.tradesService.onWebsocketOpen();
+    this.orderBookService.onWebsocketOpen();
   }
 
-  public watchWebsocketMessage() {
+  public onWebsocketMessage() {
     this.websocketService.messages$.subscribe(({ data }) => {
       this.websocketSubscribeService.handleWebsocketMessage(data)({
         onData: (data) => {

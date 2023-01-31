@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter, first } from 'rxjs';
+import { combineLatest, filter, mergeMap, Subject, takeUntil, tap } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { OrderBook } from '../models/order-book.model';
 import { WebsocketOrderBook } from '../models/websocket-order-book.model';
 import { orderBookActions, orderBookSelectors } from '../store';
@@ -11,30 +12,41 @@ import { OrderBookWebsocketService } from './order-book-websocket.service';
 @Injectable({ providedIn: 'root' })
 export class OrderBookService {
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
+  private websocketStatus$ = this.websocketService.status$;
   private orderBookStatus$ = this.store.select(orderBookSelectors.status);
 
   public constructor(
     private store: Store<AppState>,
+    private websocketService: WebsocketService,
     private orderBookWebsocketService: OrderBookWebsocketService
   ) {}
 
   public onWebsocketOpen() {
-    this.orderBookStatus$
+    const stop$ = new Subject<void>();
+
+    this.websocketStatus$
+      .pipe(filter((status) => status === 'open'))
       .pipe(
-        first(),
-        filter((status) => status === 'success')
+        mergeMap(() => {
+          return combineLatest([
+            this.orderBookStatus$.pipe(
+              takeUntil(stop$),
+              filter((status) => status === 'success')
+            ),
+            this.globalSymbol$.pipe(takeUntil(stop$), filter(Boolean)),
+          ]);
+        }),
+        tap(() => {
+          stop$.next();
+        })
       )
-      .subscribe(() => {
-        this.globalSymbol$
-          .pipe(first(), filter(Boolean))
-          .subscribe((symbol) => {
-            this.orderBookWebsocketService.subscribeToWebsocket(
-              {
-                symbol,
-              },
-              this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-            );
-          });
+      .subscribe(([_tickerStatus, symbol]) => {
+        this.orderBookWebsocketService.subscribeToWebsocket(
+          {
+            symbol,
+          },
+          this.orderBookWebsocketService.websocketSubscriptionId.subscribe
+        );
       });
   }
 

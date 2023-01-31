@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter, first } from 'rxjs';
+import { combineLatest, filter, mergeMap, Subject, takeUntil, tap } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketTicker } from '../models/websocket-ticker.model';
 import { tickersActions, tickersSelectors } from '../store';
 import { TickerEntity } from '../store/tickers.state';
@@ -12,34 +13,44 @@ import { TickerWebsocketService } from './ticker-websocket.service';
   providedIn: 'root',
 })
 export class TickerService {
+  private websocketStatus$ = this.websocketService.status$;
   private globalSymbol$ = this.store.select(globalSelectors.globalSymbol);
   private tickerStatus$ = this.store.select(tickersSelectors.status);
 
   public constructor(
     private tickerWebsocketService: TickerWebsocketService,
+    private websocketService: WebsocketService,
     private store: Store<AppState>
   ) {}
 
   // Runs once when websocket is opened
   // Then subscribe if data is loaded at this moment
   public onWebsocketOpen() {
-    this.tickerStatus$
+    const stop$ = new Subject<void>();
+
+    this.websocketStatus$
+      .pipe(filter((status) => status === 'open'))
       .pipe(
-        first(),
-        filter((status) => status === 'success')
+        mergeMap(() => {
+          return combineLatest([
+            this.tickerStatus$.pipe(
+              takeUntil(stop$),
+              filter((status) => status === 'success')
+            ),
+            this.globalSymbol$.pipe(takeUntil(stop$), filter(Boolean)),
+          ]);
+        }),
+        tap(() => {
+          stop$.next();
+        })
       )
-      .subscribe(() => {
-        this.globalSymbol$
-          .pipe(first(), filter(Boolean))
-          .subscribe((symbol) => {
-            this.tickerWebsocketService.subscribeToWebsocket(
-              {
-                symbols: [symbol],
-              },
-              this.tickerWebsocketService.websocketSubscriptionId.subscribe
-                .single
-            );
-          });
+      .subscribe(([_tickerStatus, symbol]) => {
+        this.tickerWebsocketService.subscribeToWebsocket(
+          {
+            symbols: [symbol],
+          },
+          this.tickerWebsocketService.websocketSubscriptionId.subscribe.single
+        );
       });
   }
 
