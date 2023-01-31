@@ -36,31 +36,23 @@ export class AppService {
     private tickerService: TickerService
   ) {}
 
-  public onCurrenctChange() {
-    const currency$ = this.store.select(globalSelectors.currency);
+  public setLastTitle() {
+    const globalPair$ = this.store.select(globalSelectors.globalPair);
+    const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
 
-    currency$.subscribe(() => {
-      const globalPair$ = this.store.select(globalSelectors.globalPair);
-      const lastPrice$ = this.store.select(tickersSelectors.lastPrice);
+    combineLatest([globalPair$, lastPrice$]).subscribe(
+      ([globalPair, lastPrice]) => {
+        const title = lastPrice
+          ? globalPair
+            ? `${formatDecimal(lastPrice)} | ${globalPair} | ${SITE_NAME}`
+            : `${formatDecimal(lastPrice)} | ${SITE_NAME}`
+          : globalPair
+          ? `${globalPair} | ${SITE_NAME}`
+          : `${SITE_NAME}`;
 
-      combineLatest([globalPair$, lastPrice$]).subscribe(
-        ([globalPair, lastPrice]) => {
-          if (lastPrice) {
-            const dLastPrice = formatDecimal(lastPrice);
-
-            const title = lastPrice
-              ? globalPair
-                ? `${dLastPrice} | ${globalPair} | ${SITE_NAME}`
-                : `${dLastPrice} | ${SITE_NAME}`
-              : globalPair
-              ? `${globalPair} | ${SITE_NAME}`
-              : `${SITE_NAME}`;
-
-            this.titleService.setTitle(title);
-          }
-        }
-      );
-    });
+        this.titleService.setTitle(title);
+      }
+    );
   }
 
   public onRouteEvent() {
