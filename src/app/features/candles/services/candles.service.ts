@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import {
   combineLatest,
   filter,
+  first,
+  map,
   mergeMap,
   Subject,
   take,
@@ -27,6 +29,12 @@ export class CandlesService {
   private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private websocketStatus$ = this.websocketService.status$;
   private websocketReason$ = this.websocketService.reason$;
+  private currentCandlesInterval$ = this.candlesInterval$.pipe(first());
+
+  private websocketOpened$ = this.websocketStatus$.pipe(
+    first(),
+    filter((status) => status === 'open')
+  );
 
   public constructor(
     private websocketService: WebsocketService,
@@ -34,6 +42,36 @@ export class CandlesService {
     private candlesRestService: CandlesRestService,
     private store$: Store<AppState>
   ) {}
+
+  public onAppInit({
+    symbol,
+  }: Pick<Parameters<typeof candlesActions.load>[0], 'symbol'>) {
+    this.currentCandlesInterval$
+      .pipe(
+        mergeMap((interval) => {
+          const status$ = this.candlesRestService.loadData({
+            symbol,
+            interval,
+          });
+
+          const stop$ = status$.pipe(filter((status) => status === 'success'));
+          const success$ = status$.pipe(takeUntil(stop$));
+
+          return combineLatest([success$, this.websocketOpened$]).pipe(
+            map(() => interval)
+          );
+        })
+      )
+      .subscribe((interval) => {
+        this.candlesWebsocketService.subscribeToWebsocket(
+          {
+            interval,
+            symbol,
+          },
+          this.candlesWebsocketService.websocketSubscriptionId.subscribe
+        );
+      });
+  }
 
   // Runs every time when websocket is opened
   // Then subscribe if data is loaded at this moment
