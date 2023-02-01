@@ -19,7 +19,10 @@ export const isScientific = (value: string | number) =>
 export const parsePair = (pair: string, separator: '/' | '_') => {
   const [base, quote] = pair.split(separator);
 
-  return { base, quote };
+  return {
+    base: base || null,
+    quote: quote || null,
+  };
 };
 
 export const formatDecimal = (value: number | string) => {

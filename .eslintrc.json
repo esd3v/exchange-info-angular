@@ -16,6 +16,7 @@
       ],
       "rules": {
         "rxjs/finnish": ["error"],
+        "rxjs/no-nested-subscribe": ["warn"],
         "@typescript-eslint/no-unused-vars": [
           "warn",
           { "argsIgnorePattern": "^_" }

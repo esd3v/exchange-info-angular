@@ -1,7 +1,18 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, mergeMap, takeUntil } from 'rxjs';
+import {
+  combineLatest,
+  filter,
+  first,
+  map,
+  mergeMap,
+  takeUntil,
+  timer,
+} from 'rxjs';
+import { REST_START_DELAY } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
+import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandlesRestService } from '../../candles/services/candles-rest.service';
 import { CandlesWebsocketService } from '../../candles/services/candles-websocket.service';
@@ -29,6 +40,8 @@ export class HomerService {
 
   public constructor(
     private store$: Store<AppState>,
+    private router: Router,
+    private route: ActivatedRoute,
     private websocketService: WebsocketService,
     private exchangeInfoRestService: ExchangeInfoRestService,
     private tradesRestService: TradesRestService,
@@ -40,6 +53,15 @@ export class HomerService {
     private tickerRestService: TickerRestService,
     private tickerWebsocketService: TickerWebsocketService
   ) {}
+
+  public navigateToDefaultPair() {
+    this.store$
+      .select(globalSelectors.globalPairUnderscore)
+      .pipe(first(), filter(Boolean))
+      .subscribe((pair) => {
+        this.router.navigate([pair]);
+      });
+  }
 
   public handleExchangeInfoOnAppInit() {
     this.exchangeInfoRestService.loadData();
@@ -121,6 +143,16 @@ export class HomerService {
         },
         this.orderBookWebsocketService.websocketSubscriptionId.subscribe
       );
+    });
+  }
+
+  public initAppData(symbol: string) {
+    timer(REST_START_DELAY).subscribe(() => {
+      this.handleExchangeInfoOnAppInit();
+      this.handleTickerOnAppInit(symbol);
+      this.handleCandlesOnAppInit({ symbol });
+      this.handleOrderBookOnAppInit({ symbol });
+      this.handleTradesOnAppInit({ symbol });
     });
   }
 }

@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, timer } from 'rxjs';
+import { combineLatest, timer } from 'rxjs';
 import { CandlesService } from './features/candles/services/candles.service';
 import { OrderBookService } from './features/order-book/services/order-book.service';
 import { TickerService } from './features/tickers/services/ticker.service';
@@ -24,8 +23,6 @@ import { WebsocketService } from './websocket/services/websocket.service';
 })
 export class AppService {
   public constructor(
-    private route: ActivatedRoute,
-    private router: Router,
     private titleService: Title,
     private websocketService: WebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
@@ -36,7 +33,7 @@ export class AppService {
     private tickerService: TickerService
   ) {}
 
-  public setLastTitle() {
+  public setTitle() {
     const globalPair$ = this.store$.select(globalSelectors.globalPair);
     const lastPrice$ = this.store$.select(tickersSelectors.lastPrice);
 
@@ -53,29 +50,6 @@ export class AppService {
         this.titleService.setTitle(title);
       }
     );
-  }
-
-  public onRouteEvent() {
-    this.router.events.subscribe((data: unknown) => {
-      const { type } = data as Event;
-
-      // If navigation ended
-      if (Number(type) === 1) {
-        // If we opened root (/) without pair param
-        if (!this.route.children.length) {
-          this.navigateToDefaultPair();
-        }
-      }
-    });
-  }
-
-  private navigateToDefaultPair() {
-    this.store$
-      .select(globalSelectors.globalPairUnderscore)
-      .pipe(first(), filter(Boolean))
-      .subscribe((pair) => {
-        this.router.navigate([pair]);
-      });
   }
 
   public startWebSocket() {
