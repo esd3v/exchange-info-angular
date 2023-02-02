@@ -76,24 +76,21 @@ export class CandlesService {
   // Runs every time when websocket is opened
   // Then subscribe if data is loaded at this moment
   public onWebsocketOpen() {
-    const stop$ = new Subject<void>();
-
     this.websocketStatus$
       .pipe(filter((status) => status === 'open'))
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.websocketReason$.pipe(takeUntil(stop$)),
+            this.websocketReason$.pipe(first()),
             this.candlesStatus$.pipe(
-              filter((status) => status === 'success'),
-              takeUntil(stop$)
+              // If data is CURRENTLY loaded
+              // to prevent double loading when data loaded AFTER ws opened
+              first(),
+              filter((status) => status === 'success')
             ),
-            this.globalSymbol$.pipe(filter(Boolean), takeUntil(stop$)),
-            this.candlesInterval$.pipe(takeUntil(stop$)),
+            this.globalSymbol$.pipe(first(), filter(Boolean)),
+            this.candlesInterval$.pipe(first()),
           ]);
-        }),
-        tap(() => {
-          stop$.next();
         })
       )
       .subscribe(([websocketReason, _candlesStatus, symbol, interval]) => {
