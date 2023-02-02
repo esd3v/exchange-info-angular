@@ -38,7 +38,7 @@
             ]
           }
         ],
-        "newline-per-chained-call": ["error"],
+        // "newline-per-chained-call": ["error"], // conflicts with prettier
         "padding-line-between-statements": [
           "warn",
           // Always require blank lines after directive (like "use-strict"), except between directives
