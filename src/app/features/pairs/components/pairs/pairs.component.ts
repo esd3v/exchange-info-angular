@@ -6,6 +6,7 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
+import { Location } from '@angular/common';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
@@ -87,6 +88,7 @@ export class PairsComponent implements OnDestroy, OnInit {
   public constructor(
     private pairsService: PairsService,
     private store$: Store<AppState>,
+    private location: Location,
     private router: Router
   ) {}
 
@@ -161,22 +163,24 @@ export class PairsComponent implements OnDestroy, OnInit {
 
     const { base, quote } = parsePair(pairCell.value as string, '/');
 
-    if (base && quote) {
-      const pair = `${base}_${quote}`;
-      const symbol = `${base}${quote}`;
+    if (!base || !quote) return;
 
-      this.pairsService.handleCandlesOnRowClick({ symbol });
-      this.pairsService.handleOrderBookOnRowClick({ symbol });
-      this.pairsService.handleTradesOnRowClick({ symbol });
+    const pair = `${base}_${quote}`;
+    const symbol = `${base}${quote}`;
+    const url = this.router.createUrlTree([pair]).toString();
 
-      this.store$.dispatch(
-        globalActions.setCurrency({
-          payload: { base, quote },
-        })
-      );
+    this.pairsService.handleCandlesOnRowClick({ symbol });
+    this.pairsService.handleOrderBookOnRowClick({ symbol });
+    this.pairsService.handleTradesOnRowClick({ symbol });
 
-      this.router.navigate([pair]);
-    }
+    this.store$.dispatch(
+      globalActions.setCurrency({
+        payload: { base, quote },
+      })
+    );
+
+    // Don't navigate with refresh, just replace url
+    this.location.go(url);
   }
 
   public handlePageChange(event: PageEvent) {

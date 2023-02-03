@@ -32,6 +32,7 @@ export class HomeComponent {
 
     const { base, quote } = parsePair(routePair, '_');
 
+    // e.g "ETH_" or "_BTC"
     if (!base || !quote) {
       return null;
     }
@@ -42,7 +43,6 @@ export class HomeComponent {
   public handleNavigationEnd() {
     const parsedRoutePair = this.getParsedRoutePair();
 
-    // If pair is incorrect (e.g ETH_)
     if (!parsedRoutePair) {
       return this.homeService.navigateToDefaultPair();
     }
