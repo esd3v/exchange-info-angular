@@ -42,6 +42,7 @@ export class HomeComponent {
   public handleNavigationEnd() {
     const parsedRoutePair = this.getParsedRoutePair();
 
+    // If pair is incorrect (e.g ETH_)
     if (!parsedRoutePair) {
       return this.homeService.navigateToDefaultPair();
     }

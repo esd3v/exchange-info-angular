@@ -7,7 +7,9 @@ import {
   first,
   map,
   mergeMap,
+  Subject,
   takeUntil,
+  tap,
   timer,
 } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
@@ -22,14 +24,19 @@ import { CandlesWebsocketService } from '../../candles/services/candles-websocke
 import { candlesSelectors } from '../../candles/store';
 import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
+import { orderBookSelectors } from '../../order-book/store';
 import { TickerWebsocketService } from '../../tickers/services/ticker-websocket.service';
 import { TradesRestService } from '../../trades/services/trades-rest.service';
 import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
+import { tradesSelectors } from '../../trades/store';
 
 @Injectable({ providedIn: 'root' })
 export class PairsService {
   private websocketStatus$ = this.websocketService.status$;
   public pageSymbols: string[] = [];
+  private candlesStatus$ = this.store$.select(candlesSelectors.status);
+  private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
+  private tradesStatus$ = this.store$.select(tradesSelectors.status);
   private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
   private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
@@ -101,9 +108,11 @@ export class PairsService {
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesRestService.loadData>[0], 'symbol'>) {
+    const stop$ = new Subject<void>();
+
     combineLatest([this.currentGlobalSymbol$, this.currentCandlesInterval$])
       .pipe(
-        mergeMap(([globalSymbol, interval]) => {
+        tap(([globalSymbol, interval]) => {
           // Unsubscribe from global symbol first
           this.candlesWebsocketService.unsubscribeFromWebsocket(
             {
@@ -113,14 +122,16 @@ export class PairsService {
             this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
           );
 
-          // Load data and get status
-          const status$ = this.candlesRestService.loadData({
+          this.candlesRestService.loadData({
             interval,
             symbol,
           });
-
-          const stop$ = status$.pipe(filter((status) => status === 'success'));
-          const success$ = status$.pipe(takeUntil(stop$));
+        }),
+        mergeMap(([_globalSymbol, interval]) => {
+          const success$ = this.candlesStatus$.pipe(
+            filter((status) => status === 'success'),
+            takeUntil(stop$)
+          );
 
           return combineLatest([
             success$,
@@ -130,6 +141,8 @@ export class PairsService {
         })
       )
       .subscribe((interval) => {
+        stop$.next();
+
         this.candlesWebsocketService.subscribeToWebsocket(
           {
             symbol,
@@ -143,9 +156,11 @@ export class PairsService {
   public handleOrderBookOnRowClick({
     symbol,
   }: Parameters<typeof this.orderBookRestService.loadData>[0]) {
+    const stop$ = new Subject<void>();
+
     combineLatest([this.currentGlobalSymbol$, this.currentWebsocketOpened$])
       .pipe(
-        mergeMap(([globalSymbol]) => {
+        tap(([globalSymbol]) => {
           // Unsubscribe from global symbol first
           this.orderBookWebsocketService.unsubscribeFromWebsocket(
             {
@@ -154,15 +169,20 @@ export class PairsService {
             this.orderBookWebsocketService.websocketSubscriptionId.unsubscribe
           );
 
-          // Load data and get status
-          const status$ = this.orderBookRestService.loadData({ symbol });
-          const stop$ = status$.pipe(filter((status) => status === 'success'));
-          const success$ = status$.pipe(takeUntil(stop$));
+          this.orderBookRestService.loadData({ symbol });
+        }),
+        mergeMap(() => {
+          const success$ = this.orderBookStatus$.pipe(
+            filter((status) => status === 'success'),
+            takeUntil(stop$)
+          );
 
           return combineLatest([success$, this.delay$]);
         })
       )
       .subscribe(() => {
+        stop$.next();
+
         this.orderBookWebsocketService.subscribeToWebsocket(
           {
             symbol,
@@ -175,9 +195,11 @@ export class PairsService {
   public handleTradesOnRowClick({
     symbol,
   }: Parameters<typeof this.tradesRestService.loadData>[0]) {
+    const stop$ = new Subject<void>();
+
     combineLatest([this.currentGlobalSymbol$, this.currentWebsocketOpened$])
       .pipe(
-        mergeMap(([globalSymbol]) => {
+        tap(([globalSymbol]) => {
           // Unsubscribe from global symbol first
           this.tradesWebsocketService.unsubscribeFromWebsocket(
             {
@@ -186,15 +208,20 @@ export class PairsService {
             this.tradesWebsocketService.websocketSubscriptionId.unsubscribe
           );
 
-          // Load data and get status
-          const status$ = this.tradesRestService.loadData({ symbol });
-          const stop$ = status$.pipe(filter((status) => status === 'success'));
-          const success$ = status$.pipe(takeUntil(stop$));
+          this.tradesRestService.loadData({ symbol });
+        }),
+        mergeMap(() => {
+          const success$ = this.tradesStatus$.pipe(
+            filter((status) => status === 'success'),
+            takeUntil(stop$)
+          );
 
           return combineLatest([success$, this.delay$]);
         })
       )
       .subscribe(() => {
+        stop$.next();
+
         this.tradesWebsocketService.subscribeToWebsocket(
           {
             symbol,

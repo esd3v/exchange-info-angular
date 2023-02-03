@@ -29,7 +29,7 @@ export class CandlesService {
   private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private websocketStatus$ = this.websocketService.status$;
   private websocketReason$ = this.websocketService.reason$;
-  private currentCandlesInterval$ = this.candlesInterval$.pipe(first());
+  private firstCandlesInterval$ = this.candlesInterval$.pipe(first());
 
   private websocketOpened$ = this.websocketStatus$.pipe(
     first(),
@@ -46,16 +46,21 @@ export class CandlesService {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof candlesActions.load>[0], 'symbol'>) {
-    this.currentCandlesInterval$
+    const stop$ = new Subject<void>();
+
+    this.firstCandlesInterval$
       .pipe(
-        mergeMap((interval) => {
-          const status$ = this.candlesRestService.loadData({
+        tap((interval) => {
+          this.candlesRestService.loadData({
             symbol,
             interval,
           });
-
-          const stop$ = status$.pipe(filter((status) => status === 'success'));
-          const success$ = status$.pipe(takeUntil(stop$));
+        }),
+        mergeMap((interval) => {
+          const success$ = this.candlesStatus$.pipe(
+            filter((status) => status === 'success'),
+            takeUntil(stop$)
+          );
 
           return combineLatest([success$, this.websocketOpened$]).pipe(
             map(() => interval)
@@ -63,6 +68,8 @@ export class CandlesService {
         })
       )
       .subscribe((interval) => {
+        stop$.next();
+
         this.candlesWebsocketService.subscribeToWebsocket(
           {
             interval,

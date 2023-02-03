@@ -1,14 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import {
-  combineLatest,
-  filter,
-  first,
-  mergeMap,
-  Subject,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -39,11 +31,17 @@ export class OrderBookService {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof orderBookActions.load>[0], 'symbol'>) {
-    const status$ = this.orderBookRestService.loadData({ symbol });
-    const stop$ = status$.pipe(filter((status) => status === 'success'));
-    const success$ = status$.pipe(takeUntil(stop$));
+    const stop$ = new Subject<void>();
+
+    const success$ = this.orderBookStatus$.pipe(
+      filter((status) => status === 'success')
+    );
+
+    this.orderBookRestService.loadData({ symbol });
 
     combineLatest([success$, this.websocketOpened$]).subscribe(() => {
+      stop$.next();
+
       this.orderBookWebsocketService.subscribeToWebsocket(
         {
           symbol,

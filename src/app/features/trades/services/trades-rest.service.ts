@@ -5,14 +5,12 @@ import { Observable } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { TradesGetParams } from '../models/trades-get-params.model';
 import { Trades } from '../models/trades.model';
-import { tradesActions, tradesSelectors } from '../store';
+import { tradesActions } from '../store';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TradesRestService {
-  private tradesStatus$ = this.store$.select(tradesSelectors.status);
-
   public constructor(
     private http: HttpClient,
     private store$: Store<AppState>
@@ -27,7 +25,5 @@ export class TradesRestService {
     limit = 20,
   }: Parameters<typeof tradesActions.load>[0]) {
     this.store$.dispatch(tradesActions.load({ symbol, limit }));
-
-    return this.tradesStatus$;
   }
 }

@@ -1,14 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import {
-  combineLatest,
-  filter,
-  first,
-  mergeMap,
-  Subject,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -39,11 +31,17 @@ export class TickerService {
   ) {}
 
   public onAppInit(symbol: string) {
-    const status$ = this.tickerRestService.loadData();
-    const stop$ = status$.pipe(filter((status) => status === 'success'));
-    const success$ = status$.pipe(takeUntil(stop$));
+    const stop$ = new Subject<void>();
+
+    const success$ = this.tickerStatus$.pipe(
+      filter((status) => status === 'success')
+    );
+
+    this.tickerRestService.loadData();
 
     combineLatest([success$, this.websocketOpened$]).subscribe(() => {
+      stop$.next();
+
       this.tickerWebsocketService.subscribeToWebsocket(
         {
           symbols: [symbol],
