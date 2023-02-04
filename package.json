@@ -50,6 +50,8 @@
     "@types/jasmine": "4.0.0",
     "@typescript-eslint/eslint-plugin": "5.29.0",
     "@typescript-eslint/parser": "5.29.0",
+    "cypress": "latest",
+    "cypress-network-idle": "1.14.2",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "8.6.0",
     "eslint-plugin-prettier": "4.2.1",
@@ -61,7 +63,6 @@
     "karma-jasmine": "5.1.0",
     "karma-jasmine-html-reporter": "2.0.0",
     "prettier-eslint": "15.0.1",
-    "typescript": "4.7.2",
-    "cypress": "latest"
+    "typescript": "4.7.2"
   }
 }
