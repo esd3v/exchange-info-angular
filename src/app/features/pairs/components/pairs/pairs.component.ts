@@ -187,7 +187,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     this.pageClicks$.next(event);
   }
 
-  private onTradingSymbonsAndTikersChange() {
+  private onTradingSymbolsAndTikersChange() {
     // Wait for tickers and tradingSymbols to load
     const createdRows$ = combineLatest([
       this.tradingSymbols$,
@@ -207,11 +207,10 @@ export class PairsComponent implements OnDestroy, OnInit {
     this.pageData$
       .pipe(
         filter((data) => Boolean(data.length)),
-        first()
+        first() //Must be last. Don't change the order
       )
       .subscribe(() => {
-        this.pairsService.setPageSymbols$(this.columns, this.pageData$);
-        this.pairsService.subscribeToPageSymbols();
+        this.pairsService.onDataCreate(this.columns, this.pageData$);
       });
   }
 
@@ -219,7 +218,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     // Create paginator before setting dataSource, for optimization
     this.dataSource.paginator = this.paginator;
 
-    this.onTradingSymbonsAndTikersChange();
+    this.onTradingSymbolsAndTikersChange();
 
     // Start listening to page changes
     this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {

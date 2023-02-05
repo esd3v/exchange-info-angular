@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, timer } from 'rxjs';
 import { CandlesService } from './features/candles/services/candles.service';
 import { OrderBookService } from './features/order-book/services/order-book.service';
+import { PairsService } from './features/pairs/services/pairs.service';
 import { TickerService } from './features/tickers/services/ticker.service';
 import { tickersSelectors } from './features/tickers/store';
 import { TradesService } from './features/trades/services/trades.service';
@@ -30,7 +31,8 @@ export class AppService {
     private orderBookService: OrderBookService,
     private tradesService: TradesService,
     private candlesService: CandlesService,
-    private tickerService: TickerService
+    private tickerService: TickerService,
+    private pairsService: PairsService
   ) {}
 
   public setTitle() {
@@ -66,6 +68,7 @@ export class AppService {
     this.tickerService.onWebsocketOpen();
     this.tradesService.onWebsocketOpen();
     this.orderBookService.onWebsocketOpen();
+    this.pairsService.onWebsocketOpen();
   }
 
   public onWebsocketMessage() {

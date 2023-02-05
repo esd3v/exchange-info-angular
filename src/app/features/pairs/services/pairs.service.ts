@@ -59,7 +59,12 @@ export class PairsService {
     filter((status) => status === 'open')
   );
 
-  private currentWebsocketOpened$ = this.websocketOpened$.pipe(first());
+  // Don't replace with this.websocketOpened$.pipe(first())
+  // because first() should come first
+  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
+    first(),
+    filter((status) => status === 'open')
+  );
 
   public constructor(
     private store$: Store<AppState>,
@@ -82,15 +87,32 @@ export class PairsService {
     });
   };
 
-  public subscribeToPageSymbols() {
+  public onDataCreate(columns: Column[], pageData$: BehaviorSubject<Row[]>) {
+    this.setPageSymbols$(columns, pageData$);
+    this.subscribeToPageSymbols();
+  }
+
+  public onWebsocketOpen() {
     this.websocketOpened$
-      .pipe(mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$))
-      .subscribe((symbols) => {
-        this.tickerWebsocketService.subscribeToWebsocket(
-          { symbols },
-          this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
-        );
+      .pipe(
+        mergeMap(() =>
+          this.pageSymbolsWithoutGlobalSymbol$.pipe(
+            filter((items) => Boolean(items.length))
+          )
+        )
+      )
+      .subscribe(() => {
+        this.subscribeToPageSymbols();
       });
+  }
+
+  public subscribeToPageSymbols() {
+    this.pageSymbolsWithoutGlobalSymbol$.subscribe((symbols) => {
+      this.tickerWebsocketService.subscribeToWebsocket(
+        { symbols },
+        this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
+      );
+    });
   }
 
   public unsubscribeFromPageSymbols() {
