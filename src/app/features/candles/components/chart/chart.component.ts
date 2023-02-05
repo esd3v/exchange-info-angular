@@ -5,7 +5,8 @@ import { ECharts, EChartsOption } from 'echarts';
 import { combineLatest, filter, map, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { CandleInterval } from '../../models/candle-interval.model';
-import { candlesActions, candlesSelectors } from '../../store';
+import { CandlesService } from '../../services/candles.service';
+import { candlesSelectors } from '../../store';
 
 @Component({
   selector: 'app-chart',
@@ -159,7 +160,10 @@ export class ChartComponent implements OnInit {
     ],
   };
 
-  public constructor(private store$: Store<AppState>) {}
+  public constructor(
+    private store$: Store<AppState>,
+    private candlesService: CandlesService
+  ) {}
 
   public onChartInit($event: ECharts) {
     this.chartInstance$.next($event);
@@ -168,9 +172,7 @@ export class ChartComponent implements OnInit {
   public handleIntervalChange(event: MatSelectChange) {
     const interval = event.value as CandleInterval;
 
-    this.store$.dispatch(candlesActions.setInterval({ interval }));
-
-    this.interval = interval;
+    this.candlesService.onIntervalChange(interval);
   }
 
   public ngOnInit(): void {

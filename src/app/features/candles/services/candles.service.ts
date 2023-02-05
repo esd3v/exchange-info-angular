@@ -10,11 +10,15 @@ import {
   take,
   takeUntil,
   tap,
+  timer,
 } from 'rxjs';
+import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { CandleInterval } from '../models/candle-interval.model';
 import { Candle } from '../models/candle.model';
+import { CandlesGetParams } from '../models/candles-get-params.model';
 import { WebsocketCandle } from '../models/websocket-candle.model';
 import { candlesActions, candlesSelectors } from '../store';
 import { CandlesRestService } from './candles-rest.service';
@@ -32,6 +36,12 @@ export class CandlesService {
   private firstCandlesInterval$ = this.candlesInterval$.pipe(first());
 
   private websocketOpened$ = this.websocketStatus$.pipe(
+    filter((status) => status === 'open')
+  );
+
+  // Don't replace with this.websocketOpened$.pipe(first())
+  // because first() should come first
+  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
     first(),
     filter((status) => status === 'open')
   );
@@ -46,51 +56,21 @@ export class CandlesService {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof candlesActions.load>[0], 'symbol'>) {
-    const stop$ = new Subject<void>();
-
-    this.firstCandlesInterval$
-      .pipe(
-        tap((interval) => {
-          this.candlesRestService.loadData({
-            symbol,
-            interval,
-          });
-        }),
-        mergeMap((interval) => {
-          const success$ = this.candlesStatus$.pipe(
-            filter((status) => status === 'success'),
-            takeUntil(stop$)
-          );
-
-          return combineLatest([success$, this.websocketOpened$]).pipe(
-            map(() => interval)
-          );
-        })
-      )
-      .subscribe((interval) => {
-        stop$.next();
-
-        this.candlesWebsocketService.subscribeToWebsocket(
-          {
-            interval,
-            symbol,
-          },
-          this.candlesWebsocketService.websocketSubscriptionId.subscribe
-        );
-      });
+    this.firstCandlesInterval$.subscribe((interval) => {
+      this.loadDataAndSubscribe({ symbol, interval }, false);
+    });
   }
 
   // Runs every time when websocket is opened
   // Then subscribe if data is loaded at this moment
   public onWebsocketOpen() {
-    this.websocketStatus$
-      .pipe(filter((status) => status === 'open'))
+    this.websocketOpened$
       .pipe(
         mergeMap(() => {
           return combineLatest([
             this.websocketReason$.pipe(first()),
             this.candlesStatus$.pipe(
-              // If data is CURRENTLY loaded
+              // first() comes first to check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened
               first(),
               filter((status) => status === 'success')
@@ -114,6 +94,64 @@ export class CandlesService {
           this.candlesWebsocketService.websocketSubscriptionId.subscribe
         );
       });
+  }
+
+  public loadDataAndSubscribe(
+    { interval, symbol }: CandlesGetParams,
+    unsubscribePrevious: boolean
+  ) {
+    const stop$ = new Subject<void>();
+
+    this.candlesRestService.loadData({
+      symbol,
+      interval,
+    });
+
+    const success$ = this.candlesStatus$.pipe(
+      filter((status) => status === 'success'),
+      takeUntil(stop$)
+    );
+
+    combineLatest([
+      this.firstCandlesInterval$,
+      this.currentWebsocketOpened$,
+      success$,
+    ])
+      .pipe(
+        tap(([previousCandleInterval]) => {
+          if (unsubscribePrevious) {
+            this.candlesWebsocketService.unsubscribeFromWebsocket(
+              {
+                interval: previousCandleInterval,
+                symbol,
+              },
+              this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
+            );
+          }
+        }),
+        mergeMap(() =>
+          timer(unsubscribePrevious ? WEBSOCKET_SUBSCRIPTION_DELAY : 0)
+        )
+      )
+      .subscribe(() => {
+        stop$.next();
+
+        this.store$.dispatch(candlesActions.setInterval({ interval }));
+
+        this.candlesWebsocketService.subscribeToWebsocket(
+          {
+            interval,
+            symbol,
+          },
+          this.candlesWebsocketService.websocketSubscriptionId.subscribe
+        );
+      });
+  }
+
+  public onIntervalChange(interval: CandleInterval) {
+    this.globalSymbol$.pipe(first(), filter(Boolean)).subscribe((symbol) => {
+      this.loadDataAndSubscribe({ interval, symbol }, true);
+    });
   }
 
   public handleWebsocketData({
