@@ -28,11 +28,8 @@ import { CandlesWebsocketService } from './candles-websocket.service';
 })
 export class CandlesService {
   private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
-  private candlesStatus$ = this.store$.select(candlesSelectors.status);
-  private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private websocketStatus$ = this.websocketService.status$;
   private websocketReason$ = this.websocketService.reason$;
-  private firstCandlesInterval$ = this.candlesInterval$.pipe(first());
 
   private websocketOpened$ = this.websocketStatus$.pipe(
     filter((status) => status === 'open')
@@ -45,6 +42,10 @@ export class CandlesService {
     filter((status) => status === 'open')
   );
 
+  public interval$ = this.store$.select(candlesSelectors.interval);
+  public currentInterval$ = this.interval$.pipe(first());
+  public status$ = this.store$.select(candlesSelectors.status);
+
   public constructor(
     private websocketService: WebsocketService,
     private candlesWebsocketService: CandlesWebsocketService,
@@ -55,7 +56,7 @@ export class CandlesService {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof candlesActions.load>[0], 'symbol'>) {
-    this.firstCandlesInterval$.subscribe((interval) => {
+    this.currentInterval$.subscribe((interval) => {
       this.loadDataAndSubscribe({ symbol, interval }, false);
     });
   }
@@ -68,20 +69,20 @@ export class CandlesService {
         mergeMap(() => {
           return combineLatest([
             this.websocketReason$.pipe(first()),
-            this.candlesStatus$.pipe(
+            this.globalSymbol$.pipe(first(), filter(Boolean)),
+            this.currentInterval$,
+            this.status$.pipe(
               // first() comes first to check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened
               first(),
               filter((status) => status === 'success')
             ),
-            this.globalSymbol$.pipe(first(), filter(Boolean)),
-            this.candlesInterval$.pipe(first()),
           ]);
         })
       )
-      .subscribe(([websocketReason, _candlesStatus, symbol, interval]) => {
+      .subscribe(([reason, symbol, interval]) => {
         // If we enable ws by switch for the first time or re-enable it
-        if (websocketReason === 'switch' || websocketReason === 'restored') {
+        if (reason === 'switch' || reason === 'restored') {
           this.candlesRestService.loadData({ symbol, interval });
         }
 
@@ -106,13 +107,13 @@ export class CandlesService {
       interval,
     });
 
-    const success$ = this.candlesStatus$.pipe(
+    const success$ = this.status$.pipe(
       filter((status) => status === 'success'),
       takeUntil(stop$)
     );
 
     combineLatest([
-      this.firstCandlesInterval$,
+      this.currentInterval$,
       this.currentWebsocketOpened$,
       success$,
     ])

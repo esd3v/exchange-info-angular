@@ -21,6 +21,7 @@ import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandlesRestService } from '../../candles/services/candles-rest.service';
 import { CandlesWebsocketService } from '../../candles/services/candles-websocket.service';
+import { CandlesService } from '../../candles/services/candles.service';
 import { candlesSelectors } from '../../candles/store';
 import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
@@ -34,7 +35,7 @@ import { tradesSelectors } from '../../trades/store';
 export class PairsService {
   private websocketStatus$ = this.websocketService.status$;
   public pageSymbols: string[] = [];
-  private candlesStatus$ = this.store$.select(candlesSelectors.status);
+
   private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
   private tradesStatus$ = this.store$.select(tradesSelectors.status);
   private candlesInterval$ = this.store$.select(candlesSelectors.interval);
@@ -71,6 +72,7 @@ export class PairsService {
     private websocketService: WebsocketService,
     private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService,
+    private candlesService: CandlesService,
     private candlesRestService: CandlesRestService,
     private candlesWebsocketService: CandlesWebsocketService,
     private orderBookRestService: OrderBookRestService,
@@ -150,7 +152,7 @@ export class PairsService {
           });
         }),
         mergeMap(([_globalSymbol, interval]) => {
-          const success$ = this.candlesStatus$.pipe(
+          const success$ = this.candlesService.status$.pipe(
             filter((status) => status === 'success'),
             takeUntil(stop$)
           );
