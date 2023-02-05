@@ -16,6 +16,7 @@ import { OrderBookColumn } from '../../models/order-book-column.model';
 import { orderBookSelectors } from '../../store';
 import { OrderBookProps } from './order-book.props';
 import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 
 @Component({
   selector: 'app-order-book',
@@ -28,7 +29,9 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
-  public placeholderRows = Array<Row>(20).fill([{ value: '' }]);
+  public placeholderRows = Array<Row>(WIDGET_DEPTH_DEFAULT_LIMIT).fill([
+    { value: '' },
+  ]);
 
   public title = this.getTitle(this.type);
 

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { OrderBookGetParams } from '../models/order-book-get-params.model';
 import { OrderBook } from '../models/order-book.model';
@@ -22,7 +23,7 @@ export class OrderBookRestService {
 
   public loadData({
     symbol,
-    limit = 20,
+    limit = WIDGET_DEPTH_DEFAULT_LIMIT,
   }: Parameters<typeof orderBookActions.load>[0]) {
     this.store$.dispatch(orderBookActions.load({ symbol, limit }));
   }

@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { WEBSOCKET_UNSUBSCRIBE_BASE_ID } from 'src/app/shared/config';
+import {
+  WEBSOCKET_UNSUBSCRIBE_BASE_ID,
+  WIDGET_DEPTH_DEFAULT_LIMIT,
+} from 'src/app/shared/config';
 import { WithWebsocket } from 'src/app/shared/types/with-websocket';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketOrderBookStreamParams } from '../models/websocket-order-book-stream-params.model';
@@ -17,7 +20,9 @@ export class OrderBookWebsocketService
 
   public websocketSubscription =
     this.websocketSubscribeService.createSubscription<WebsocketOrderBookStreamParams>(
-      ({ symbol }) => [`${symbol.toLowerCase()}@depth20@1000ms`]
+      ({ symbol, limit = WIDGET_DEPTH_DEFAULT_LIMIT }) => [
+        `${symbol.toLowerCase()}@depth${limit}@1000ms`,
+      ]
     );
 
   public constructor(

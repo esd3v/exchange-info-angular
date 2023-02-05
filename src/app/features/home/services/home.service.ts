@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter, first, timer } from 'rxjs';
-import { REST_START_DELAY } from 'src/app/shared/config';
+import { API_START_DELAY } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { CandlesService } from '../../candles/services/candles.service';
@@ -33,7 +33,7 @@ export class HomerService {
   }
 
   public initAppData(symbol: string) {
-    timer(REST_START_DELAY).subscribe(() => {
+    timer(API_START_DELAY).subscribe(() => {
       this.exchangeInfoRestService.loadData();
       this.tickerService.onAppInit(symbol);
       this.candlesService.onAppInit({ symbol });

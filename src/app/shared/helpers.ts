@@ -1,4 +1,4 @@
-import { TOFIXED_DIGITS } from './config';
+import { MISC_TOFIXED_DIGITS } from './config';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
 import { SortOrder } from './models/sort-order.model';
@@ -46,7 +46,7 @@ export function numberWithCommas(x: string, symbol = ',') {
 }
 
 export const formatPriceChangePercent = (value: string) =>
-  `${addPlusIfPositive(Number(value).toFixed(TOFIXED_DIGITS))}%`;
+  `${addPlusIfPositive(Number(value).toFixed(MISC_TOFIXED_DIGITS))}%`;
 
 export const isPositive = (value: string | null) =>
   value === null || Number(value) === 0 ? null : Number(value) > 0;

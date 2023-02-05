@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { SITE_NAME } from 'src/app/shared/config';
+import { APP_SITE_NAME } from 'src/app/shared/config';
 
 @Component({
   selector: 'app-header',
@@ -7,7 +7,7 @@ import { SITE_NAME } from 'src/app/shared/config';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
-  public siteName = SITE_NAME;
+  public siteName = APP_SITE_NAME;
 
   public constructor() {}
 }

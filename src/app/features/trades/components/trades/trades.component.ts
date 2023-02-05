@@ -2,6 +2,7 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
 import { map, Observable } from 'rxjs';
+import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import {
   formatDecimal,
   getFormattedDate,
@@ -22,7 +23,9 @@ import { tradesSelectors } from '../../store';
 export class TradesComponent implements OnInit {
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
-  public placeholderRows = Array<Row>(20).fill([{ value: '' }]);
+  public placeholderRows = Array<Row>(WIDGET_TRADES_DEFAULT_LIMIT).fill([
+    { value: '' },
+  ]);
 
   public columns$: Observable<TradesColumn[]> = this.store$
     .select(globalSelectors.currency)

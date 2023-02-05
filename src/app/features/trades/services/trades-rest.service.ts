@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { TradesGetParams } from '../models/trades-get-params.model';
 import { Trades } from '../models/trades.model';
@@ -22,7 +23,7 @@ export class TradesRestService {
 
   public loadData({
     symbol,
-    limit = 20,
+    limit = WIDGET_TRADES_DEFAULT_LIMIT,
   }: Parameters<typeof tradesActions.load>[0]) {
     this.store$.dispatch(tradesActions.load({ symbol, limit }));
   }

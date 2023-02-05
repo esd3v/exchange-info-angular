@@ -8,7 +8,7 @@ import { TickerService } from './features/tickers/services/ticker.service';
 import { tickersSelectors } from './features/tickers/store';
 import { TradesService } from './features/trades/services/trades.service';
 import {
-  SITE_NAME,
+  APP_SITE_NAME,
   WEBSOCKET_ENABLED_AT_START,
   WEBSOCKET_START_DELAY,
 } from './shared/config';
@@ -41,11 +41,11 @@ export class AppService {
       ([globalPair, lastPrice]) => {
         const title = lastPrice
           ? globalPair
-            ? `${formatDecimal(lastPrice)} | ${globalPair} | ${SITE_NAME}`
-            : `${formatDecimal(lastPrice)} | ${SITE_NAME}`
+            ? `${formatDecimal(lastPrice)} | ${globalPair} | ${APP_SITE_NAME}`
+            : `${formatDecimal(lastPrice)} | ${APP_SITE_NAME}`
           : globalPair
-          ? `${globalPair} | ${SITE_NAME}`
-          : `${SITE_NAME}`;
+          ? `${globalPair} | ${APP_SITE_NAME}`
+          : `${APP_SITE_NAME}`;
 
         this.titleService.setTitle(title);
       }
