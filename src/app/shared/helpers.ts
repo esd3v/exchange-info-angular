@@ -16,6 +16,14 @@ export const isScientific = (value: string | number) =>
     typeof value === 'number' ? value.toString() : value
   );
 
+export const createPair = (base: string, quote: string) => {
+  return {
+    underscore: `${base}_${quote}`,
+    slash: `${base}/${quote}`,
+    symbol: `${base}${quote}`,
+  };
+};
+
 export const parsePair = (pair: string, separator: '/' | '_') => {
   const [base, quote] = pair.split(separator);
 
