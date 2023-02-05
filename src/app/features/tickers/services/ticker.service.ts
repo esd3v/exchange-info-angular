@@ -19,6 +19,12 @@ export class TickerService {
   private tickerStatus$ = this.store$.select(tickersSelectors.status);
 
   private websocketOpened$ = this.websocketStatus$.pipe(
+    filter((status) => status === 'open')
+  );
+
+  // Don't replace with this.websocketOpened$.pipe(first())
+  // because first() should come first
+  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
     first(),
     filter((status) => status === 'open')
   );
@@ -39,7 +45,7 @@ export class TickerService {
 
     this.tickerRestService.loadData();
 
-    combineLatest([success$, this.websocketOpened$]).subscribe(() => {
+    combineLatest([success$, this.currentWebsocketOpened$]).subscribe(() => {
       stop$.next();
 
       this.tickerWebsocketService.subscribeToWebsocket(
@@ -54,13 +60,12 @@ export class TickerService {
   // Runs once when websocket is opened
   // Then subscribe if data is loaded at this moment
   public onWebsocketOpen() {
-    this.websocketStatus$
-      .pipe(filter((status) => status === 'open'))
+    this.websocketOpened$
       .pipe(
         mergeMap(() => {
           return combineLatest([
             this.tickerStatus$.pipe(
-              // If data is CURRENTLY loaded
+              // first() comes first to check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened
               first(),
               filter((status) => status === 'success')

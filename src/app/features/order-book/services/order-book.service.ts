@@ -17,6 +17,12 @@ export class OrderBookService {
   private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
 
   private websocketOpened$ = this.websocketStatus$.pipe(
+    filter((status) => status === 'open')
+  );
+
+  // Don't replace with this.websocketOpened$.pipe(first())
+  // because first() should come first
+  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
     first(),
     filter((status) => status === 'open')
   );
@@ -39,7 +45,7 @@ export class OrderBookService {
 
     this.orderBookRestService.loadData({ symbol });
 
-    combineLatest([success$, this.websocketOpened$]).subscribe(() => {
+    combineLatest([success$, this.currentWebsocketOpened$]).subscribe(() => {
       stop$.next();
 
       this.orderBookWebsocketService.subscribeToWebsocket(
@@ -52,14 +58,13 @@ export class OrderBookService {
   }
 
   public onWebsocketOpen() {
-    this.websocketStatus$
-      .pipe(filter((status) => status === 'open'))
+    this.websocketOpened$
       .pipe(
         mergeMap(() => {
           return combineLatest([
             this.orderBookStatus$.pipe(
-              // If data is CURRENTLY loaded
-              // to prevent double loading when data loaded AFTER ws opened)
+              // first() comes first to check if data is CURRENTLY loaded
+              // to prevent double loading when data loaded AFTER ws opened
               first(),
               filter((status) => status === 'success')
             ),
