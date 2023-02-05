@@ -16,7 +16,6 @@ import { TickerWebsocketService } from './ticker-websocket.service';
 export class TickerService {
   private websocketStatus$ = this.websocketService.status$;
   private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
-  private tickerStatus$ = this.store$.select(tickersSelectors.status);
 
   private websocketOpened$ = this.websocketStatus$.pipe(
     filter((status) => status === 'open')
@@ -29,6 +28,8 @@ export class TickerService {
     filter((status) => status === 'open')
   );
 
+  public status$ = this.store$.select(tickersSelectors.status);
+
   public constructor(
     private tickerRestService: TickerRestService,
     private tickerWebsocketService: TickerWebsocketService,
@@ -39,7 +40,7 @@ export class TickerService {
   public onAppInit(symbol: string) {
     const stop$ = new Subject<void>();
 
-    const success$ = this.tickerStatus$.pipe(
+    const success$ = this.status$.pipe(
       filter((status) => status === 'success')
     );
 
@@ -64,17 +65,17 @@ export class TickerService {
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.tickerStatus$.pipe(
+            this.globalSymbol$.pipe(first(), filter(Boolean)),
+            this.status$.pipe(
               // first() comes first to check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened
               first(),
               filter((status) => status === 'success')
             ),
-            this.globalSymbol$.pipe(first(), filter(Boolean)),
           ]);
         })
       )
-      .subscribe(([_tickerStatus, symbol]) => {
+      .subscribe(([symbol]) => {
         this.tickerWebsocketService.subscribeToWebsocket(
           {
             symbols: [symbol],
