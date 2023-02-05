@@ -3,7 +3,7 @@ import {
   API_HTTP_BASEURL,
   WIDGET_CHART_DEFAULT_CANDLEINTERVAL,
 } from 'src/app/shared/config';
-import { CandleInterval } from 'src/app/features/candles/models/candle-interval.model';
+import { CandleInterval } from 'src/app/features/candles/types/candle-interval';
 
 it('Pair click', () => {
   const pair = createPair('LTC', 'BTC');

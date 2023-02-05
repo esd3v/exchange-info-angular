@@ -1,4 +1,4 @@
-import { CandleInterval } from '../features/candles/models/candle-interval.model';
+import { CandleInterval } from '../features/candles/types/candle-interval';
 
 export const APP_SITE_NAME = 'Binance Exchange Info';
 export const APP_DEFAULT_BASE_CURRENCY = 'ETH';

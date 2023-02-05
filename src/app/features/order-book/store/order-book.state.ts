@@ -1,5 +1,5 @@
 import { LoadingStatus } from 'src/app/store/state';
-import { OrderBook } from '../models/order-book.model';
+import { OrderBook } from '../types/order-book';
 
 export type OrderBookState = {
   status: LoadingStatus;

@@ -4,9 +4,9 @@ import { Store } from '@ngrx/store';
 import { ECharts, EChartsOption } from 'echarts';
 import { combineLatest, filter, map, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { CandleInterval } from '../../models/candle-interval.model';
 import { CandlesService } from '../../services/candles.service';
 import { candlesSelectors } from '../../store';
+import { CandleInterval } from '../../types/candle-interval';
 
 @Component({
   selector: 'app-chart',

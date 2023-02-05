@@ -1,6 +1,6 @@
 import { EntityAdapter, createEntityAdapter, EntityState } from '@ngrx/entity';
-import { Ticker } from 'src/app/features/tickers/models/ticker.model';
 import { LoadingStatus } from '../../../store/state';
+import { Ticker } from '../types/ticker';
 
 export type TickerEntity = Pick<
   Ticker,

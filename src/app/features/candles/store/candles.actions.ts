@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
-import { CandleInterval } from '../models/candle-interval.model';
-import { Candle } from '../models/candle.model';
-import { CandlesGetParams } from '../models/candles-get-params.model';
+import { CandleInterval } from '../types/candle-interval';
+import { Candle } from '../types/candle';
+import { CandlesGetParams } from '../types/candles-get-params';
 
 const PREFIX = '[CANDLES]';
 const LOAD = `${PREFIX} LOAD`;

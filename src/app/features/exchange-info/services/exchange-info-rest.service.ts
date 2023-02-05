@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { ExchangeInfo } from '../models/exchange-info.model';
+import { ExchangeInfo } from '../types/exchange-info';
 import { exchangeInfoActions } from '../store';
 
 @Injectable({

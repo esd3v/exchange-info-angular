@@ -1,10 +1,10 @@
 import { MISC_TOFIXED_DIGITS } from './config';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { SortOrder } from './models/sort-order.model';
-import { Row } from './models/row.model';
 import { Decimal } from 'decimal.js';
-import { Column } from './models/column';
+import { Column } from './types/column';
+import { Row } from './types/row';
+import { SortOrder } from './types/sort-order';
 
 dayjs.extend(utc);
 

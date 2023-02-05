@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
-import { OrderBookGetParams } from '../models/order-book-get-params.model';
-import { OrderBook } from '../models/order-book.model';
+import { OrderBookGetParams } from '../types/order-book-get-params';
+import { OrderBook } from '../types/order-book';
 
 const PREFIX = '[ORDER BOOK]';
 const LOAD = `${PREFIX} LOAD`;

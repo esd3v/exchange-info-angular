@@ -1,4 +1,4 @@
-import { CandleInterval } from './candle-interval.model';
+import { CandleInterval } from './candle-interval';
 
 export interface WebsocketCandlesStreamParams {
   symbol: string;

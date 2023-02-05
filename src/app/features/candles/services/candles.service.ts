@@ -4,7 +4,6 @@ import {
   combineLatest,
   filter,
   first,
-  map,
   mergeMap,
   Subject,
   take,
@@ -16,11 +15,11 @@ import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { CandleInterval } from '../models/candle-interval.model';
-import { Candle } from '../models/candle.model';
-import { CandlesGetParams } from '../models/candles-get-params.model';
-import { WebsocketCandle } from '../models/websocket-candle.model';
 import { candlesActions, candlesSelectors } from '../store';
+import { Candle } from '../types/candle';
+import { CandleInterval } from '../types/candle-interval';
+import { CandlesGetParams } from '../types/candles-get-params';
+import { WebsocketCandle } from '../types/websocket-candle';
 import { CandlesRestService } from './candles-rest.service';
 import { CandlesWebsocketService } from './candles-websocket.service';
 

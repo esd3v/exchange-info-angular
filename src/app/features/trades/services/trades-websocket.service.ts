@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { WEBSOCKET_UNSUBSCRIBE_BASE_ID } from 'src/app/shared/config';
 import { WithWebsocket } from 'src/app/shared/types/with-websocket';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
-import { WebsocketTradesStreamParams } from '../models/websocket-trades-stream-params.model';
+import { WebsocketTradesStreamParams } from '../types/websocket-trades-stream-params';
 
 @Injectable({
   providedIn: 'root',

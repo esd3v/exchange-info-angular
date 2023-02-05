@@ -1,4 +1,4 @@
-import { CandleInterval } from 'src/app/features/candles/models/candle-interval.model';
+import { CandleInterval } from 'src/app/features/candles/types/candle-interval';
 import { createPair } from 'src/app/shared/helpers';
 import {
   API_HTTP_BASEURL,

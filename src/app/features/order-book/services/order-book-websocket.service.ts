@@ -5,7 +5,7 @@ import {
 } from 'src/app/shared/config';
 import { WithWebsocket } from 'src/app/shared/types/with-websocket';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
-import { WebsocketOrderBookStreamParams } from '../models/websocket-order-book-stream-params.model';
+import { WebsocketOrderBookStreamParams } from '../types/websocket-order-book-stream-params';
 
 @Injectable({
   providedIn: 'root',

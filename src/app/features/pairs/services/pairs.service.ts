@@ -14,8 +14,8 @@ import {
 } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { getCellByColumnId, parsePair } from 'src/app/shared/helpers';
-import { Column } from 'src/app/shared/models/column';
-import { Row } from 'src/app/shared/models/row.model';
+import { Column } from 'src/app/shared/types/column';
+import { Row } from 'src/app/shared/types/row';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';

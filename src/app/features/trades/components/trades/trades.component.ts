@@ -8,10 +8,10 @@ import {
   getFormattedDate,
   multiplyDecimal,
 } from 'src/app/shared/helpers';
-import { Row } from 'src/app/shared/models/row.model';
+import { Row } from 'src/app/shared/types/row';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
-import { TradesColumn } from '../../models/trades-column.model';
+import { TradesColumn } from '../../types/trades-column';
 import { tradesSelectors } from '../../store';
 
 @Component({

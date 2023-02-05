@@ -8,15 +8,15 @@ import {
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
 import { combineLatest, map, Observable } from 'rxjs';
-import { NgChanges } from 'src/app/shared/models/misc.model';
-import { Row } from 'src/app/shared/models/row.model';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
-import { OrderBookColumn } from '../../models/order-book-column.model';
+import { OrderBookColumn } from '../../types/order-book-column';
 import { orderBookSelectors } from '../../store';
 import { OrderBookProps } from './order-book.props';
 import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
+import { NgChanges } from 'src/app/shared/types/misc';
+import { Row } from 'src/app/shared/types/row';
 
 @Component({
   selector: 'app-order-book',

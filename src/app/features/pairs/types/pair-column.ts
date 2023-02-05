@@ -1,4 +1,4 @@
-import { Ticker } from '../../tickers/models/ticker.model';
+import { Ticker } from '../../tickers/types/ticker';
 
 export interface PairColumn {
   id: 'pair' | keyof Pick<Ticker, 'lastPrice' | 'priceChangePercent'>;

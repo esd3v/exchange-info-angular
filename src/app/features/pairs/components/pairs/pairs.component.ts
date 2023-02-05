@@ -22,13 +22,13 @@ import {
   getCellByColumnId,
   parsePair,
 } from 'src/app/shared/helpers';
-import { Row } from 'src/app/shared/models/row.model';
 import { AppState } from 'src/app/store';
 import { globalActions } from 'src/app/store/global';
 import { symbolsSelectors } from 'src/app/store/symbols';
 import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
-import { PairColumn } from '../../models/pair-column.model';
+import { PairColumn } from '../../types/pair-column';
 import { PairsService } from '../../services/pairs.service';
+import { Row } from 'src/app/shared/types/row';
 
 @Component({
   selector: 'app-pairs',

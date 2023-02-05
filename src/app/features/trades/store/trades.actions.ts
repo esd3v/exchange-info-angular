@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
-import { TradesGetParams } from '../models/trades-get-params.model';
-import { Trades } from '../models/trades.model';
+import { TradesGetParams } from '../types/trades-get-params';
+import { Trades } from '../types/trades';
 import { TradesEntity } from './trades.state';
 
 const PREFIX = '[TRADES]';

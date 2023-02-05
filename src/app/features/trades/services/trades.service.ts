@@ -4,7 +4,7 @@ import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { WebsocketTrades } from '../models/websocket-trades.model';
+import { WebsocketTrades } from '../types/websocket-trades';
 import { tradesActions, tradesSelectors } from '../store';
 import { TradesEntity } from '../store/trades.state';
 import { TradesRestService } from './trades-rest.service';

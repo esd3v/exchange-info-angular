@@ -1,7 +1,7 @@
 import { EntityAdapter, createEntityAdapter, EntityState } from '@ngrx/entity';
 import { WIDGET_CHART_DEFAULT_CANDLEINTERVAL } from 'src/app/shared/config';
 import { LoadingStatus } from 'src/app/store/state';
-import { CandleInterval } from '../models/candle-interval.model';
+import { CandleInterval } from '../types/candle-interval';
 
 export interface CandleEntity {
   openTime: number;

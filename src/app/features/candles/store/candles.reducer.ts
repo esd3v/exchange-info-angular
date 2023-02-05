@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { candlesActions } from '.';
-import { Candle } from '../models/candle.model';
+import { Candle } from '../types/candle';
 import { CandleEntity, candlesAdapter, initialState } from './candles.state';
 
 // OHLC order is different on purpose (for echarts)

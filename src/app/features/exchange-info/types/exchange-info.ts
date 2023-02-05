@@ -1,6 +1,6 @@
-import { ExchangeFilters } from './exchange-filters.model';
-import { ExchangeSymbol } from './exchange-symbol.model';
-import { RateLimit } from './rate-limit.model';
+import { ExchangeFilters } from './exchange-filters';
+import { ExchangeSymbol } from './exchange-symbol';
+import { RateLimit } from './rate-limit';
 
 export interface ExchangeInfo {
   timezone: string;

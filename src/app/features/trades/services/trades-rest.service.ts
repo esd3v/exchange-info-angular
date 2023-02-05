@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
-import { TradesGetParams } from '../models/trades-get-params.model';
-import { Trades } from '../models/trades.model';
+import { TradesGetParams } from '../types/trades-get-params';
+import { Trades } from '../types/trades';
 import { tradesActions } from '../store';
 
 @Injectable({

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { WEBSOCKET_UNSUBSCRIBE_BASE_ID } from 'src/app/shared/config';
-import { WebsocketMessageIncoming } from '../models/websocket-message-incoming.model';
-import { WebsocketMessageStreamParams } from '../models/websocket-message-stream-params.model';
+import { WebsocketMessageIncoming } from '../types/websocket-message-incoming';
+import { WebsocketMessageStreamParams } from '../types/websocket-message-stream-params';
 import { WebsocketService } from './websocket.service';
 
 type Params = Record<string, any>;

@@ -4,8 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
-import { OrderBookGetParams } from '../models/order-book-get-params.model';
-import { OrderBook } from '../models/order-book.model';
+import { OrderBookGetParams } from '../types/order-book-get-params';
+import { OrderBook } from '../types/order-book';
 import { orderBookActions } from '../store';
 
 @Injectable({

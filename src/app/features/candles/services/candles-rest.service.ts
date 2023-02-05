@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { Candle } from '../models/candle.model';
-import { CandlesGetParams } from '../models/candles-get-params.model';
+import { Candle } from '../types/candle';
+import { CandlesGetParams } from '../types/candles-get-params';
 import { candlesActions } from '../store';
 
 @Injectable({

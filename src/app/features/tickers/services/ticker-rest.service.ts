@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { Ticker } from '../models/ticker.model';
+import { Ticker } from '../types/ticker';
 import { tickersActions } from '../store';
 
 @Injectable({

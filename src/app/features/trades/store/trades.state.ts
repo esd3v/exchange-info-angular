@@ -1,5 +1,5 @@
 import { LoadingStatus } from 'src/app/store/state';
-import { Trades } from '../models/trades.model';
+import { Trades } from '../types/trades';
 
 export type TradesEntity = Pick<
   Trades,

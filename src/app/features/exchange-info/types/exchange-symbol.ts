@@ -1,6 +1,6 @@
-import { OrderTypes } from './oder-types.model';
-import { SymbolFilters } from './symbol-filters.model';
-import { SymbolStatus } from './symbol-status.model';
+import { OrderTypes } from './oder-types';
+import { SymbolFilters } from './symbol-filters';
+import { SymbolStatus } from './symbol-status';
 
 export interface ExchangeSymbol {
   symbol: string;

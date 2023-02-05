@@ -1,5 +1,5 @@
-import { RateLimitIntervals } from './rate-limit-intervals.model';
-import { RateLimitTypes } from './rate-limit-types.model';
+import { RateLimitIntervals } from './rate-limit-intervals';
+import { RateLimitTypes } from './rate-limit-types';
 
 export interface RateLimit {
   rateLimitType: RateLimitTypes;

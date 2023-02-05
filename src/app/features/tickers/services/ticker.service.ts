@@ -4,7 +4,7 @@ import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { WebsocketTicker } from '../models/websocket-ticker.model';
+import { WebsocketTicker } from '../types/websocket-ticker';
 import { tickersActions, tickersSelectors } from '../store';
 import { TickerEntity } from '../store/tickers.state';
 import { TickerRestService } from './ticker-rest.service';
