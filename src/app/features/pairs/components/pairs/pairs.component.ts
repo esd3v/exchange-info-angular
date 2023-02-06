@@ -14,7 +14,6 @@ import { Dictionary } from '@ngrx/entity';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, map, Subject } from 'rxjs';
 import { debounceTime, filter, first } from 'rxjs/operators';
-import { tickersSelectors } from 'src/app/features/tickers/store';
 import { TickerEntity } from 'src/app/features/tickers/store/tickers.state';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import {
@@ -29,6 +28,7 @@ import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
 import { PairColumn } from '../../types/pair-column';
 import { PairsService } from '../../services/pairs.service';
 import { Row } from 'src/app/shared/types/row';
+import { TickerService } from 'src/app/features/tickers/services/ticker.service';
 
 @Component({
   selector: 'app-pairs',
@@ -40,11 +40,9 @@ import { Row } from 'src/app/shared/types/row';
 export class PairsComponent implements OnDestroy, OnInit {
   @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
 
-  private tickers$ = this.store$.select(tickersSelectors.tickers);
   private tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
   private debounceTime = 1000;
   private pageClicks$ = new Subject<PageEvent>();
-  private tickersStatus$ = this.store$.select(tickersSelectors.status);
   private tradingSymbolsStatus$ = this.store$.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
@@ -64,7 +62,7 @@ export class PairsComponent implements OnDestroy, OnInit {
   ]);
 
   public loading$ = combineLatest([
-    this.tickersStatus$,
+    this.tickerService.status$,
     this.tradingSymbolsStatus$,
   ]).pipe(
     map(
@@ -87,6 +85,7 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public constructor(
     private pairsService: PairsService,
+    private tickerService: TickerService,
     private store$: Store<AppState>,
     private location: Location,
     private router: Router
@@ -191,7 +190,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     // Wait for tickers and tradingSymbols to load
     const createdRows$ = combineLatest([
       this.tradingSymbols$,
-      this.tickers$,
+      this.tickerService.tickers$,
     ]).pipe(
       map(([tradingSymbols, tickers]) =>
         this.createRows(tradingSymbols, tickers)

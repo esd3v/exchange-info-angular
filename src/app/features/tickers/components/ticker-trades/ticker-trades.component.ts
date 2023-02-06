@@ -1,23 +1,20 @@
 import { Component } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs';
-import { AppState } from 'src/app/store';
-import { tickersSelectors } from 'src/app/features/tickers/store';
+import { TickerService } from '../../services/ticker.service';
 
 @Component({
   selector: 'app-ticker-trades',
   templateUrl: './ticker-trades.component.html',
 })
 export class TickerTradesComponent {
-  public loading$ = this.store$.select(tickersSelectors.loading);
+  public loading$ = this.tickerService.isLoading$;
 
-  public numberOfTrades$ = this.store$
-    .select(tickersSelectors.numberOfTrades)
+  public numberOfTrades$ = this.tickerService.numberOfTrades$
     // Don't use just map(Number) because we need also null result for N/A
     .pipe(
       filter(Boolean),
       map((data) => data && Number(data))
     );
 
-  public constructor(private store$: Store<AppState>) {}
+  public constructor(private tickerService: TickerService) {}
 }

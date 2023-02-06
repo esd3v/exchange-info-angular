@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Store } from '@ngrx/store';
 import { combineLatest, timer } from 'rxjs';
 import { CandlesService } from './features/candles/services/candles.service';
 import { OrderBookService } from './features/order-book/services/order-book.service';
 import { PairsService } from './features/pairs/services/pairs.service';
 import { TickerService } from './features/tickers/services/ticker.service';
-import { tickersSelectors } from './features/tickers/store';
 import { TradesService } from './features/trades/services/trades.service';
 import {
   APP_SITE_NAME,
@@ -15,7 +13,6 @@ import {
 } from './shared/config';
 import { formatDecimal } from './shared/helpers';
 import { GlobalService } from './shared/services/global.service';
-import { AppState } from './store';
 import { WebsocketSubscribeService } from './websocket/services/websocket-subscribe.service';
 import { WebsocketService } from './websocket/services/websocket.service';
 
@@ -28,7 +25,6 @@ export class AppService {
     private globalService: GlobalService,
     private websocketService: WebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private store$: Store<AppState>,
     private orderBookService: OrderBookService,
     private tradesService: TradesService,
     private candlesService: CandlesService,
@@ -37,21 +33,20 @@ export class AppService {
   ) {}
 
   public setTitle() {
-    const lastPrice$ = this.store$.select(tickersSelectors.lastPrice);
+    combineLatest([
+      this.globalService.globalPair$,
+      this.tickerService.lastPrice$,
+    ]).subscribe(([globalPair, lastPrice]) => {
+      const title = lastPrice
+        ? globalPair
+          ? `${formatDecimal(lastPrice)} | ${globalPair} | ${APP_SITE_NAME}`
+          : `${formatDecimal(lastPrice)} | ${APP_SITE_NAME}`
+        : globalPair
+        ? `${globalPair} | ${APP_SITE_NAME}`
+        : `${APP_SITE_NAME}`;
 
-    combineLatest([this.globalService.globalPair$, lastPrice$]).subscribe(
-      ([globalPair, lastPrice]) => {
-        const title = lastPrice
-          ? globalPair
-            ? `${formatDecimal(lastPrice)} | ${globalPair} | ${APP_SITE_NAME}`
-            : `${formatDecimal(lastPrice)} | ${APP_SITE_NAME}`
-          : globalPair
-          ? `${globalPair} | ${APP_SITE_NAME}`
-          : `${APP_SITE_NAME}`;
-
-        this.titleService.setTitle(title);
-      }
-    );
+      this.titleService.setTitle(title);
+    });
   }
 
   public startWebSocket() {

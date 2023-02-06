@@ -1,8 +1,6 @@
-import { Store } from '@ngrx/store';
 import { Component, OnInit } from '@angular/core';
-import { AppState } from 'src/app/store';
-import { filter, combineLatestWith } from 'rxjs';
-import { tickersSelectors } from 'src/app/features/tickers/store';
+import { combineLatestWith, filter } from 'rxjs';
+import { TickerService } from '../../services/ticker.service';
 
 @Component({
   selector: 'app-ticker-last-price',
@@ -10,17 +8,15 @@ import { tickersSelectors } from 'src/app/features/tickers/store';
 })
 export class TickerLastPriceComponent implements OnInit {
   public positive: boolean | null = null;
-  public loading$ = this.store$.select(tickersSelectors.loading);
+  public loading$ = this.tickerService.isLoading$;
 
-  public lastPrice$ = this.store$
-    .select(tickersSelectors.lastPrice)
-    .pipe(filter(Boolean));
+  public lastPrice$ = this.tickerService.lastPrice$.pipe(filter(Boolean));
 
-  public prevLastPrice$ = this.store$
-    .select(tickersSelectors.prevLastPrice)
-    .pipe(filter(Boolean));
+  public prevLastPrice$ = this.tickerService.prevLastPrice$.pipe(
+    filter(Boolean)
+  );
 
-  public constructor(private store$: Store<AppState>) {}
+  public constructor(private tickerService: TickerService) {}
 
   public ngOnInit(): void {
     this.lastPrice$

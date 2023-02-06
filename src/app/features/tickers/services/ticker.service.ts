@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, mergeMap } from 'rxjs';
+import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
 import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -19,6 +19,24 @@ export class TickerService {
   public success$ = this.status$.pipe(filter((status) => status === 'success'));
 
   public successCurrent$ = this.success$.pipe(first());
+
+  public lastPrice$ = this.store$.select(tickersSelectors.lastPrice);
+
+  public prevLastPrice$ = this.store$.select(tickersSelectors.prevLastPrice);
+
+  public tickers$ = this.store$.select(tickersSelectors.tickers);
+
+  public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
+
+  public priceChange$ = this.store$.select(tickersSelectors.priceChange);
+
+  public priceChangePercent$ = this.store$.select(
+    tickersSelectors.priceChangePercent
+  );
+
+  public lastQuantity$ = this.store$.select(tickersSelectors.lastQuantity);
+
+  public numberOfTrades$ = this.store$.select(tickersSelectors.numberOfTrades);
 
   public constructor(
     private globalService: GlobalService,
