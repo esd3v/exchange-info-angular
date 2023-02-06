@@ -28,8 +28,19 @@ import { CandlesWebsocketService } from './candles-websocket.service';
 })
 export class CandlesService {
   public interval$ = this.store$.select(candlesSelectors.interval);
-  public currentInterval$ = this.interval$.pipe(first());
   public status$ = this.store$.select(candlesSelectors.status);
+
+  public intervalCurrent$ = this.interval$.pipe(first());
+
+  public successCurrent$ = this.status$.pipe(
+    first(), // Order shouldn't be changed
+    filter((status) => status === 'success')
+  );
+
+  public successUntil$ = this.status$.pipe(
+    filter((status) => status === 'success'),
+    first() // Order shouldn't be changed
+  );
 
   public constructor(
     private globalService: GlobalService,
@@ -42,7 +53,7 @@ export class CandlesService {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof candlesActions.load>[0], 'symbol'>) {
-    this.currentInterval$.subscribe((interval) => {
+    this.intervalCurrent$.subscribe((interval) => {
       this.loadDataAndSubscribe({ symbol, interval }, false);
     });
   }
@@ -56,13 +67,10 @@ export class CandlesService {
           return combineLatest([
             this.websocketService.reasonOnce$,
             this.globalService.globalSymbolOnce$,
-            this.currentInterval$,
-            this.status$.pipe(
-              // first() comes first to check if data is CURRENTLY loaded
-              // to prevent double loading when data loaded AFTER ws opened
-              first(),
-              filter((status) => status === 'success')
-            ),
+            this.intervalCurrent$,
+            // Check if data is CURRENTLY loaded
+            // to prevent double loading when data loaded AFTER ws opened
+            this.successCurrent$,
           ]);
         })
       )
@@ -83,47 +91,37 @@ export class CandlesService {
   }
 
   public loadDataAndSubscribe(
-    { interval, symbol }: CandlesGetParams,
-    unsubscribePrevious: boolean
+    { interval, symbol }: Parameters<typeof candlesActions.load>[0],
+    unsubscribePrevious: boolean // TODO replace with auto subscribe check
   ) {
-    const stop$ = new Subject<void>();
+    combineLatest([
+      this.intervalCurrent$,
+      this.globalService.globalSymbolOnce$,
+      this.websocketService.openOnce$,
+    ]).subscribe(([currentInterval, globalSymbol]) => {
+      if (unsubscribePrevious) {
+        this.candlesWebsocketService.unsubscribeFromWebsocket(
+          {
+            interval: currentInterval,
+            symbol: globalSymbol,
+          },
+          this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
+        );
+      }
+    });
 
     this.candlesRestService.loadData({
       symbol,
       interval,
     });
 
-    const success$ = this.status$.pipe(
-      filter((status) => status === 'success'),
-      takeUntil(stop$)
-    );
-
-    combineLatest([
-      this.currentInterval$,
-      this.websocketService.openOnce$,
-      success$,
-    ])
+    combineLatest([this.websocketService.openOnce$, this.successUntil$])
       .pipe(
-        tap(([previousCandleInterval]) => {
-          if (unsubscribePrevious) {
-            this.candlesWebsocketService.unsubscribeFromWebsocket(
-              {
-                interval: previousCandleInterval,
-                symbol,
-              },
-              this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
-            );
-          }
-        }),
         mergeMap(() =>
           timer(unsubscribePrevious ? WEBSOCKET_SUBSCRIPTION_DELAY : 0)
         )
       )
       .subscribe(() => {
-        stop$.next();
-
-        this.store$.dispatch(candlesActions.setInterval({ interval }));
-
         this.candlesWebsocketService.subscribeToWebsocket(
           {
             interval,
@@ -137,6 +135,7 @@ export class CandlesService {
   public onIntervalChange(interval: CandleInterval) {
     this.globalService.globalSymbolOnce$.subscribe((symbol) => {
       this.loadDataAndSubscribe({ interval, symbol }, true);
+      this.store$.dispatch(candlesActions.setInterval({ interval }));
     });
   }
 

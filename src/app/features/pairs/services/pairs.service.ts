@@ -116,52 +116,9 @@ export class PairsService {
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesRestService.loadData>[0], 'symbol'>) {
-    const stop$ = new Subject<void>();
-
-    combineLatest([
-      this.globalService.globalSymbolOnce$,
-      this.currentCandlesInterval$,
-    ])
-      .pipe(
-        tap(([globalSymbol, interval]) => {
-          // Unsubscribe from global symbol first
-          this.candlesWebsocketService.unsubscribeFromWebsocket(
-            {
-              symbol: globalSymbol,
-              interval,
-            },
-            this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
-          );
-
-          this.candlesRestService.loadData({
-            interval,
-            symbol,
-          });
-        }),
-        mergeMap(([_globalSymbol, interval]) => {
-          const success$ = this.candlesService.status$.pipe(
-            filter((status) => status === 'success'),
-            takeUntil(stop$)
-          );
-
-          return combineLatest([
-            success$,
-            this.websocketService.openOnce$,
-            this.delay$,
-          ]).pipe(map(() => interval));
-        })
-      )
-      .subscribe((interval) => {
-        stop$.next();
-
-        this.candlesWebsocketService.subscribeToWebsocket(
-          {
-            symbol,
-            interval,
-          },
-          this.candlesWebsocketService.websocketSubscriptionId.subscribe
-        );
-      });
+    this.currentCandlesInterval$.subscribe((interval) => {
+      this.candlesService.loadDataAndSubscribe({ symbol, interval }, true);
+    });
   }
 
   public handleOrderBookOnRowClick({

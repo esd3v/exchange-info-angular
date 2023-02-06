@@ -180,7 +180,7 @@ export class ChartComponent implements OnInit {
     const dates$ = this.store$.select(candlesSelectors.dates);
     const volumes$ = this.store$.select(candlesSelectors.volumes);
 
-    this.candlesService.currentInterval$.subscribe((data) => {
+    this.candlesService.intervalCurrent$.subscribe((data) => {
       this.interval = data;
     });
 
