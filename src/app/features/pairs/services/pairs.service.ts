@@ -20,9 +20,7 @@ import { Row } from 'src/app/shared/types/row';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandlesRestService } from '../../candles/services/candles-rest.service';
-import { CandlesWebsocketService } from '../../candles/services/candles-websocket.service';
 import { CandlesService } from '../../candles/services/candles.service';
-import { candlesSelectors } from '../../candles/store';
 import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
 import { OrderBookService } from '../../order-book/services/order-book.service';
@@ -36,10 +34,7 @@ export class PairsService {
   public pageSymbols: string[] = [];
 
   private tradesStatus$ = this.store$.select(tradesSelectors.status);
-  private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
-
-  private currentCandlesInterval$ = this.candlesInterval$.pipe(first());
 
   // Exclude globalSymbol because we already subscribed to it
   private pageSymbolsWithoutGlobalSymbol$ =
@@ -115,7 +110,7 @@ export class PairsService {
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesRestService.loadData>[0], 'symbol'>) {
-    this.currentCandlesInterval$.subscribe((interval) => {
+    this.candlesService.intervalCurrent$.subscribe((interval) => {
       this.candlesService.loadDataAndSubscribe({ symbol, interval }, true);
     });
   }

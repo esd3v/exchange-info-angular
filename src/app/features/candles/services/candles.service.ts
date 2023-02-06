@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, mergeMap, take, timer } from 'rxjs';
+import { combineLatest, filter, first, map, mergeMap, take, timer } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
@@ -30,6 +30,12 @@ export class CandlesService {
     filter((status) => status === 'success'),
     first() // Order shouldn't be changed
   );
+
+  public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
+
+  public ohlc$ = this.store$.select(candlesSelectors.ohlc);
+  public dates$ = this.store$.select(candlesSelectors.dates);
+  public volumes$ = this.store$.select(candlesSelectors.volumes);
 
   public constructor(
     private globalService: GlobalService,
