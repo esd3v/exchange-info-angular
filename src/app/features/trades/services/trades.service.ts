@@ -33,16 +33,18 @@ export class TradesService {
 
     this.tradesRestService.loadData({ symbol });
 
-    combineLatest([success$, this.websocketService.openOnce$]).subscribe(() => {
-      stop$.next();
+    combineLatest([success$, this.websocketService.openCurrent$]).subscribe(
+      () => {
+        stop$.next();
 
-      this.tradesWebsocketService.subscribeToWebsocket(
-        {
-          symbol,
-        },
-        this.tradesWebsocketService.websocketSubscriptionId.subscribe
-      );
-    });
+        this.tradesWebsocketService.subscribeToWebsocket(
+          {
+            symbol,
+          },
+          this.tradesWebsocketService.websocketSubscriptionId.subscribe
+        );
+      }
+    );
   }
 
   public onWebsocketOpen() {

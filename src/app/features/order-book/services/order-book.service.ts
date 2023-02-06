@@ -33,16 +33,18 @@ export class OrderBookService {
 
     this.orderBookRestService.loadData({ symbol });
 
-    combineLatest([success$, this.websocketService.openOnce$]).subscribe(() => {
-      stop$.next();
+    combineLatest([success$, this.websocketService.openCurrent$]).subscribe(
+      () => {
+        stop$.next();
 
-      this.orderBookWebsocketService.subscribeToWebsocket(
-        {
-          symbol,
-        },
-        this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-      );
-    });
+        this.orderBookWebsocketService.subscribeToWebsocket(
+          {
+            symbol,
+          },
+          this.orderBookWebsocketService.websocketSubscriptionId.subscribe
+        );
+      }
+    );
   }
 
   public onWebsocketOpen() {

@@ -33,17 +33,17 @@ export class WebsocketService implements OnDestroy {
 
   // Don't replace with this.open$.pipe(first())
   // because first() should come first
-  public openOnce$ = this.status$.pipe(
+  public openCurrent$ = this.status$.pipe(
     first(),
     filter((status) => status === 'open')
   );
 
-  public closedOrNullOnce$ = this.status$.pipe(
+  public closedOrNullCurrent$ = this.status$.pipe(
     first(),
     filter((status) => status === 'closed' || status === null)
   );
 
-  public reasonOnce$ = this.reason$.pipe(first());
+  public reasonCurrent$ = this.reason$.pipe(first());
 
   public get messages$() {
     return this._messages$;

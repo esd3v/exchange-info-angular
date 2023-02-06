@@ -33,7 +33,7 @@ export class TickerService {
 
     combineLatest([
       this.successCurrent$,
-      this.websocketService.openOnce$,
+      this.websocketService.openCurrent$,
     ]).subscribe(() => {
       this.tickerWebsocketService.subscribeToWebsocket(
         {

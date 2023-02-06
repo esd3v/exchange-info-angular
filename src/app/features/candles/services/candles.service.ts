@@ -1,16 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import {
-  combineLatest,
-  filter,
-  first,
-  mergeMap,
-  Subject,
-  take,
-  takeUntil,
-  tap,
-  timer,
-} from 'rxjs';
+import { combineLatest, filter, first, mergeMap, take, timer } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
@@ -18,7 +8,6 @@ import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { candlesActions, candlesSelectors } from '../store';
 import { Candle } from '../types/candle';
 import { CandleInterval } from '../types/candle-interval';
-import { CandlesGetParams } from '../types/candles-get-params';
 import { WebsocketCandle } from '../types/websocket-candle';
 import { CandlesRestService } from './candles-rest.service';
 import { CandlesWebsocketService } from './candles-websocket.service';
@@ -65,7 +54,7 @@ export class CandlesService {
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.websocketService.reasonOnce$,
+            this.websocketService.reasonCurrent$,
             this.globalService.globalSymbolCurrent$,
             this.intervalCurrent$,
             // Check if data is CURRENTLY loaded
@@ -97,7 +86,7 @@ export class CandlesService {
     combineLatest([
       this.intervalCurrent$,
       this.globalService.globalSymbolCurrent$,
-      this.websocketService.openOnce$,
+      this.websocketService.openCurrent$,
     ]).subscribe(([currentInterval, globalSymbol]) => {
       if (unsubscribePrevious) {
         this.candlesWebsocketService.unsubscribeFromWebsocket(
@@ -115,7 +104,7 @@ export class CandlesService {
       interval,
     });
 
-    combineLatest([this.websocketService.openOnce$, this.successUntil$])
+    combineLatest([this.websocketService.openCurrent$, this.successUntil$])
       .pipe(
         mergeMap(() =>
           timer(unsubscribePrevious ? WEBSOCKET_SUBSCRIPTION_DELAY : 0)

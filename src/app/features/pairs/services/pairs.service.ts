@@ -102,7 +102,7 @@ export class PairsService {
   }
 
   public unsubscribeFromPageSymbols() {
-    this.websocketService.openOnce$
+    this.websocketService.openCurrent$
       .pipe(mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$))
       .subscribe((symbols) => {
         this.tickerWebsocketService.unsubscribeFromWebsocket(
@@ -128,7 +128,7 @@ export class PairsService {
 
     combineLatest([
       this.globalService.globalSymbolCurrent$,
-      this.websocketService.openOnce$,
+      this.websocketService.openCurrent$,
     ])
       .pipe(
         tap(([globalSymbol]) => {
@@ -170,7 +170,7 @@ export class PairsService {
 
     combineLatest([
       this.globalService.globalSymbolCurrent$,
-      this.websocketService.openOnce$,
+      this.websocketService.openCurrent$,
     ])
       .pipe(
         tap(([globalSymbol]) => {

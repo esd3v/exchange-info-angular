@@ -22,11 +22,11 @@ export class WebsocketSwitchComponent {
 
   public handleChange({ checked }: MatSlideToggleChange) {
     if (checked) {
-      this.websocketService.closedOrNullOnce$.subscribe(() => {
+      this.websocketService.closedOrNullCurrent$.subscribe(() => {
         this.websocketService.connect('switch');
       });
     } else {
-      this.websocketService.openOnce$.subscribe(() => {
+      this.websocketService.openCurrent$.subscribe(() => {
         this.websocketService.close();
       });
     }
