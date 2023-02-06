@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import {
   BehaviorSubject,
   combineLatest,
@@ -7,8 +6,6 @@ import {
   first,
   map,
   mergeMap,
-  Subject,
-  takeUntil,
   tap,
   timer,
 } from 'rxjs';
@@ -17,7 +14,6 @@ import { getCellByColumnId, parsePair } from 'src/app/shared/helpers';
 import { GlobalService } from 'src/app/shared/services/global.service';
 import { Column } from 'src/app/shared/types/column';
 import { Row } from 'src/app/shared/types/row';
-import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandlesRestService } from '../../candles/services/candles-rest.service';
 import { CandlesService } from '../../candles/services/candles.service';
@@ -27,13 +23,12 @@ import { OrderBookService } from '../../order-book/services/order-book.service';
 import { TickerWebsocketService } from '../../tickers/services/ticker-websocket.service';
 import { TradesRestService } from '../../trades/services/trades-rest.service';
 import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
-import { tradesSelectors } from '../../trades/store';
+import { TradesService } from '../../trades/services/trades.service';
 
 @Injectable({ providedIn: 'root' })
 export class PairsService {
   public pageSymbols: string[] = [];
 
-  private tradesStatus$ = this.store$.select(tradesSelectors.status);
   private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
 
   // Exclude globalSymbol because we already subscribed to it
@@ -45,9 +40,9 @@ export class PairsService {
     );
 
   public constructor(
-    private store$: Store<AppState>,
     private globalService: GlobalService,
     private websocketService: WebsocketService,
+    private tradesService: TradesService,
     private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService,
     private candlesService: CandlesService,
@@ -154,8 +149,6 @@ export class PairsService {
   public handleTradesOnRowClick({
     symbol,
   }: Parameters<typeof this.tradesRestService.loadData>[0]) {
-    const stop$ = new Subject<void>();
-
     combineLatest([
       this.globalService.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
@@ -173,17 +166,10 @@ export class PairsService {
           this.tradesRestService.loadData({ symbol });
         }),
         mergeMap(() => {
-          const success$ = this.tradesStatus$.pipe(
-            filter((status) => status === 'success'),
-            takeUntil(stop$)
-          );
-
-          return combineLatest([success$, this.delay$]);
+          return combineLatest([this.tradesService.successUntil$, this.delay$]);
         })
       )
       .subscribe(() => {
-        stop$.next();
-
         this.tradesWebsocketService.subscribeToWebsocket(
           {
             symbol,

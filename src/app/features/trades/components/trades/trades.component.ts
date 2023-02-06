@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Store } from '@ngrx/store';
 import { map, Observable } from 'rxjs';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import {
@@ -8,11 +7,10 @@ import {
   getFormattedDate,
   multiplyDecimal,
 } from 'src/app/shared/helpers';
+import { GlobalService } from 'src/app/shared/services/global.service';
 import { Row } from 'src/app/shared/types/row';
-import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
+import { TradesService } from '../../services/trades.service';
 import { TradesColumn } from '../../types/trades-column';
-import { tradesSelectors } from '../../store';
 
 @Component({
   selector: 'app-trades',
@@ -27,9 +25,8 @@ export class TradesComponent implements OnInit {
     { value: '' },
   ]);
 
-  public columns$: Observable<TradesColumn[]> = this.store$
-    .select(globalSelectors.currency)
-    .pipe(
+  public columns$: Observable<TradesColumn[]> =
+    this.globalService.currency$.pipe(
       map(({ base, quote }) => {
         return [
           {
@@ -62,26 +59,19 @@ export class TradesComponent implements OnInit {
 
   public columnLabels: string[] = [];
 
-  private tradesStatus$ = this.store$.select(tradesSelectors.status);
+  public loading$ = this.tradesService.isLoading$;
 
-  public loading$ = this.tradesStatus$.pipe(
-    map((status) => status === 'loading')
-  );
-
-  public constructor(private store$: Store<AppState>) {}
+  public constructor(
+    private globalService: GlobalService,
+    private tradesService: TradesService
+  ) {}
 
   public trackRow(_index: number, _item: Row) {
     return _index;
   }
 
-  private getTrades$() {
-    const trades$ = this.store$.select(tradesSelectors.data);
-
-    return trades$;
-  }
-
   private createRows$(): Observable<Row[]> {
-    return this.getTrades$().pipe(
+    return this.tradesService.trades$.pipe(
       map((data) => {
         return data.map((item) => {
           const { isBuyerMaker, price, qty, time } = item;

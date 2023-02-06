@@ -71,7 +71,7 @@ export class TickerService {
           return combineLatest([
             this.globalService.globalSymbolCurrent$,
             this.status$.pipe(
-              // first() comes first to check if data is CURRENTLY loaded
+              // Check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened
               first(),
               filter((status) => status === 'success')
