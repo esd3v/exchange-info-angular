@@ -66,7 +66,7 @@ export class CandlesService {
         mergeMap(() => {
           return combineLatest([
             this.websocketService.reasonOnce$,
-            this.globalService.globalSymbolOnce$,
+            this.globalService.globalSymbolCurrent$,
             this.intervalCurrent$,
             // Check if data is CURRENTLY loaded
             // to prevent double loading when data loaded AFTER ws opened
@@ -96,7 +96,7 @@ export class CandlesService {
   ) {
     combineLatest([
       this.intervalCurrent$,
-      this.globalService.globalSymbolOnce$,
+      this.globalService.globalSymbolCurrent$,
       this.websocketService.openOnce$,
     ]).subscribe(([currentInterval, globalSymbol]) => {
       if (unsubscribePrevious) {
@@ -133,7 +133,7 @@ export class CandlesService {
   }
 
   public onIntervalChange(interval: CandleInterval) {
-    this.globalService.globalSymbolOnce$.subscribe((symbol) => {
+    this.globalService.globalSymbolCurrent$.subscribe((symbol) => {
       this.loadDataAndSubscribe({ interval, symbol }, true);
       this.store$.dispatch(candlesActions.setInterval({ interval }));
     });

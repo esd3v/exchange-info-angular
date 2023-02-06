@@ -56,7 +56,7 @@ export class OrderBookService {
               first(),
               filter((status) => status === 'success')
             ),
-            this.globalService.globalSymbolOnce$,
+            this.globalService.globalSymbolCurrent$,
           ]);
         })
       )

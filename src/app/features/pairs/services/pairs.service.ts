@@ -44,7 +44,7 @@ export class PairsService {
 
   // Exclude globalSymbol because we already subscribed to it
   private pageSymbolsWithoutGlobalSymbol$ =
-    this.globalService.globalSymbolOnce$.pipe(
+    this.globalService.globalSymbolCurrent$.pipe(
       map((globalSymbol) =>
         this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
       )
@@ -127,7 +127,7 @@ export class PairsService {
     const stop$ = new Subject<void>();
 
     combineLatest([
-      this.globalService.globalSymbolOnce$,
+      this.globalService.globalSymbolCurrent$,
       this.websocketService.openOnce$,
     ])
       .pipe(
@@ -169,7 +169,7 @@ export class PairsService {
     const stop$ = new Subject<void>();
 
     combineLatest([
-      this.globalService.globalSymbolOnce$,
+      this.globalService.globalSymbolCurrent$,
       this.websocketService.openOnce$,
     ])
       .pipe(

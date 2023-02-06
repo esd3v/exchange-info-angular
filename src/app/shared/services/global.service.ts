@@ -16,10 +16,14 @@ export class GlobalService {
     globalSelectors.globalPairUnderscore
   );
 
-  public globalPairOnce$ = this.globalPair$.pipe(first(), filter(Boolean));
-  public globalSymbolOnce$ = this.globalSymbol$.pipe(first(), filter(Boolean));
+  public globalPairCurrent$ = this.globalPair$.pipe(first(), filter(Boolean));
 
-  public globalPairUnderscoreOnce$ = this.globalPairUnderscore$.pipe(
+  public globalSymbolCurrent$ = this.globalSymbol$.pipe(
+    first(),
+    filter(Boolean)
+  );
+
+  public globalPairUnderscoreCurrent$ = this.globalPairUnderscore$.pipe(
     first(),
     filter(Boolean)
   );

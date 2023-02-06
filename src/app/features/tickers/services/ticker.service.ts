@@ -18,7 +18,7 @@ export class TickerService {
 
   public success$ = this.status$.pipe(filter((status) => status === 'success'));
 
-  public successOnce$ = this.success$.pipe(first());
+  public successCurrent$ = this.success$.pipe(first());
 
   public constructor(
     private globalService: GlobalService,
@@ -32,7 +32,7 @@ export class TickerService {
     this.tickerRestService.loadData();
 
     combineLatest([
-      this.successOnce$,
+      this.successCurrent$,
       this.websocketService.openOnce$,
     ]).subscribe(() => {
       this.tickerWebsocketService.subscribeToWebsocket(
@@ -51,7 +51,7 @@ export class TickerService {
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.globalService.globalSymbolOnce$,
+            this.globalService.globalSymbolCurrent$,
             this.status$.pipe(
               // first() comes first to check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened

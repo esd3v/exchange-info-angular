@@ -25,7 +25,7 @@ export class HomerService {
   ) {}
 
   public navigateToDefaultPair() {
-    this.globalService.globalPairUnderscoreOnce$.subscribe((pair) => {
+    this.globalService.globalPairUnderscoreCurrent$.subscribe((pair) => {
       this.router.navigate([pair]);
     });
   }
