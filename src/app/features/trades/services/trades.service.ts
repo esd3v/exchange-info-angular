@@ -12,20 +12,8 @@ import { TradesWebsocketService } from './trades-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class TradesService {
-  private websocketStatus$ = this.websocketService.status$;
   private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
   private tradesStatus$ = this.store$.select(tradesSelectors.status);
-
-  private websocketOpened$ = this.websocketStatus$.pipe(
-    filter((status) => status === 'open')
-  );
-
-  // Don't replace with this.websocketOpened$.pipe(first())
-  // because first() should come first
-  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
-    first(),
-    filter((status) => status === 'open')
-  );
 
   public constructor(
     private store$: Store<AppState>,
@@ -45,7 +33,7 @@ export class TradesService {
 
     this.tradesRestService.loadData({ symbol });
 
-    combineLatest([success$, this.currentWebsocketOpened$]).subscribe(() => {
+    combineLatest([success$, this.websocketService.openOnce$]).subscribe(() => {
       stop$.next();
 
       this.tradesWebsocketService.subscribeToWebsocket(
@@ -58,7 +46,7 @@ export class TradesService {
   }
 
   public onWebsocketOpen() {
-    this.websocketOpened$
+    this.websocketService.open$
       .pipe(
         mergeMap(() => {
           return combineLatest([

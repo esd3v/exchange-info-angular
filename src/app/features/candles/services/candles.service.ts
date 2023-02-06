@@ -28,19 +28,6 @@ import { CandlesWebsocketService } from './candles-websocket.service';
 })
 export class CandlesService {
   private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
-  private websocketStatus$ = this.websocketService.status$;
-  private websocketReason$ = this.websocketService.reason$;
-
-  private websocketOpened$ = this.websocketStatus$.pipe(
-    filter((status) => status === 'open')
-  );
-
-  // Don't replace with this.websocketOpened$.pipe(first())
-  // because first() should come first
-  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
-    first(),
-    filter((status) => status === 'open')
-  );
 
   public interval$ = this.store$.select(candlesSelectors.interval);
   public currentInterval$ = this.interval$.pipe(first());
@@ -64,11 +51,11 @@ export class CandlesService {
   // Runs every time when websocket is opened
   // Then subscribe if data is loaded at this moment
   public onWebsocketOpen() {
-    this.websocketOpened$
+    this.websocketService.open$
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.websocketReason$.pipe(first()),
+            this.websocketService.reasonOnce$,
             this.globalSymbol$.pipe(first(), filter(Boolean)),
             this.currentInterval$,
             this.status$.pipe(
@@ -114,7 +101,7 @@ export class CandlesService {
 
     combineLatest([
       this.currentInterval$,
-      this.currentWebsocketOpened$,
+      this.websocketService.openOnce$,
       success$,
     ])
       .pipe(

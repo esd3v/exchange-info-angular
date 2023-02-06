@@ -1,5 +1,12 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, filter, interval, Subject, takeUntil } from 'rxjs';
+import {
+  BehaviorSubject,
+  filter,
+  first,
+  interval,
+  Subject,
+  takeUntil,
+} from 'rxjs';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
 type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing' | null;
@@ -21,6 +28,22 @@ export class WebsocketService implements OnDestroy {
 
   public reason$ = new BehaviorSubject<Reason>(null);
   public status$ = new BehaviorSubject<WebsocketStatus>(null);
+
+  public open$ = this.status$.pipe(filter((status) => status === 'open'));
+
+  // Don't replace with this.open$.pipe(first())
+  // because first() should come first
+  public openOnce$ = this.status$.pipe(
+    first(),
+    filter((status) => status === 'open')
+  );
+
+  public closedOrNullOnce$ = this.status$.pipe(
+    first(),
+    filter((status) => status === 'closed' || status === null)
+  );
+
+  public reasonOnce$ = this.reason$.pipe(first());
 
   public get messages$() {
     return this._messages$;

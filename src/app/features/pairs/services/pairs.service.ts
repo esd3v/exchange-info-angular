@@ -33,7 +33,6 @@ import { tradesSelectors } from '../../trades/store';
 
 @Injectable({ providedIn: 'root' })
 export class PairsService {
-  private websocketStatus$ = this.websocketService.status$;
   public pageSymbols: string[] = [];
 
   private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
@@ -54,17 +53,6 @@ export class PairsService {
     map((globalSymbol) =>
       this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
     )
-  );
-
-  private websocketOpened$ = this.websocketStatus$.pipe(
-    filter((status) => status === 'open')
-  );
-
-  // Don't replace with this.websocketOpened$.pipe(first())
-  // because first() should come first
-  private currentWebsocketOpened$ = this.websocketStatus$.pipe(
-    first(),
-    filter((status) => status === 'open')
   );
 
   public constructor(
@@ -95,7 +83,7 @@ export class PairsService {
   }
 
   public onWebsocketOpen() {
-    this.websocketOpened$
+    this.websocketService.open$
       .pipe(
         mergeMap(() =>
           this.pageSymbolsWithoutGlobalSymbol$.pipe(
@@ -118,7 +106,7 @@ export class PairsService {
   }
 
   public unsubscribeFromPageSymbols() {
-    this.currentWebsocketOpened$
+    this.websocketService.openOnce$
       .pipe(mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$))
       .subscribe((symbols) => {
         this.tickerWebsocketService.unsubscribeFromWebsocket(
@@ -159,7 +147,7 @@ export class PairsService {
 
           return combineLatest([
             success$,
-            this.currentWebsocketOpened$,
+            this.websocketService.openOnce$,
             this.delay$,
           ]).pipe(map(() => interval));
         })
@@ -182,7 +170,7 @@ export class PairsService {
   }: Parameters<typeof this.orderBookRestService.loadData>[0]) {
     const stop$ = new Subject<void>();
 
-    combineLatest([this.currentGlobalSymbol$, this.currentWebsocketOpened$])
+    combineLatest([this.currentGlobalSymbol$, this.websocketService.openOnce$])
       .pipe(
         tap(([globalSymbol]) => {
           // Unsubscribe from global symbol first
@@ -221,7 +209,7 @@ export class PairsService {
   }: Parameters<typeof this.tradesRestService.loadData>[0]) {
     const stop$ = new Subject<void>();
 
-    combineLatest([this.currentGlobalSymbol$, this.currentWebsocketOpened$])
+    combineLatest([this.currentGlobalSymbol$, this.websocketService.openOnce$])
       .pipe(
         tap(([globalSymbol]) => {
           // Unsubscribe from global symbol first
