@@ -25,7 +25,7 @@ import { CandlesService } from '../../candles/services/candles.service';
 import { candlesSelectors } from '../../candles/store';
 import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
-import { orderBookSelectors } from '../../order-book/store';
+import { OrderBookService } from '../../order-book/services/order-book.service';
 import { TickerWebsocketService } from '../../tickers/services/ticker-websocket.service';
 import { TradesRestService } from '../../trades/services/trades-rest.service';
 import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
@@ -35,7 +35,6 @@ import { tradesSelectors } from '../../trades/store';
 export class PairsService {
   public pageSymbols: string[] = [];
 
-  private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
   private tradesStatus$ = this.store$.select(tradesSelectors.status);
   private candlesInterval$ = this.store$.select(candlesSelectors.interval);
   private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
@@ -58,7 +57,7 @@ export class PairsService {
     private tradesWebsocketService: TradesWebsocketService,
     private candlesService: CandlesService,
     private candlesRestService: CandlesRestService,
-    private candlesWebsocketService: CandlesWebsocketService,
+    private orderBookService: OrderBookService,
     private orderBookRestService: OrderBookRestService,
     private orderBookWebsocketService: OrderBookWebsocketService,
     private tickerWebsocketService: TickerWebsocketService
@@ -124,8 +123,6 @@ export class PairsService {
   public handleOrderBookOnRowClick({
     symbol,
   }: Parameters<typeof this.orderBookRestService.loadData>[0]) {
-    const stop$ = new Subject<void>();
-
     combineLatest([
       this.globalService.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
@@ -143,17 +140,13 @@ export class PairsService {
           this.orderBookRestService.loadData({ symbol });
         }),
         mergeMap(() => {
-          const success$ = this.orderBookStatus$.pipe(
-            filter((status) => status === 'success'),
-            takeUntil(stop$)
-          );
-
-          return combineLatest([success$, this.delay$]);
+          return combineLatest([
+            this.orderBookService.successUntil$,
+            this.delay$,
+          ]);
         })
       )
       .subscribe(() => {
-        stop$.next();
-
         this.orderBookWebsocketService.subscribeToWebsocket(
           {
             symbol,

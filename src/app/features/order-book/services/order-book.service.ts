@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
+import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
 import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -12,7 +12,22 @@ import { OrderBookWebsocketService } from './order-book-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderBookService {
-  private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
+  private status$ = this.store$.select(orderBookSelectors.status);
+
+  public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
+
+  public successCurrent$ = this.status$.pipe(
+    first(), // Order shouldn't be changed
+    filter((status) => status === 'success')
+  );
+
+  public successUntil$ = this.status$.pipe(
+    filter((status) => status === 'success'),
+    first() // Order shouldn't be changed
+  );
+
+  public asks$ = this.store$.select(orderBookSelectors.asks);
+  public bids$ = this.store$.select(orderBookSelectors.bids);
 
   public constructor(
     private store$: Store<AppState>,
@@ -25,26 +40,19 @@ export class OrderBookService {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof orderBookActions.load>[0], 'symbol'>) {
-    const stop$ = new Subject<void>();
-
-    const success$ = this.orderBookStatus$.pipe(
-      filter((status) => status === 'success')
-    );
-
     this.orderBookRestService.loadData({ symbol });
 
-    combineLatest([success$, this.websocketService.openCurrent$]).subscribe(
-      () => {
-        stop$.next();
-
-        this.orderBookWebsocketService.subscribeToWebsocket(
-          {
-            symbol,
-          },
-          this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-        );
-      }
-    );
+    combineLatest([
+      this.successUntil$,
+      this.websocketService.openCurrent$,
+    ]).subscribe(() => {
+      this.orderBookWebsocketService.subscribeToWebsocket(
+        {
+          symbol,
+        },
+        this.orderBookWebsocketService.websocketSubscriptionId.subscribe
+      );
+    });
   }
 
   public onWebsocketOpen() {
@@ -52,12 +60,9 @@ export class OrderBookService {
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.orderBookStatus$.pipe(
-              // first() comes first to check if data is CURRENTLY loaded
-              // to prevent double loading when data loaded AFTER ws opened
-              first(),
-              filter((status) => status === 'success')
-            ),
+            // Check if data is CURRENTLY loaded
+            // to prevent double loading when data loaded AFTER ws opened
+            this.successCurrent$,
             this.globalService.globalSymbolCurrent$,
           ]);
         })

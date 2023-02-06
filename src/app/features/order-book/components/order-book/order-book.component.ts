@@ -6,15 +6,13 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Store } from '@ngrx/store';
 import { combineLatest, map, Observable } from 'rxjs';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
 import { GlobalService } from 'src/app/shared/services/global.service';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
-import { AppState } from 'src/app/store';
-import { orderBookSelectors } from '../../store';
+import { OrderBookService } from '../../services/order-book.service';
 import { OrderBookColumn } from '../../types/order-book-column';
 import { OrderBookProps } from './order-book.props';
 
@@ -64,14 +62,10 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public columnLabels: string[] = [];
 
-  private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
-
-  public loading$ = this.orderBookStatus$.pipe(
-    map((status) => status === 'loading')
-  );
+  public loading$ = this.orderBookService.isLoading$;
 
   public constructor(
-    private store$: Store<AppState>,
+    private orderBookService: OrderBookService,
     private globalService: GlobalService
   ) {}
 
@@ -84,12 +78,10 @@ export class OrderBookComponent implements OnInit, OnChanges {
   }
 
   private getOrderBook$() {
-    const asks$ = this.store$.select(orderBookSelectors.asks);
-    const bids$ = this.store$.select(orderBookSelectors.bids);
-
-    return combineLatest([asks$, bids$]).pipe(
-      map(([asks, bids]) => (this.type === 'asks' ? asks : bids))
-    );
+    return combineLatest([
+      this.orderBookService.asks$,
+      this.orderBookService.bids$,
+    ]).pipe(map(([asks, bids]) => (this.type === 'asks' ? asks : bids)));
   }
 
   private createRows$(): Observable<Row[]> {
