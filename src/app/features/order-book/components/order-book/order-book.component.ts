@@ -8,15 +8,15 @@ import {
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
 import { combineLatest, map, Observable } from 'rxjs';
-import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
-import { OrderBookColumn } from '../../types/order-book-column';
-import { orderBookSelectors } from '../../store';
-import { OrderBookProps } from './order-book.props';
-import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
+import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
+import { GlobalService } from 'src/app/shared/services/global.service';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
+import { AppState } from 'src/app/store';
+import { orderBookSelectors } from '../../store';
+import { OrderBookColumn } from '../../types/order-book-column';
+import { OrderBookProps } from './order-book.props';
 
 @Component({
   selector: 'app-order-book',
@@ -35,9 +35,8 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public title = this.getTitle(this.type);
 
-  public columns$: Observable<OrderBookColumn[]> = this.store$
-    .select(globalSelectors.currency)
-    .pipe(
+  public columns$: Observable<OrderBookColumn[]> =
+    this.globalService.currency$.pipe(
       map(({ base, quote }) => {
         return [
           {
@@ -71,7 +70,10 @@ export class OrderBookComponent implements OnInit, OnChanges {
     map((status) => status === 'loading')
   );
 
-  public constructor(private store$: Store<AppState>) {}
+  public constructor(
+    private store$: Store<AppState>,
+    private globalService: GlobalService
+  ) {}
 
   public trackRow(_index: number, _item: Row) {
     return _index;

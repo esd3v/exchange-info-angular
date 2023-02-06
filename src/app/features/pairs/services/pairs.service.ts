@@ -14,10 +14,10 @@ import {
 } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { getCellByColumnId, parsePair } from 'src/app/shared/helpers';
+import { GlobalService } from 'src/app/shared/services/global.service';
 import { Column } from 'src/app/shared/types/column';
 import { Row } from 'src/app/shared/types/row';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandlesRestService } from '../../candles/services/candles-rest.service';
 import { CandlesWebsocketService } from '../../candles/services/candles-websocket.service';
@@ -38,25 +38,21 @@ export class PairsService {
   private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
   private tradesStatus$ = this.store$.select(tradesSelectors.status);
   private candlesInterval$ = this.store$.select(candlesSelectors.interval);
-  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
   private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
 
   private currentCandlesInterval$ = this.candlesInterval$.pipe(first());
 
-  private currentGlobalSymbol$ = this.globalSymbol$.pipe(
-    first(),
-    filter(Boolean)
-  );
-
   // Exclude globalSymbol because we already subscribed to it
-  private pageSymbolsWithoutGlobalSymbol$ = this.currentGlobalSymbol$.pipe(
-    map((globalSymbol) =>
-      this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
-    )
-  );
+  private pageSymbolsWithoutGlobalSymbol$ =
+    this.globalService.globalSymbolOnce$.pipe(
+      map((globalSymbol) =>
+        this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
+      )
+    );
 
   public constructor(
     private store$: Store<AppState>,
+    private globalService: GlobalService,
     private websocketService: WebsocketService,
     private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService,
@@ -122,7 +118,10 @@ export class PairsService {
   }: Pick<Parameters<typeof this.candlesRestService.loadData>[0], 'symbol'>) {
     const stop$ = new Subject<void>();
 
-    combineLatest([this.currentGlobalSymbol$, this.currentCandlesInterval$])
+    combineLatest([
+      this.globalService.globalSymbolOnce$,
+      this.currentCandlesInterval$,
+    ])
       .pipe(
         tap(([globalSymbol, interval]) => {
           // Unsubscribe from global symbol first
@@ -170,7 +169,10 @@ export class PairsService {
   }: Parameters<typeof this.orderBookRestService.loadData>[0]) {
     const stop$ = new Subject<void>();
 
-    combineLatest([this.currentGlobalSymbol$, this.websocketService.openOnce$])
+    combineLatest([
+      this.globalService.globalSymbolOnce$,
+      this.websocketService.openOnce$,
+    ])
       .pipe(
         tap(([globalSymbol]) => {
           // Unsubscribe from global symbol first
@@ -209,7 +211,10 @@ export class PairsService {
   }: Parameters<typeof this.tradesRestService.loadData>[0]) {
     const stop$ = new Subject<void>();
 
-    combineLatest([this.currentGlobalSymbol$, this.websocketService.openOnce$])
+    combineLatest([
+      this.globalService.globalSymbolOnce$,
+      this.websocketService.openOnce$,
+    ])
       .pipe(
         tap(([globalSymbol]) => {
           // Unsubscribe from global symbol first

@@ -14,8 +14,8 @@ import {
   WEBSOCKET_START_DELAY,
 } from './shared/config';
 import { formatDecimal } from './shared/helpers';
+import { GlobalService } from './shared/services/global.service';
 import { AppState } from './store';
-import { globalSelectors } from './store/global';
 import { WebsocketSubscribeService } from './websocket/services/websocket-subscribe.service';
 import { WebsocketService } from './websocket/services/websocket.service';
 
@@ -25,6 +25,7 @@ import { WebsocketService } from './websocket/services/websocket.service';
 export class AppService {
   public constructor(
     private titleService: Title,
+    private globalService: GlobalService,
     private websocketService: WebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
     private store$: Store<AppState>,
@@ -36,10 +37,9 @@ export class AppService {
   ) {}
 
   public setTitle() {
-    const globalPair$ = this.store$.select(globalSelectors.globalPair);
     const lastPrice$ = this.store$.select(tickersSelectors.lastPrice);
 
-    combineLatest([globalPair$, lastPrice$]).subscribe(
+    combineLatest([this.globalService.globalPair$, lastPrice$]).subscribe(
       ([globalPair, lastPrice]) => {
         const title = lastPrice
           ? globalPair

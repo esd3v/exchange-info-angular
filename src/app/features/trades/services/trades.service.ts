@@ -2,21 +2,21 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketTrades } from '../types/websocket-trades';
 import { tradesActions, tradesSelectors } from '../store';
 import { TradesEntity } from '../store/trades.state';
 import { TradesRestService } from './trades-rest.service';
 import { TradesWebsocketService } from './trades-websocket.service';
+import { GlobalService } from 'src/app/shared/services/global.service';
 
 @Injectable({ providedIn: 'root' })
 export class TradesService {
-  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
   private tradesStatus$ = this.store$.select(tradesSelectors.status);
 
   public constructor(
     private store$: Store<AppState>,
+    private globalService: GlobalService,
     private websocketService: WebsocketService,
     private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService
@@ -56,7 +56,7 @@ export class TradesService {
               first(),
               filter((status) => status === 'success')
             ),
-            this.globalSymbol$.pipe(first(), filter(Boolean)),
+            this.globalService.globalSymbolOnce$,
           ]);
         })
       )

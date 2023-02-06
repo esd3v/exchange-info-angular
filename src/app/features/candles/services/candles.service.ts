@@ -12,8 +12,8 @@ import {
   timer,
 } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
+import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { candlesActions, candlesSelectors } from '../store';
 import { Candle } from '../types/candle';
@@ -27,13 +27,12 @@ import { CandlesWebsocketService } from './candles-websocket.service';
   providedIn: 'root',
 })
 export class CandlesService {
-  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
-
   public interval$ = this.store$.select(candlesSelectors.interval);
   public currentInterval$ = this.interval$.pipe(first());
   public status$ = this.store$.select(candlesSelectors.status);
 
   public constructor(
+    private globalService: GlobalService,
     private websocketService: WebsocketService,
     private candlesWebsocketService: CandlesWebsocketService,
     private candlesRestService: CandlesRestService,
@@ -56,7 +55,7 @@ export class CandlesService {
         mergeMap(() => {
           return combineLatest([
             this.websocketService.reasonOnce$,
-            this.globalSymbol$.pipe(first(), filter(Boolean)),
+            this.globalService.globalSymbolOnce$,
             this.currentInterval$,
             this.status$.pipe(
               // first() comes first to check if data is CURRENTLY loaded
@@ -136,7 +135,7 @@ export class CandlesService {
   }
 
   public onIntervalChange(interval: CandleInterval) {
-    this.globalSymbol$.pipe(first(), filter(Boolean)).subscribe((symbol) => {
+    this.globalService.globalSymbolOnce$.subscribe((symbol) => {
       this.loadDataAndSubscribe({ interval, symbol }, true);
     });
   }

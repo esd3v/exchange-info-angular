@@ -1,24 +1,27 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
+import { combineLatest, filter, first, mergeMap } from 'rxjs';
+import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
-import { WebsocketTicker } from '../types/websocket-ticker';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { tickersActions, tickersSelectors } from '../store';
 import { TickerEntity } from '../store/tickers.state';
+import { WebsocketTicker } from '../types/websocket-ticker';
 import { TickerRestService } from './ticker-rest.service';
 import { TickerWebsocketService } from './ticker-websocket.service';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TickerService {
-  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
-
   public status$ = this.store$.select(tickersSelectors.status);
 
+  public success$ = this.status$.pipe(filter((status) => status === 'success'));
+
+  public successOnce$ = this.success$.pipe(first());
+
   public constructor(
+    private globalService: GlobalService,
     private tickerRestService: TickerRestService,
     private tickerWebsocketService: TickerWebsocketService,
     private websocketService: WebsocketService,
@@ -26,17 +29,12 @@ export class TickerService {
   ) {}
 
   public onAppInit(symbol: string) {
-    const stop$ = new Subject<void>();
-
-    const success$ = this.status$.pipe(
-      filter((status) => status === 'success')
-    );
-
     this.tickerRestService.loadData();
 
-    combineLatest([success$, this.websocketService.openOnce$]).subscribe(() => {
-      stop$.next();
-
+    combineLatest([
+      this.successOnce$,
+      this.websocketService.openOnce$,
+    ]).subscribe(() => {
       this.tickerWebsocketService.subscribeToWebsocket(
         {
           symbols: [symbol],
@@ -53,7 +51,7 @@ export class TickerService {
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.globalSymbol$.pipe(first(), filter(Boolean)),
+            this.globalService.globalSymbolOnce$,
             this.status$.pipe(
               // first() comes first to check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened

@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, mergeMap, Subject } from 'rxjs';
+import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { orderBookActions, orderBookSelectors } from '../store';
 import { OrderBook } from '../types/order-book';
 import { WebsocketOrderBook } from '../types/websocket-order-book';
-import { orderBookActions, orderBookSelectors } from '../store';
 import { OrderBookRestService } from './order-book-rest.service';
 import { OrderBookWebsocketService } from './order-book-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderBookService {
-  private globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
   private orderBookStatus$ = this.store$.select(orderBookSelectors.status);
 
   public constructor(
     private store$: Store<AppState>,
+    private globalService: GlobalService,
     private websocketService: WebsocketService,
     private orderBookRestService: OrderBookRestService,
     private orderBookWebsocketService: OrderBookWebsocketService
@@ -56,7 +56,7 @@ export class OrderBookService {
               first(),
               filter((status) => status === 'success')
             ),
-            this.globalSymbol$.pipe(first(), filter(Boolean)),
+            this.globalService.globalSymbolOnce$,
           ]);
         })
       )

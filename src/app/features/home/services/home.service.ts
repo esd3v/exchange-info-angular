@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, first, timer } from 'rxjs';
+import { timer } from 'rxjs';
 import { API_START_DELAY } from 'src/app/shared/config';
+import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
 import { CandlesService } from '../../candles/services/candles.service';
 import { ExchangeInfoRestService } from '../../exchange-info/services/exchange-info-rest.service';
 import { OrderBookService } from '../../order-book/services/order-book.service';
@@ -15,6 +15,7 @@ import { TradesService } from '../../trades/services/trades.service';
 export class HomerService {
   public constructor(
     private store$: Store<AppState>,
+    private globalService: GlobalService,
     private router: Router,
     private exchangeInfoRestService: ExchangeInfoRestService,
     private tradesService: TradesService,
@@ -24,12 +25,9 @@ export class HomerService {
   ) {}
 
   public navigateToDefaultPair() {
-    this.store$
-      .select(globalSelectors.globalPairUnderscore)
-      .pipe(first(), filter(Boolean))
-      .subscribe((pair) => {
-        this.router.navigate([pair]);
-      });
+    this.globalService.globalPairUnderscoreOnce$.subscribe((pair) => {
+      this.router.navigate([pair]);
+    });
   }
 
   public initAppData(symbol: string) {
