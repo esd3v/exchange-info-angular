@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { first, filter } from 'rxjs';
+import { globalSelectors } from 'src/app/features/global/store';
 import { AppState } from 'src/app/store';
-import { globalSelectors } from 'src/app/store/global';
 
 @Injectable({
   providedIn: 'root',

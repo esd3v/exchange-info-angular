@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { globalActions } from 'src/app/features/global/store';
 import { parsePair } from 'src/app/shared/helpers';
 import { AppState } from 'src/app/store';
-import { globalActions } from 'src/app/store/global';
 import { HomerService } from '../../services/home.service';
 
 @Component({

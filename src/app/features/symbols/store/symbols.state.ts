@@ -1,5 +1,5 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from '@ngrx/entity';
-import { ExchangeSymbol } from '../../features/exchange-info/types/exchange-symbol';
+import { ExchangeSymbol } from '../../exchange-info/types/exchange-symbol';
 
 export type ExchangeSymbolEntity = Pick<
   ExchangeSymbol,

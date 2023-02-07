@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tap } from 'rxjs';
-import { GlobalService } from 'src/app/shared/services/global.service';
+import { GlobalService } from 'src/app/features/global/services/global.service';
 import { AppState } from 'src/app/store';
 
 @Component({

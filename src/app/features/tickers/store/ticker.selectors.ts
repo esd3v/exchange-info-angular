@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState } from '../../../store';
-import { globalSelectors } from '../../../store/global';
+import { globalSelectors } from '../../global/store';
 import { tickersAdapter } from './tickers.state';
 
 const featureSelector = createFeatureSelector<AppState['tickers']>('tickers');

@@ -22,13 +22,13 @@ import {
   parsePair,
 } from 'src/app/shared/helpers';
 import { AppState } from 'src/app/store';
-import { globalActions } from 'src/app/store/global';
-import { symbolsSelectors } from 'src/app/store/symbols';
-import { ExchangeSymbolEntity } from 'src/app/store/symbols/symbols.state';
+import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { PairColumn } from '../../types/pair-column';
 import { PairsService } from '../../services/pairs.service';
 import { Row } from 'src/app/shared/types/row';
 import { TickerService } from 'src/app/features/tickers/services/ticker.service';
+import { symbolsSelectors } from 'src/app/features/symbols/store';
+import { globalActions } from 'src/app/features/global/store';
 
 @Component({
   selector: 'app-pairs',

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
-import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { GlobalService } from '../../global/services/global.service';
 import { tickersActions, tickersSelectors } from '../store';
 import { TickerEntity } from '../store/tickers.state';
 import { WebsocketTicker } from '../types/websocket-ticker';

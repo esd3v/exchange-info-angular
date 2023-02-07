@@ -11,12 +11,12 @@ import {
 } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { getCellByColumnId, parsePair } from 'src/app/shared/helpers';
-import { GlobalService } from 'src/app/shared/services/global.service';
 import { Column } from 'src/app/shared/types/column';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandlesRestService } from '../../candles/services/candles-rest.service';
 import { CandlesService } from '../../candles/services/candles.service';
+import { GlobalService } from '../../global/services/global.service';
 import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
 import { OrderBookService } from '../../order-book/services/order-book.service';

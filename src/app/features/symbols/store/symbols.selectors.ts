@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { exchangeInfoSelectors } from 'src/app/features/exchange-info/store';
-import { AppState } from '..';
+import { AppState } from '../../../store';
 import { symbolsAdapter } from './symbols.state';
 
 const featureSelector = createFeatureSelector<AppState['symbols']>('symbols');

@@ -3,8 +3,8 @@ import { ExchangeInfoState } from '../features/exchange-info/store/exchange-info
 import { OrderBookState } from '../features/order-book/store/order-book.state';
 import { TickersState } from '../features/tickers/store/tickers.state';
 import { TradesState } from '../features/trades/store/trades.state';
-import { GlobalState } from './global/global.state';
-import { SymbolsState } from './symbols/symbols.state';
+import { SymbolsState } from '../features/symbols/store/symbols.state';
+import { GlobalState } from '../features/global/store/global.state';
 
 export type AppState = {
   global: GlobalState;

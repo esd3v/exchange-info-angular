@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
-import { GlobalService } from 'src/app/shared/services/global.service';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { GlobalService } from '../../global/services/global.service';
 import { tradesActions, tradesSelectors } from '../store';
 import { TradesEntity } from '../store/trades.state';
 import { WebsocketTrades } from '../types/websocket-trades';

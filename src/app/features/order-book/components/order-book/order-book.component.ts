@@ -7,9 +7,9 @@ import {
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { combineLatest, map, Observable } from 'rxjs';
+import { GlobalService } from 'src/app/features/global/services/global.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
-import { GlobalService } from 'src/app/shared/services/global.service';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
 import { OrderBookService } from '../../services/order-book.service';

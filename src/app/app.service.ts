@@ -12,7 +12,7 @@ import {
   WEBSOCKET_START_DELAY,
 } from './shared/config';
 import { formatDecimal } from './shared/helpers';
-import { GlobalService } from './shared/services/global.service';
+import { GlobalService } from './features/global/services/global.service';
 import { WebsocketSubscribeService } from './websocket/services/websocket-subscribe.service';
 import { WebsocketService } from './websocket/services/websocket.service';
 

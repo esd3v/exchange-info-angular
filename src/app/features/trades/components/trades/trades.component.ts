@@ -1,13 +1,13 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { map, Observable } from 'rxjs';
+import { GlobalService } from 'src/app/features/global/services/global.service';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import {
   formatDecimal,
   getFormattedDate,
   multiplyDecimal,
 } from 'src/app/shared/helpers';
-import { GlobalService } from 'src/app/shared/services/global.service';
 import { Row } from 'src/app/shared/types/row';
 import { TradesService } from '../../services/trades.service';
 import { TradesColumn } from '../../types/trades-column';
