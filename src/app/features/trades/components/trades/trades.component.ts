@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { map, Observable } from 'rxjs';
-import { GlobalService } from 'src/app/features/global/services/global.service';
+import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import {
   formatDecimal,
@@ -9,7 +9,7 @@ import {
   multiplyDecimal,
 } from 'src/app/shared/helpers';
 import { Row } from 'src/app/shared/types/row';
-import { TradesService } from '../../services/trades.service';
+import { TradesFacade } from '../../services/trades-facade.service';
 import { TradesColumn } from '../../types/trades-column';
 
 @Component({
@@ -26,7 +26,7 @@ export class TradesComponent implements OnInit {
   ]);
 
   public columns$: Observable<TradesColumn[]> =
-    this.globalService.currency$.pipe(
+    this.globalFacade.currency$.pipe(
       map(({ base, quote }) => {
         return [
           {
@@ -59,11 +59,11 @@ export class TradesComponent implements OnInit {
 
   public columnLabels: string[] = [];
 
-  public loading$ = this.tradesService.isLoading$;
+  public loading$ = this.tradesFacade.isLoading$;
 
   public constructor(
-    private globalService: GlobalService,
-    private tradesService: TradesService
+    private globalFacade: GlobalFacade,
+    private tradesFacade: TradesFacade
   ) {}
 
   public trackRow(_index: number, _item: Row) {
@@ -71,7 +71,7 @@ export class TradesComponent implements OnInit {
   }
 
   private createRows$(): Observable<Row[]> {
-    return this.tradesService.trades$.pipe(
+    return this.tradesFacade.trades$.pipe(
       map((data) => {
         return data.map((item) => {
           const { isBuyerMaker, price, qty, time } = item;

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tap } from 'rxjs';
-import { GlobalService } from 'src/app/features/global/services/global.service';
+import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { AppState } from 'src/app/store';
 
 @Component({
@@ -11,7 +11,7 @@ import { AppState } from 'src/app/store';
 export class TickerPairComponent {
   public loading = true;
 
-  public globalPair$ = this.globalService.globalPair$.pipe(
+  public globalPair$ = this.globalFacade.globalPair$.pipe(
     tap((data) => {
       this.loading = !Boolean(data);
     })
@@ -19,6 +19,6 @@ export class TickerPairComponent {
 
   public constructor(
     private store$: Store<AppState>,
-    private globalService: GlobalService
+    private globalFacade: GlobalFacade
   ) {}
 }

@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { combineLatest, timer } from 'rxjs';
-import { CandlesService } from './features/candles/services/candles.service';
-import { OrderBookService } from './features/order-book/services/order-book.service';
+import { CandlesFacade } from './features/candles/services/candles-facade.service';
+import { GlobalFacade } from './features/global/services/global-facade.service';
+import { OrderBookFacade } from './features/order-book/services/order-book-facade.service';
 import { PairsService } from './features/pairs/services/pairs.service';
-import { TickerService } from './features/tickers/services/ticker.service';
-import { TradesService } from './features/trades/services/trades.service';
+import { TickerFacade } from './features/tickers/services/ticker-facade.service';
+import { TradesFacade } from './features/trades/services/trades-facade.service';
 import {
   APP_SITE_NAME,
   WEBSOCKET_ENABLED_AT_START,
   WEBSOCKET_START_DELAY,
 } from './shared/config';
 import { formatDecimal } from './shared/helpers';
-import { GlobalService } from './features/global/services/global.service';
 import { WebsocketSubscribeService } from './websocket/services/websocket-subscribe.service';
 import { WebsocketService } from './websocket/services/websocket.service';
 
@@ -22,20 +22,20 @@ import { WebsocketService } from './websocket/services/websocket.service';
 export class AppService {
   public constructor(
     private titleService: Title,
-    private globalService: GlobalService,
+    private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private orderBookService: OrderBookService,
-    private tradesService: TradesService,
-    private candlesService: CandlesService,
-    private tickerService: TickerService,
+    private orderBookFacade: OrderBookFacade,
+    private tradesFacade: TradesFacade,
+    private candlesFacade: CandlesFacade,
+    private tickerFacade: TickerFacade,
     private pairsService: PairsService
   ) {}
 
   public setTitle() {
     combineLatest([
-      this.globalService.globalPair$,
-      this.tickerService.lastPrice$,
+      this.globalFacade.globalPair$,
+      this.tickerFacade.lastPrice$,
     ]).subscribe(([globalPair, lastPrice]) => {
       const title = lastPrice
         ? globalPair
@@ -59,10 +59,10 @@ export class AppService {
 
   // App start / switch
   public onWebsocketOpen() {
-    this.candlesService.onWebsocketOpen();
-    this.tickerService.onWebsocketOpen();
-    this.tradesService.onWebsocketOpen();
-    this.orderBookService.onWebsocketOpen();
+    this.candlesFacade.onWebsocketOpen();
+    this.tickerFacade.onWebsocketOpen();
+    this.tradesFacade.onWebsocketOpen();
+    this.orderBookFacade.onWebsocketOpen();
     this.pairsService.onWebsocketOpen();
   }
 
@@ -72,15 +72,15 @@ export class AppService {
         onData: (data) => {
           if ('e' in data) {
             if (data.e === 'kline') {
-              this.candlesService.handleWebsocketData(data);
+              this.candlesFacade.handleWebsocketData(data);
             } else if (data.e === '24hrTicker') {
-              this.tickerService.handleWebsocketData(data);
+              this.tickerFacade.handleWebsocketData(data);
             } else if (data.e === 'trade') {
-              this.tradesService.handleWebsocketData(data);
+              this.tradesFacade.handleWebsocketData(data);
             }
           } else {
             if ('lastUpdateId' in data) {
-              this.orderBookService.handleWebsocketData(data);
+              this.orderBookFacade.handleWebsocketData(data);
             }
           }
         },

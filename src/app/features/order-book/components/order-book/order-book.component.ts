@@ -7,12 +7,12 @@ import {
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { combineLatest, map, Observable } from 'rxjs';
-import { GlobalService } from 'src/app/features/global/services/global.service';
+import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
-import { OrderBookService } from '../../services/order-book.service';
+import { OrderBookFacade } from '../../services/order-book-facade.service';
 import { OrderBookColumn } from '../../types/order-book-column';
 import { OrderBookProps } from './order-book.props';
 
@@ -34,7 +34,7 @@ export class OrderBookComponent implements OnInit, OnChanges {
   public title = this.getTitle(this.type);
 
   public columns$: Observable<OrderBookColumn[]> =
-    this.globalService.currency$.pipe(
+    this.globalFacade.currency$.pipe(
       map(({ base, quote }) => {
         return [
           {
@@ -62,11 +62,11 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public columnLabels: string[] = [];
 
-  public loading$ = this.orderBookService.isLoading$;
+  public loading$ = this.orderBookFacade.isLoading$;
 
   public constructor(
-    private orderBookService: OrderBookService,
-    private globalService: GlobalService
+    private orderBookFacade: OrderBookFacade,
+    private globalFacade: GlobalFacade
   ) {}
 
   public trackRow(_index: number, _item: Row) {
@@ -79,8 +79,8 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   private getOrderBook$() {
     return combineLatest([
-      this.orderBookService.asks$,
-      this.orderBookService.bids$,
+      this.orderBookFacade.asks$,
+      this.orderBookFacade.bids$,
     ]).pipe(map(([asks, bids]) => (this.type === 'asks' ? asks : bids)));
   }
 

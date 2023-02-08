@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { ECharts, EChartsOption } from 'echarts';
 import { combineLatest, filter, Subject } from 'rxjs';
-import { CandlesService } from '../../services/candles.service';
+import { CandlesFacade } from '../../services/candles-facade.service';
 import { CandleInterval } from '../../types/candle-interval';
 
 @Component({
@@ -36,7 +36,7 @@ export class ChartComponent implements OnInit {
 
   public interval!: CandleInterval;
 
-  public loading$ = this.candlesService.isLoading$;
+  public loading$ = this.candlesFacade.isLoading$;
 
   public chartOptions: EChartsOption = {
     backgroundColor: '#fff',
@@ -155,7 +155,7 @@ export class ChartComponent implements OnInit {
     ],
   };
 
-  public constructor(private candlesService: CandlesService) {}
+  public constructor(private candlesFacade: CandlesFacade) {}
 
   public onChartInit($event: ECharts) {
     this.chartInstance$.next($event);
@@ -164,19 +164,19 @@ export class ChartComponent implements OnInit {
   public handleIntervalChange(event: MatSelectChange) {
     const interval = event.value as CandleInterval;
 
-    this.candlesService.onIntervalChange(interval);
+    this.candlesFacade.onIntervalChange(interval);
   }
 
   public ngOnInit(): void {
-    this.candlesService.intervalCurrent$.subscribe((data) => {
+    this.candlesFacade.intervalCurrent$.subscribe((data) => {
       this.interval = data;
     });
 
     combineLatest([
       this.chartInstance$.pipe(filter(Boolean)),
-      this.candlesService.ohlc$.pipe(filter((item) => Boolean(item.length))),
-      this.candlesService.dates$.pipe(filter((item) => Boolean(item.length))),
-      this.candlesService.volumes$.pipe(filter((item) => Boolean(item.length))),
+      this.candlesFacade.ohlc$.pipe(filter((item) => Boolean(item.length))),
+      this.candlesFacade.dates$.pipe(filter((item) => Boolean(item.length))),
+      this.candlesFacade.volumes$.pipe(filter((item) => Boolean(item.length))),
     ]).subscribe(([instance, ohlc, dates, volumes]) => {
       instance.setOption({
         xAxis: [

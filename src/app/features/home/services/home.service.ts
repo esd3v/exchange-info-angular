@@ -2,27 +2,27 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { timer } from 'rxjs';
 import { API_START_DELAY } from 'src/app/shared/config';
-import { CandlesService } from '../../candles/services/candles.service';
+import { CandlesFacade } from '../../candles/services/candles-facade.service';
 import { ExchangeInfoRestService } from '../../exchange-info/services/exchange-info-rest.service';
-import { GlobalService } from '../../global/services/global.service';
-import { OrderBookService } from '../../order-book/services/order-book.service';
-import { TickerService } from '../../tickers/services/ticker.service';
-import { TradesService } from '../../trades/services/trades.service';
+import { GlobalFacade } from '../../global/services/global-facade.service';
+import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
+import { TickerFacade } from '../../tickers/services/ticker-facade.service';
+import { TradesFacade } from '../../trades/services/trades-facade.service';
 
 @Injectable({ providedIn: 'root' })
 export class HomerService {
   public constructor(
-    private globalService: GlobalService,
+    private globalFacade: GlobalFacade,
     private router: Router,
     private exchangeInfoRestService: ExchangeInfoRestService,
-    private tradesService: TradesService,
-    private candlesService: CandlesService,
-    private orderBookService: OrderBookService,
-    private tickerService: TickerService
+    private tradesFacade: TradesFacade,
+    private candlesFacade: CandlesFacade,
+    private orderBookFacade: OrderBookFacade,
+    private tickerFacade: TickerFacade
   ) {}
 
   public navigateToDefaultPair() {
-    this.globalService.globalPairUnderscoreCurrent$.subscribe((pair) => {
+    this.globalFacade.globalPairUnderscoreCurrent$.subscribe((pair) => {
       this.router.navigate([pair]);
     });
   }
@@ -30,10 +30,10 @@ export class HomerService {
   public initAppData(symbol: string) {
     timer(API_START_DELAY).subscribe(() => {
       this.exchangeInfoRestService.loadData();
-      this.tickerService.onAppInit(symbol);
-      this.candlesService.onAppInit({ symbol });
-      this.orderBookService.onAppInit({ symbol });
-      this.tradesService.onAppInit({ symbol });
+      this.tickerFacade.onAppInit(symbol);
+      this.candlesFacade.onAppInit({ symbol });
+      this.orderBookFacade.onAppInit({ symbol });
+      this.tradesFacade.onAppInit({ symbol });
     });
   }
 }

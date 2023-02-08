@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { GlobalService } from '../../global/services/global.service';
+import { GlobalFacade } from '../../global/services/global-facade.service';
 import { tradesActions, tradesSelectors } from '../store';
 import { TradesEntity } from '../store/trades.state';
 import { WebsocketTrades } from '../types/websocket-trades';
@@ -11,7 +11,7 @@ import { TradesRestService } from './trades-rest.service';
 import { TradesWebsocketService } from './trades-websocket.service';
 
 @Injectable({ providedIn: 'root' })
-export class TradesService {
+export class TradesFacade {
   private status$ = this.store$.select(tradesSelectors.status);
 
   public successCurrent$ = this.status$.pipe(
@@ -30,7 +30,7 @@ export class TradesService {
 
   public constructor(
     private store$: Store<AppState>,
-    private globalService: GlobalService,
+    private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
     private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService
@@ -62,7 +62,7 @@ export class TradesService {
             // Check if data is CURRENTLY loaded
             // to prevent double loading when data loaded AFTER ws opened
             this.successCurrent$,
-            this.globalService.globalSymbolCurrent$,
+            this.globalFacade.globalSymbolCurrent$,
           ]);
         })
       )

@@ -15,15 +15,15 @@ import { Column } from 'src/app/shared/types/column';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandlesRestService } from '../../candles/services/candles-rest.service';
-import { CandlesService } from '../../candles/services/candles.service';
-import { GlobalService } from '../../global/services/global.service';
+import { CandlesFacade } from '../../candles/services/candles-facade.service';
 import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
-import { OrderBookService } from '../../order-book/services/order-book.service';
+import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
 import { TickerWebsocketService } from '../../tickers/services/ticker-websocket.service';
 import { TradesRestService } from '../../trades/services/trades-rest.service';
 import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
-import { TradesService } from '../../trades/services/trades.service';
+import { GlobalFacade } from '../../global/services/global-facade.service';
+import { TradesFacade } from '../../trades/services/trades-facade.service';
 
 @Injectable({ providedIn: 'root' })
 export class PairsService {
@@ -33,21 +33,21 @@ export class PairsService {
 
   // Exclude globalSymbol because we already subscribed to it
   private pageSymbolsWithoutGlobalSymbol$ =
-    this.globalService.globalSymbolCurrent$.pipe(
+    this.globalFacade.globalSymbolCurrent$.pipe(
       map((globalSymbol) =>
         this.pageSymbols.filter((symbol) => symbol !== globalSymbol)
       )
     );
 
   public constructor(
-    private globalService: GlobalService,
+    private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
-    private tradesService: TradesService,
+    private tradesFacade: TradesFacade,
     private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService,
-    private candlesService: CandlesService,
+    private candlesFacade: CandlesFacade,
     private candlesRestService: CandlesRestService,
-    private orderBookService: OrderBookService,
+    private orderBookFacade: OrderBookFacade,
     private orderBookRestService: OrderBookRestService,
     private orderBookWebsocketService: OrderBookWebsocketService,
     private tickerWebsocketService: TickerWebsocketService
@@ -105,8 +105,8 @@ export class PairsService {
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesRestService.loadData>[0], 'symbol'>) {
-    this.candlesService.intervalCurrent$.subscribe((interval) => {
-      this.candlesService.loadDataAndSubscribe({ symbol, interval }, true);
+    this.candlesFacade.intervalCurrent$.subscribe((interval) => {
+      this.candlesFacade.loadDataAndSubscribe({ symbol, interval }, true);
     });
   }
 
@@ -114,7 +114,7 @@ export class PairsService {
     symbol,
   }: Parameters<typeof this.orderBookRestService.loadData>[0]) {
     combineLatest([
-      this.globalService.globalSymbolCurrent$,
+      this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
     ])
       .pipe(
@@ -131,7 +131,7 @@ export class PairsService {
         }),
         mergeMap(() => {
           return combineLatest([
-            this.orderBookService.successUntil$,
+            this.orderBookFacade.successUntil$,
             this.delay$,
           ]);
         })
@@ -150,7 +150,7 @@ export class PairsService {
     symbol,
   }: Parameters<typeof this.tradesRestService.loadData>[0]) {
     combineLatest([
-      this.globalService.globalSymbolCurrent$,
+      this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
     ])
       .pipe(
@@ -166,7 +166,7 @@ export class PairsService {
           this.tradesRestService.loadData({ symbol });
         }),
         mergeMap(() => {
-          return combineLatest([this.tradesService.successUntil$, this.delay$]);
+          return combineLatest([this.tradesFacade.successUntil$, this.delay$]);
         })
       )
       .subscribe(() => {

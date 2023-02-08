@@ -4,7 +4,7 @@ import { combineLatest, filter, first, map, mergeMap, take, timer } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { GlobalService } from '../../global/services/global.service';
+import { GlobalFacade } from '../../global/services/global-facade.service';
 import { candlesActions, candlesSelectors } from '../store';
 import { Candle } from '../types/candle';
 import { CandleInterval } from '../types/candle-interval';
@@ -15,7 +15,7 @@ import { CandlesWebsocketService } from './candles-websocket.service';
 @Injectable({
   providedIn: 'root',
 })
-export class CandlesService {
+export class CandlesFacade {
   public interval$ = this.store$.select(candlesSelectors.interval);
   public status$ = this.store$.select(candlesSelectors.status);
 
@@ -38,7 +38,7 @@ export class CandlesService {
   public volumes$ = this.store$.select(candlesSelectors.volumes);
 
   public constructor(
-    private globalService: GlobalService,
+    private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
     private candlesWebsocketService: CandlesWebsocketService,
     private candlesRestService: CandlesRestService,
@@ -61,7 +61,7 @@ export class CandlesService {
         mergeMap(() => {
           return combineLatest([
             this.websocketService.reasonCurrent$,
-            this.globalService.globalSymbolCurrent$,
+            this.globalFacade.globalSymbolCurrent$,
             this.intervalCurrent$,
             // Check if data is CURRENTLY loaded
             // to prevent double loading when data loaded AFTER ws opened
@@ -91,7 +91,7 @@ export class CandlesService {
   ) {
     combineLatest([
       this.intervalCurrent$,
-      this.globalService.globalSymbolCurrent$,
+      this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
     ]).subscribe(([currentInterval, globalSymbol]) => {
       if (unsubscribePrevious) {
@@ -128,7 +128,7 @@ export class CandlesService {
   }
 
   public onIntervalChange(interval: CandleInterval) {
-    this.globalService.globalSymbolCurrent$.subscribe((symbol) => {
+    this.globalFacade.globalSymbolCurrent$.subscribe((symbol) => {
       this.loadDataAndSubscribe({ interval, symbol }, true);
       this.store$.dispatch(candlesActions.setInterval({ interval }));
     });

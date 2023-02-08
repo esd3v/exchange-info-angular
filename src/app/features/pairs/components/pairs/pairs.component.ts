@@ -26,9 +26,9 @@ import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.sta
 import { PairColumn } from '../../types/pair-column';
 import { PairsService } from '../../services/pairs.service';
 import { Row } from 'src/app/shared/types/row';
-import { TickerService } from 'src/app/features/tickers/services/ticker.service';
 import { symbolsSelectors } from 'src/app/features/symbols/store';
 import { globalActions } from 'src/app/features/global/store';
+import { TickerFacade } from 'src/app/features/tickers/services/ticker-facade.service';
 
 @Component({
   selector: 'app-pairs',
@@ -62,7 +62,7 @@ export class PairsComponent implements OnDestroy, OnInit {
   ]);
 
   public loading$ = combineLatest([
-    this.tickerService.status$,
+    this.tickerFacade.status$,
     this.tradingSymbolsStatus$,
   ]).pipe(
     map(
@@ -85,7 +85,7 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public constructor(
     private pairsService: PairsService,
-    private tickerService: TickerService,
+    private tickerFacade: TickerFacade,
     private store$: Store<AppState>,
     private location: Location,
     private router: Router
@@ -190,7 +190,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     // Wait for tickers and tradingSymbols to load
     const createdRows$ = combineLatest([
       this.tradingSymbols$,
-      this.tickerService.tickers$,
+      this.tickerFacade.tickers$,
     ]).pipe(
       map(([tradingSymbols, tickers]) =>
         this.createRows(tradingSymbols, tickers)

@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { GlobalService } from '../../global/services/global.service';
+import { GlobalFacade } from '../../global/services/global-facade.service';
 import { tickersActions, tickersSelectors } from '../store';
 import { TickerEntity } from '../store/tickers.state';
 import { WebsocketTicker } from '../types/websocket-ticker';
@@ -13,7 +13,7 @@ import { TickerWebsocketService } from './ticker-websocket.service';
 @Injectable({
   providedIn: 'root',
 })
-export class TickerService {
+export class TickerFacade {
   public status$ = this.store$.select(tickersSelectors.status);
 
   public success$ = this.status$.pipe(filter((status) => status === 'success'));
@@ -39,7 +39,7 @@ export class TickerService {
   public numberOfTrades$ = this.store$.select(tickersSelectors.numberOfTrades);
 
   public constructor(
-    private globalService: GlobalService,
+    private globalFacade: GlobalFacade,
     private tickerRestService: TickerRestService,
     private tickerWebsocketService: TickerWebsocketService,
     private websocketService: WebsocketService,
@@ -69,7 +69,7 @@ export class TickerService {
       .pipe(
         mergeMap(() => {
           return combineLatest([
-            this.globalService.globalSymbolCurrent$,
+            this.globalFacade.globalSymbolCurrent$,
             this.status$.pipe(
               // Check if data is CURRENTLY loaded
               // to prevent double loading when data loaded AFTER ws opened
