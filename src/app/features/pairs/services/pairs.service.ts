@@ -104,7 +104,7 @@ export class PairsService {
 
   public handleCandlesOnRowClick({
     symbol,
-  }: Pick<Parameters<typeof this.candlesRestService.loadData>[0], 'symbol'>) {
+  }: Pick<Parameters<typeof this.candlesFacade.loadData>[0], 'symbol'>) {
     this.candlesFacade.intervalCurrent$.subscribe((interval) => {
       this.candlesFacade.loadDataAndSubscribe({ symbol, interval }, true);
     });
@@ -112,7 +112,7 @@ export class PairsService {
 
   public handleOrderBookOnRowClick({
     symbol,
-  }: Parameters<typeof this.orderBookRestService.loadData>[0]) {
+  }: Parameters<typeof this.orderBookFacade.loadData>[0]) {
     combineLatest([
       this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
@@ -127,7 +127,7 @@ export class PairsService {
             this.orderBookWebsocketService.websocketSubscriptionId.unsubscribe
           );
 
-          this.orderBookRestService.loadData({ symbol });
+          this.orderBookFacade.loadData({ symbol });
         }),
         mergeMap(() => {
           return combineLatest([
@@ -148,7 +148,7 @@ export class PairsService {
 
   public handleTradesOnRowClick({
     symbol,
-  }: Parameters<typeof this.tradesRestService.loadData>[0]) {
+  }: Parameters<typeof this.tradesFacade.loadData>[0]) {
     combineLatest([
       this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
@@ -163,7 +163,7 @@ export class PairsService {
             this.tradesWebsocketService.websocketSubscriptionId.unsubscribe
           );
 
-          this.tradesRestService.loadData({ symbol });
+          this.tradesFacade.loadData({ symbol });
         }),
         mergeMap(() => {
           return combineLatest([this.tradesFacade.successUntil$, this.delay$]);

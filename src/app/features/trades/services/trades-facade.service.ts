@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
+import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
 import { tradesActions, tradesSelectors } from '../store';
 import { TradesEntity } from '../store/trades.state';
 import { WebsocketTrades } from '../types/websocket-trades';
-import { TradesRestService } from './trades-rest.service';
 import { TradesWebsocketService } from './trades-websocket.service';
 
 @Injectable({ providedIn: 'root' })
@@ -32,14 +32,13 @@ export class TradesFacade {
     private store$: Store<AppState>,
     private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
-    private tradesRestService: TradesRestService,
     private tradesWebsocketService: TradesWebsocketService
   ) {}
 
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof tradesActions.load>[0], 'symbol'>) {
-    this.tradesRestService.loadData({ symbol });
+    this.loadData({ symbol });
 
     combineLatest([
       this.successUntil$,
@@ -86,5 +85,12 @@ export class TradesFacade {
 
     this.store$.dispatch(tradesActions.add({ trades }));
     this.store$.dispatch(tradesActions.removeLast());
+  }
+
+  public loadData({
+    symbol,
+    limit = WIDGET_TRADES_DEFAULT_LIMIT,
+  }: Parameters<typeof tradesActions.load>[0]) {
+    this.store$.dispatch(tradesActions.load({ symbol, limit }));
   }
 }

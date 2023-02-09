@@ -25,6 +25,10 @@ import { OrderBookProps } from './order-book.props';
 export class OrderBookComponent implements OnInit, OnChanges {
   @Input() public type: OrderBookProps['type'] = 'asks';
 
+  public tableClass = 'order-book';
+  public cellClass = `${this.tableClass}__cell`;
+  public cellRightClass = `${this.cellClass}--alignedRight`;
+
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
   public placeholderRows = Array<Row>(WIDGET_DEPTH_DEFAULT_LIMIT).fill([

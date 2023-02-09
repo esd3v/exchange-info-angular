@@ -7,7 +7,6 @@ import { GlobalFacade } from '../../global/services/global-facade.service';
 import { tickersActions, tickersSelectors } from '../store';
 import { TickerEntity } from '../store/tickers.state';
 import { WebsocketTicker } from '../types/websocket-ticker';
-import { TickerRestService } from './ticker-rest.service';
 import { TickerWebsocketService } from './ticker-websocket.service';
 
 @Injectable({
@@ -40,14 +39,13 @@ export class TickerFacade {
 
   public constructor(
     private globalFacade: GlobalFacade,
-    private tickerRestService: TickerRestService,
     private tickerWebsocketService: TickerWebsocketService,
     private websocketService: WebsocketService,
     private store$: Store<AppState>
   ) {}
 
   public onAppInit(symbol: string) {
-    this.tickerRestService.loadData();
+    this.loadData();
 
     combineLatest([
       this.successCurrent$,
@@ -100,5 +98,9 @@ export class TickerFacade {
     };
 
     this.store$.dispatch(tickersActions.update({ data: ticker }));
+  }
+
+  public loadData() {
+    this.store$.dispatch(tickersActions.load());
   }
 }

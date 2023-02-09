@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
 import { orderBookActions, orderBookSelectors } from '../store';
 import { OrderBook } from '../types/order-book';
 import { WebsocketOrderBook } from '../types/websocket-order-book';
-import { OrderBookRestService } from './order-book-rest.service';
 import { OrderBookWebsocketService } from './order-book-websocket.service';
 
 @Injectable({ providedIn: 'root' })
@@ -33,14 +33,13 @@ export class OrderBookFacade {
     private store$: Store<AppState>,
     private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
-    private orderBookRestService: OrderBookRestService,
     private orderBookWebsocketService: OrderBookWebsocketService
   ) {}
 
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof orderBookActions.load>[0], 'symbol'>) {
-    this.orderBookRestService.loadData({ symbol });
+    this.loadData({ symbol });
 
     combineLatest([
       this.successUntil$,
@@ -85,5 +84,12 @@ export class OrderBookFacade {
     };
 
     this.store$.dispatch(orderBookActions.set(orderBook));
+  }
+
+  public loadData({
+    symbol,
+    limit = WIDGET_DEPTH_DEFAULT_LIMIT,
+  }: Parameters<typeof orderBookActions.load>[0]) {
+    this.store$.dispatch(orderBookActions.load({ symbol, limit }));
   }
 }

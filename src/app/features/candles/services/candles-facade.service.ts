@@ -9,7 +9,6 @@ import { candlesActions, candlesSelectors } from '../store';
 import { Candle } from '../types/candle';
 import { CandleInterval } from '../types/candle-interval';
 import { WebsocketCandle } from '../types/websocket-candle';
-import { CandlesRestService } from './candles-rest.service';
 import { CandlesWebsocketService } from './candles-websocket.service';
 
 @Injectable({
@@ -41,7 +40,6 @@ export class CandlesFacade {
     private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
     private candlesWebsocketService: CandlesWebsocketService,
-    private candlesRestService: CandlesRestService,
     private store$: Store<AppState>
   ) {}
 
@@ -72,7 +70,7 @@ export class CandlesFacade {
       .subscribe(([reason, symbol, interval]) => {
         // If we enable ws by switch for the first time or re-enable it
         if (reason === 'switch' || reason === 'restored') {
-          this.candlesRestService.loadData({ symbol, interval });
+          this.loadData({ symbol, interval });
         }
 
         this.candlesWebsocketService.subscribeToWebsocket(
@@ -105,7 +103,7 @@ export class CandlesFacade {
       }
     });
 
-    this.candlesRestService.loadData({
+    this.loadData({
       symbol,
       interval,
     });
@@ -151,5 +149,9 @@ export class CandlesFacade {
         this.store$.dispatch(candlesActions.removeFirstCandle());
       }
     });
+  }
+
+  public loadData(params: Parameters<typeof candlesActions.load>[0]) {
+    this.store$.dispatch(candlesActions.load(params));
   }
 }
