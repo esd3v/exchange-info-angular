@@ -12,15 +12,15 @@ export type TickerEntity = Pick<
   | 'lastQty'
 > & { prevLastPrice?: string };
 
-export const tickersAdapter: EntityAdapter<TickerEntity> =
+export const tickerAdapter: EntityAdapter<TickerEntity> =
   createEntityAdapter<TickerEntity>({
     selectId: (item) => item.symbol,
   });
 
-export interface TickersState extends EntityState<TickerEntity> {
+export interface TickerState extends EntityState<TickerEntity> {
   status: LoadingStatus;
 }
 
-export const initialState: TickersState = tickersAdapter.getInitialState({
+export const initialState: TickerState = tickerAdapter.getInitialState({
   status: 'init',
 });

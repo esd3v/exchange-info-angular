@@ -6,7 +6,7 @@ import { CandlesFacade } from '../../candles/services/candles-facade.service';
 import { ExchangeInfoFacade } from '../../exchange-info/services/exchange-info-facade.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
 import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
-import { TickerFacade } from '../../tickers/services/ticker-facade.service';
+import { TickerFacade } from '../../ticker/services/ticker-facade.service';
 import { TradesFacade } from '../../trades/services/trades-facade.service';
 
 @Injectable({ providedIn: 'root' })

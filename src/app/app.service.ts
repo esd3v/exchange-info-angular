@@ -5,7 +5,7 @@ import { CandlesFacade } from './features/candles/services/candles-facade.servic
 import { GlobalFacade } from './features/global/services/global-facade.service';
 import { OrderBookFacade } from './features/order-book/services/order-book-facade.service';
 import { PairsService } from './features/pairs/services/pairs.service';
-import { TickerFacade } from './features/tickers/services/ticker-facade.service';
+import { TickerFacade } from './features/ticker/services/ticker-facade.service';
 import { TradesFacade } from './features/trades/services/trades-facade.service';
 import {
   APP_SITE_NAME,

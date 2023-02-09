@@ -1,16 +1,16 @@
 import { createReducer, on } from '@ngrx/store';
-import { tickersActions } from '.';
-import { initialState, TickerEntity, tickersAdapter } from './tickers.state';
+import { tickerActions } from '.';
+import { initialState, TickerEntity, tickerAdapter } from './ticker.state';
 
-export const tickersReducer = createReducer(
+export const tickerReducer = createReducer(
   initialState,
-  on(tickersActions.load, (state) => {
-    return tickersAdapter.updateMany([], {
+  on(tickerActions.load, (state) => {
+    return tickerAdapter.updateMany([], {
       ...state,
       status: 'loading',
     });
   }),
-  on(tickersActions.loadSuccess, (state, { data }) => {
+  on(tickerActions.loadSuccess, (state, { data }) => {
     const mapped = data.map((item) => {
       const {
         lastPrice,
@@ -31,14 +31,14 @@ export const tickersReducer = createReducer(
       };
     }) as TickerEntity[];
 
-    return tickersAdapter.setAll(mapped, {
+    return tickerAdapter.setAll(mapped, {
       ...state,
       status: 'success',
     });
   }),
-  on(tickersActions.update, (state, { data }) => {
+  on(tickerActions.update, (state, { data }) => {
     return data.symbol
-      ? tickersAdapter.updateOne(
+      ? tickerAdapter.updateOne(
           {
             id: data.symbol,
             changes: {

@@ -2,17 +2,17 @@ import { TickerRestService } from '../services/ticker-rest.service';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { switchMap, map } from 'rxjs';
-import { tickersActions } from '.';
+import { tickerActions } from '.';
 
 @Injectable()
-export class TickersEffects {
+export class TickerEffects {
   public loadTicker$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(tickersActions.load),
+      ofType(tickerActions.load),
       switchMap(() => {
         return this.tickerRestService
           .get$()
-          .pipe(map((data) => tickersActions.loadSuccess({ data })));
+          .pipe(map((data) => tickerActions.loadSuccess({ data })));
       })
     );
   });

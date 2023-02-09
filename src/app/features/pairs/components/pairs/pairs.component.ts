@@ -14,7 +14,7 @@ import { Dictionary } from '@ngrx/entity';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, map, Subject } from 'rxjs';
 import { debounceTime, filter, first } from 'rxjs/operators';
-import { TickerEntity } from 'src/app/features/tickers/store/tickers.state';
+import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import {
   formatDecimal,
@@ -28,7 +28,7 @@ import { PairsService } from '../../services/pairs.service';
 import { Row } from 'src/app/shared/types/row';
 import { symbolsSelectors } from 'src/app/features/symbols/store';
 import { globalActions } from 'src/app/features/global/store';
-import { TickerFacade } from 'src/app/features/tickers/services/ticker-facade.service';
+import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 
 @Component({
   selector: 'app-pairs',
@@ -66,8 +66,8 @@ export class PairsComponent implements OnDestroy, OnInit {
     this.tradingSymbolsStatus$,
   ]).pipe(
     map(
-      ([tickersStatus, tradingSymbolsStatus]) =>
-        tickersStatus === 'loading' || tradingSymbolsStatus === 'loading'
+      ([tickerStatus, tradingSymbolsStatus]) =>
+        tickerStatus === 'loading' || tradingSymbolsStatus === 'loading'
     )
   );
 

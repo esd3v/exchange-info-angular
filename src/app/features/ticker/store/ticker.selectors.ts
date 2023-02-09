@@ -1,14 +1,14 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState } from '../../../store';
 import { globalSelectors } from '../../global/store';
-import { tickersAdapter } from './tickers.state';
+import { tickerAdapter } from './ticker.state';
 
-const featureSelector = createFeatureSelector<AppState['tickers']>('tickers');
+const featureSelector = createFeatureSelector<AppState['ticker']>('ticker');
 
 export const globalSelector =
   createFeatureSelector<AppState['global']>('global');
 
-const { selectAll, selectEntities } = tickersAdapter.getSelectors();
+const { selectAll, selectEntities } = tickerAdapter.getSelectors();
 
 export const globalSymbol = globalSelectors.globalSymbol;
 

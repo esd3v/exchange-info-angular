@@ -1,4 +1,4 @@
-import { TickersEffects } from '../features/tickers/store/tickers.effects';
+import { TickerEffects } from '../features/ticker/store/ticker.effects';
 import { metaReducers, reducers } from './reducers';
 import { NgModule } from '@angular/core';
 import { EffectsModule } from '@ngrx/effects';
@@ -14,7 +14,7 @@ import { TradesEffects } from '../features/trades/store/trades.effects';
   declarations: [],
   imports: [
     EffectsModule.forRoot([
-      TickersEffects,
+      TickerEffects,
       ExchangeInfoEffects,
       CandlesEffects,
       OrderBookEffects,

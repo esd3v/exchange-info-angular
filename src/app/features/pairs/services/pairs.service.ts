@@ -19,7 +19,7 @@ import { CandlesFacade } from '../../candles/services/candles-facade.service';
 import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
 import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
-import { TickerWebsocketService } from '../../tickers/services/ticker-websocket.service';
+import { TickerWebsocketService } from '../../ticker/services/ticker-websocket.service';
 import { TradesRestService } from '../../trades/services/trades-rest.service';
 import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';

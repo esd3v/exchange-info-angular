@@ -4,8 +4,8 @@ import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
-import { tickersActions, tickersSelectors } from '../store';
-import { TickerEntity } from '../store/tickers.state';
+import { tickerActions, tickerSelectors } from '../store';
+import { TickerEntity } from '../store/ticker.state';
 import { WebsocketTicker } from '../types/websocket-ticker';
 import { TickerWebsocketService } from './ticker-websocket.service';
 
@@ -13,29 +13,29 @@ import { TickerWebsocketService } from './ticker-websocket.service';
   providedIn: 'root',
 })
 export class TickerFacade {
-  public status$ = this.store$.select(tickersSelectors.status);
+  public status$ = this.store$.select(tickerSelectors.status);
 
   public success$ = this.status$.pipe(filter((status) => status === 'success'));
 
   public successCurrent$ = this.success$.pipe(first());
 
-  public lastPrice$ = this.store$.select(tickersSelectors.lastPrice);
+  public lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
 
-  public prevLastPrice$ = this.store$.select(tickersSelectors.prevLastPrice);
+  public prevLastPrice$ = this.store$.select(tickerSelectors.prevLastPrice);
 
-  public tickers$ = this.store$.select(tickersSelectors.tickers);
+  public tickers$ = this.store$.select(tickerSelectors.tickers);
 
   public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
 
-  public priceChange$ = this.store$.select(tickersSelectors.priceChange);
+  public priceChange$ = this.store$.select(tickerSelectors.priceChange);
 
   public priceChangePercent$ = this.store$.select(
-    tickersSelectors.priceChangePercent
+    tickerSelectors.priceChangePercent
   );
 
-  public lastQuantity$ = this.store$.select(tickersSelectors.lastQuantity);
+  public lastQuantity$ = this.store$.select(tickerSelectors.lastQuantity);
 
-  public numberOfTrades$ = this.store$.select(tickersSelectors.numberOfTrades);
+  public numberOfTrades$ = this.store$.select(tickerSelectors.numberOfTrades);
 
   public constructor(
     private globalFacade: GlobalFacade,
@@ -97,10 +97,10 @@ export class TickerFacade {
       count: n,
     };
 
-    this.store$.dispatch(tickersActions.update({ data: ticker }));
+    this.store$.dispatch(tickerActions.update({ data: ticker }));
   }
 
   public loadData() {
-    this.store$.dispatch(tickersActions.load());
+    this.store$.dispatch(tickerActions.load());
   }
 }
