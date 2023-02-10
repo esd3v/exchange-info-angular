@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
+import { combineLatest, filter, first, map, mergeMap, timer } from 'rxjs';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -85,6 +85,36 @@ export class TradesFacade {
 
     this.store$.dispatch(tradesActions.add({ trades }));
     this.store$.dispatch(tradesActions.removeLast());
+  }
+
+  public loadDataAndSubscribe(
+    { symbol }: Parameters<typeof this.loadData>[0],
+    delay: number
+  ) {
+    this.loadData({ symbol });
+
+    combineLatest([this.websocketService.openCurrent$, timer(delay)]).subscribe(
+      () => {
+        this.tradesWebsocketService.subscribeToWebsocket(
+          { symbol },
+          this.tradesWebsocketService.websocketSubscriptionId.subscribe
+        );
+      }
+    );
+  }
+
+  public unsubscribeCurrent() {
+    combineLatest([
+      this.globalFacade.globalSymbolCurrent$,
+      this.websocketService.openCurrent$,
+    ]).subscribe(([globalSymbol]) => {
+      this.tradesWebsocketService.unsubscribeFromWebsocket(
+        {
+          symbol: globalSymbol,
+        },
+        this.tradesWebsocketService.websocketSubscriptionId.unsubscribe
+      );
+    });
   }
 
   public loadData({

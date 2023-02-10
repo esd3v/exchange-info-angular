@@ -47,7 +47,7 @@ export class CandlesFacade {
     symbol,
   }: Pick<Parameters<typeof candlesActions.load>[0], 'symbol'>) {
     this.intervalCurrent$.subscribe((interval) => {
-      this.loadDataAndSubscribe({ symbol, interval }, false);
+      this.loadDataAndSubscribe({ symbol, interval }, 0);
     });
   }
 
@@ -74,60 +74,56 @@ export class CandlesFacade {
         }
 
         this.candlesWebsocketService.subscribeToWebsocket(
-          {
-            symbol,
-            interval,
-          },
+          { symbol, interval },
           this.candlesWebsocketService.websocketSubscriptionId.subscribe
         );
       });
   }
 
   public loadDataAndSubscribe(
-    { interval, symbol }: Parameters<typeof candlesActions.load>[0],
-    unsubscribePrevious: boolean // TODO replace with auto subscribe check
+    { interval, symbol }: Parameters<typeof this.loadData>[0],
+    delay: number
   ) {
-    combineLatest([
-      this.intervalCurrent$,
-      this.globalFacade.globalSymbolCurrent$,
-      this.websocketService.openCurrent$,
-    ]).subscribe(([currentInterval, globalSymbol]) => {
-      if (unsubscribePrevious) {
-        this.candlesWebsocketService.unsubscribeFromWebsocket(
-          {
-            interval: currentInterval,
-            symbol: globalSymbol,
-          },
-          this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
-        );
-      }
-    });
-
     this.loadData({
       symbol,
       interval,
     });
 
-    combineLatest([this.websocketService.openCurrent$, this.successUntil$])
-      .pipe(
-        mergeMap(() =>
-          timer(unsubscribePrevious ? WEBSOCKET_SUBSCRIPTION_DELAY : 0)
-        )
-      )
-      .subscribe(() => {
+    combineLatest([this.websocketService.openCurrent$, timer(delay)]).subscribe(
+      () => {
         this.candlesWebsocketService.subscribeToWebsocket(
-          {
-            interval,
-            symbol,
-          },
+          { interval, symbol },
           this.candlesWebsocketService.websocketSubscriptionId.subscribe
         );
-      });
+      }
+    );
+  }
+
+  public unsubscribeCurrent() {
+    combineLatest([
+      this.intervalCurrent$,
+      this.globalFacade.globalSymbolCurrent$,
+      this.websocketService.openCurrent$,
+    ]).subscribe(([currentInterval, globalSymbol]) => {
+      this.candlesWebsocketService.unsubscribeFromWebsocket(
+        {
+          interval: currentInterval,
+          symbol: globalSymbol,
+        },
+        this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
+      );
+    });
   }
 
   public onIntervalChange(interval: CandleInterval) {
     this.globalFacade.globalSymbolCurrent$.subscribe((symbol) => {
-      this.loadDataAndSubscribe({ interval, symbol }, true);
+      this.unsubscribeCurrent();
+
+      this.loadDataAndSubscribe(
+        { interval, symbol },
+        WEBSOCKET_SUBSCRIPTION_DELAY
+      );
+
       this.store$.dispatch(candlesActions.setInterval({ interval }));
     });
   }

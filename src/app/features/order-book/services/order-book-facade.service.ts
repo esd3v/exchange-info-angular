@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
+import { combineLatest, filter, first, map, mergeMap, timer } from 'rxjs';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -39,19 +39,7 @@ export class OrderBookFacade {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof orderBookActions.load>[0], 'symbol'>) {
-    this.loadData({ symbol });
-
-    combineLatest([
-      this.successUntil$,
-      this.websocketService.openCurrent$,
-    ]).subscribe(() => {
-      this.orderBookWebsocketService.subscribeToWebsocket(
-        {
-          symbol,
-        },
-        this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-      );
-    });
+    this.loadDataAndSubscribe({ symbol }, 0);
   }
 
   public onWebsocketOpen() {
@@ -68,9 +56,7 @@ export class OrderBookFacade {
       )
       .subscribe(([_tickerStatus, symbol]) => {
         this.orderBookWebsocketService.subscribeToWebsocket(
-          {
-            symbol,
-          },
+          { symbol },
           this.orderBookWebsocketService.websocketSubscriptionId.subscribe
         );
       });
@@ -84,6 +70,38 @@ export class OrderBookFacade {
     };
 
     this.store$.dispatch(orderBookActions.set(orderBook));
+  }
+
+  public loadDataAndSubscribe(
+    { symbol }: Parameters<typeof this.loadData>[0],
+    delay: number
+  ) {
+    this.loadData({
+      symbol,
+    });
+
+    combineLatest([
+      this.websocketService.openCurrent$,
+      this.successUntil$,
+      timer(delay),
+    ]).subscribe(() => {
+      this.orderBookWebsocketService.subscribeToWebsocket(
+        { symbol },
+        this.orderBookWebsocketService.websocketSubscriptionId.subscribe
+      );
+    });
+  }
+
+  public unsubscribeCurrent() {
+    combineLatest([
+      this.globalFacade.globalSymbolCurrent$,
+      this.websocketService.openCurrent$,
+    ]).subscribe(([globalSymbol]) => {
+      this.orderBookWebsocketService.unsubscribeFromWebsocket(
+        { symbol: globalSymbol },
+        this.orderBookWebsocketService.websocketSubscriptionId.unsubscribe
+      );
+    });
   }
 
   public loadData({

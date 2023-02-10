@@ -6,7 +6,6 @@ import {
   first,
   map,
   mergeMap,
-  tap,
   timer,
 } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
@@ -14,15 +13,10 @@ import { getCellByColumnId, parsePair } from 'src/app/shared/helpers';
 import { Column } from 'src/app/shared/types/column';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { CandlesRestService } from '../../candles/services/candles-rest.service';
 import { CandlesFacade } from '../../candles/services/candles-facade.service';
-import { OrderBookRestService } from '../../order-book/services/order-book-rest.service';
-import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
+import { GlobalFacade } from '../../global/services/global-facade.service';
 import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
 import { TickerWebsocketService } from '../../ticker/services/ticker-websocket.service';
-import { TradesRestService } from '../../trades/services/trades-rest.service';
-import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
-import { GlobalFacade } from '../../global/services/global-facade.service';
 import { TradesFacade } from '../../trades/services/trades-facade.service';
 
 @Injectable({ providedIn: 'root' })
@@ -43,13 +37,8 @@ export class PairsService {
     private globalFacade: GlobalFacade,
     private websocketService: WebsocketService,
     private tradesFacade: TradesFacade,
-    private tradesRestService: TradesRestService,
-    private tradesWebsocketService: TradesWebsocketService,
     private candlesFacade: CandlesFacade,
-    private candlesRestService: CandlesRestService,
     private orderBookFacade: OrderBookFacade,
-    private orderBookRestService: OrderBookRestService,
-    private orderBookWebsocketService: OrderBookWebsocketService,
     private tickerWebsocketService: TickerWebsocketService
   ) {}
 
@@ -82,7 +71,10 @@ export class PairsService {
   }
 
   public subscribeToPageSymbols() {
-    this.pageSymbolsWithoutGlobalSymbol$.subscribe((symbols) => {
+    combineLatest([
+      this.pageSymbolsWithoutGlobalSymbol$,
+      this.websocketService.openCurrent$,
+    ]).subscribe(([symbols]) => {
       this.tickerWebsocketService.subscribeToWebsocket(
         { symbols },
         this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
@@ -91,92 +83,50 @@ export class PairsService {
   }
 
   public unsubscribeFromPageSymbols() {
-    this.websocketService.openCurrent$
-      .pipe(mergeMap(() => this.pageSymbolsWithoutGlobalSymbol$))
-      .subscribe((symbols) => {
-        this.tickerWebsocketService.unsubscribeFromWebsocket(
-          { symbols },
-          this.tickerWebsocketService.websocketSubscriptionId.unsubscribe
-            .multiple
-        );
-      });
+    combineLatest([
+      this.pageSymbolsWithoutGlobalSymbol$,
+      this.websocketService.openCurrent$,
+    ]).subscribe(([symbols]) => {
+      this.tickerWebsocketService.unsubscribeFromWebsocket(
+        { symbols },
+        this.tickerWebsocketService.websocketSubscriptionId.unsubscribe.multiple
+      );
+    });
   }
 
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesFacade.loadData>[0], 'symbol'>) {
+    this.candlesFacade.unsubscribeCurrent();
+
     this.candlesFacade.intervalCurrent$.subscribe((interval) => {
-      this.candlesFacade.loadDataAndSubscribe({ symbol, interval }, true);
+      this.candlesFacade.loadDataAndSubscribe(
+        { symbol, interval },
+        WEBSOCKET_SUBSCRIPTION_DELAY
+      );
     });
   }
 
   public handleOrderBookOnRowClick({
     symbol,
   }: Parameters<typeof this.orderBookFacade.loadData>[0]) {
-    combineLatest([
-      this.globalFacade.globalSymbolCurrent$,
-      this.websocketService.openCurrent$,
-    ])
-      .pipe(
-        tap(([globalSymbol]) => {
-          // Unsubscribe from global symbol first
-          this.orderBookWebsocketService.unsubscribeFromWebsocket(
-            {
-              symbol: globalSymbol,
-            },
-            this.orderBookWebsocketService.websocketSubscriptionId.unsubscribe
-          );
+    this.orderBookFacade.unsubscribeCurrent();
 
-          this.orderBookFacade.loadData({ symbol });
-        }),
-        mergeMap(() => {
-          return combineLatest([
-            this.orderBookFacade.successUntil$,
-            this.delay$,
-          ]);
-        })
-      )
-      .subscribe(() => {
-        this.orderBookWebsocketService.subscribeToWebsocket(
-          {
-            symbol,
-          },
-          this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-        );
-      });
+    this.orderBookFacade.loadDataAndSubscribe(
+      { symbol },
+      WEBSOCKET_SUBSCRIPTION_DELAY
+    );
   }
 
   public handleTradesOnRowClick({
     symbol,
   }: Parameters<typeof this.tradesFacade.loadData>[0]) {
-    combineLatest([
-      this.globalFacade.globalSymbolCurrent$,
-      this.websocketService.openCurrent$,
-    ])
-      .pipe(
-        tap(([globalSymbol]) => {
-          // Unsubscribe from global symbol first
-          this.tradesWebsocketService.unsubscribeFromWebsocket(
-            {
-              symbol: globalSymbol,
-            },
-            this.tradesWebsocketService.websocketSubscriptionId.unsubscribe
-          );
+    this.tradesFacade.unsubscribeCurrent();
 
-          this.tradesFacade.loadData({ symbol });
-        }),
-        mergeMap(() => {
-          return combineLatest([this.tradesFacade.successUntil$, this.delay$]);
-        })
-      )
-      .subscribe(() => {
-        this.tradesWebsocketService.subscribeToWebsocket(
-          {
-            symbol,
-          },
-          this.tradesWebsocketService.websocketSubscriptionId.subscribe
-        );
-      });
+    this.tradesFacade.loadDataAndSubscribe(
+      { symbol },
+      WEBSOCKET_SUBSCRIPTION_DELAY
+    );
   }
 
   public setPageSymbols$(columns: Column[], pageData$: BehaviorSubject<Row[]>) {
