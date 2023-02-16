@@ -44,12 +44,7 @@ export class TradesFacade {
       this.successUntil$,
       this.websocketService.openCurrent$,
     ]).subscribe(() => {
-      this.tradesWebsocketService.subscribeToWebsocket(
-        {
-          symbol,
-        },
-        this.tradesWebsocketService.websocketSubscriptionId.subscribe
-      );
+      this.tradesWebsocketService.subscribe({ symbol });
     });
   }
 
@@ -66,12 +61,7 @@ export class TradesFacade {
         })
       )
       .subscribe(([_tickerStatus, symbol]) => {
-        this.tradesWebsocketService.subscribeToWebsocket(
-          {
-            symbol,
-          },
-          this.tradesWebsocketService.websocketSubscriptionId.subscribe
-        );
+        this.tradesWebsocketService.subscribe({ symbol });
       });
   }
 
@@ -95,10 +85,7 @@ export class TradesFacade {
 
     combineLatest([this.websocketService.openCurrent$, timer(delay)]).subscribe(
       () => {
-        this.tradesWebsocketService.subscribeToWebsocket(
-          { symbol },
-          this.tradesWebsocketService.websocketSubscriptionId.subscribe
-        );
+        this.tradesWebsocketService.subscribe({ symbol });
       }
     );
   }
@@ -108,12 +95,9 @@ export class TradesFacade {
       this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
     ]).subscribe(([globalSymbol]) => {
-      this.tradesWebsocketService.unsubscribeFromWebsocket(
-        {
-          symbol: globalSymbol,
-        },
-        this.tradesWebsocketService.websocketSubscriptionId.unsubscribe
-      );
+      this.tradesWebsocketService.unsubscribe({
+        symbol: globalSymbol,
+      });
     });
   }
 

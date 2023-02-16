@@ -73,10 +73,7 @@ export class CandlesFacade {
           this.loadData({ symbol, interval });
         }
 
-        this.candlesWebsocketService.subscribeToWebsocket(
-          { symbol, interval },
-          this.candlesWebsocketService.websocketSubscriptionId.subscribe
-        );
+        this.candlesWebsocketService.subscribe({ symbol, interval });
       });
   }
 
@@ -91,10 +88,7 @@ export class CandlesFacade {
 
     combineLatest([this.websocketService.openCurrent$, timer(delay)]).subscribe(
       () => {
-        this.candlesWebsocketService.subscribeToWebsocket(
-          { interval, symbol },
-          this.candlesWebsocketService.websocketSubscriptionId.subscribe
-        );
+        this.candlesWebsocketService.subscribe({ interval, symbol });
       }
     );
   }
@@ -105,13 +99,10 @@ export class CandlesFacade {
       this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
     ]).subscribe(([currentInterval, globalSymbol]) => {
-      this.candlesWebsocketService.unsubscribeFromWebsocket(
-        {
-          interval: currentInterval,
-          symbol: globalSymbol,
-        },
-        this.candlesWebsocketService.websocketSubscriptionId.unsubscribe
-      );
+      this.candlesWebsocketService.unsubscribe({
+        interval: currentInterval,
+        symbol: globalSymbol,
+      });
     });
   }
 

@@ -51,12 +51,9 @@ export class TickerFacade {
       this.successCurrent$,
       this.websocketService.openCurrent$,
     ]).subscribe(() => {
-      this.tickerWebsocketService.subscribeToWebsocket(
-        {
-          symbols: [symbol],
-        },
-        this.tickerWebsocketService.websocketSubscriptionId.subscribe.single
-      );
+      this.tickerWebsocketService.subscribe({
+        symbols: [symbol],
+      });
     });
   }
 
@@ -78,12 +75,9 @@ export class TickerFacade {
         })
       )
       .subscribe(([symbol]) => {
-        this.tickerWebsocketService.subscribeToWebsocket(
-          {
-            symbols: [symbol],
-          },
-          this.tickerWebsocketService.websocketSubscriptionId.subscribe.single
-        );
+        this.tickerWebsocketService.subscribe({
+          symbols: [symbol],
+        });
       });
   }
 

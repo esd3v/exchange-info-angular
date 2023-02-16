@@ -4,47 +4,49 @@ import { WebsocketMessageIncoming } from '../types/websocket-message-incoming';
 import { WebsocketMessageStreamParams } from '../types/websocket-message-stream-params';
 import { WebsocketService } from './websocket.service';
 
-type Params = Record<string, any>;
-
-export type WebsocketSubscription = {
-  readonly subscribe: string;
-  readonly unsubscribe: string;
-};
-
 @Injectable({
   providedIn: 'root',
 })
 export class WebsocketSubscribeService {
+  private subscriptions: Record<string, number> = {};
+
   public constructor(private websocketService: WebsocketService) {}
 
-  public createSubscription<T extends Params>(fn: (params: T) => string[]) {
-    return (params: T, id: number): WebsocketSubscription => {
-      const createRequest = (
-        method: WebsocketMessageStreamParams['method']
-      ): string =>
-        JSON.stringify({
-          method,
-          params: fn(params),
-          id,
-        });
+  private createSubscription = (
+    params: string[],
+    method: WebsocketMessageStreamParams['method'],
+    id: number
+  ): string => {
+    return JSON.stringify({
+      method,
+      params,
+      id,
+    });
+  };
 
-      return {
-        get subscribe() {
-          return createRequest('SUBSCRIBE');
-        },
-        get unsubscribe() {
-          return createRequest('UNSUBSCRIBE');
-        },
-      };
-    };
+  public subscribe(params: string[]) {
+    const stringifiedParams = JSON.stringify(params);
+    const prevSubscribeId = this.subscriptions[stringifiedParams];
+    const newSubscribeId = Object.keys(this.subscriptions).length + 1;
+    const id = prevSubscribeId || newSubscribeId;
+    const subscription = this.createSubscription(params, 'SUBSCRIBE', id);
+
+    this.websocketService.send(subscription);
+    this.subscriptions[stringifiedParams] = newSubscribeId;
   }
 
-  public subscribe(subscription: WebsocketSubscription) {
-    this.websocketService.send(subscription.subscribe);
-  }
+  public unsubscribe(params: string[]) {
+    const stringifiedParams = JSON.stringify(params);
+    const prevSubscribeId = this.subscriptions[stringifiedParams];
 
-  public unsubscribe(subscription: WebsocketSubscription) {
-    this.websocketService.send(subscription.unsubscribe);
+    const id = prevSubscribeId
+      ? prevSubscribeId + WEBSOCKET_UNSUBSCRIBE_BASE_ID
+      : -1; // -1 if trying to unsubscrube if previously wasn't subscribed
+
+    const subscription = this.createSubscription(params, 'UNSUBSCRIBE', id);
+
+    this.websocketService.send(subscription);
+    delete this.subscriptions[stringifiedParams];
   }
 
   public handleWebsocketMessage(message: string) {

@@ -55,10 +55,7 @@ export class OrderBookFacade {
         })
       )
       .subscribe(([_tickerStatus, symbol]) => {
-        this.orderBookWebsocketService.subscribeToWebsocket(
-          { symbol },
-          this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-        );
+        this.orderBookWebsocketService.subscribe({ symbol });
       });
   }
 
@@ -85,10 +82,7 @@ export class OrderBookFacade {
       this.successUntil$,
       timer(delay),
     ]).subscribe(() => {
-      this.orderBookWebsocketService.subscribeToWebsocket(
-        { symbol },
-        this.orderBookWebsocketService.websocketSubscriptionId.subscribe
-      );
+      this.orderBookWebsocketService.subscribe({ symbol });
     });
   }
 
@@ -97,10 +91,7 @@ export class OrderBookFacade {
       this.globalFacade.globalSymbolCurrent$,
       this.websocketService.openCurrent$,
     ]).subscribe(([globalSymbol]) => {
-      this.orderBookWebsocketService.unsubscribeFromWebsocket(
-        { symbol: globalSymbol },
-        this.orderBookWebsocketService.websocketSubscriptionId.unsubscribe
-      );
+      this.orderBookWebsocketService.unsubscribe({ symbol: globalSymbol });
     });
   }
 

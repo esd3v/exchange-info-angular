@@ -75,10 +75,7 @@ export class PairsService {
       this.pageSymbolsWithoutGlobalSymbol$,
       this.websocketService.openCurrent$,
     ]).subscribe(([symbols]) => {
-      this.tickerWebsocketService.subscribeToWebsocket(
-        { symbols },
-        this.tickerWebsocketService.websocketSubscriptionId.subscribe.multiple
-      );
+      this.tickerWebsocketService.subscribe({ symbols });
     });
   }
 
@@ -87,10 +84,7 @@ export class PairsService {
       this.pageSymbolsWithoutGlobalSymbol$,
       this.websocketService.openCurrent$,
     ]).subscribe(([symbols]) => {
-      this.tickerWebsocketService.unsubscribeFromWebsocket(
-        { symbols },
-        this.tickerWebsocketService.websocketSubscriptionId.unsubscribe.multiple
-      );
+      this.tickerWebsocketService.unsubscribe({ symbols });
     });
   }
 

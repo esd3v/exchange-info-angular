@@ -1,12 +1,5 @@
-import { WebsocketSubscription } from 'src/app/websocket/services/websocket-subscribe.service';
-
 export interface WithWebsocket<T> {
-  websocketSubscriptionId: {
-    subscribe: number | Record<string, number>;
-    unsubscribe: number | Record<string, number>;
-  };
-
-  websocketSubscription(params: T, id: number): WebsocketSubscription;
-  subscribeToWebsocket(params: T, id: number): void;
-  unsubscribeFromWebsocket?(params: T, id: number): void;
+  createParams(params: T): string[];
+  subscribe(params: T, manualId: number): void;
+  unsubscribe?(params: T): void;
 }
