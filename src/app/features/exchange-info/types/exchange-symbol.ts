@@ -1,5 +1,15 @@
 import { OrderTypes } from './oder-types';
-import { SymbolFilters } from './symbol-filters';
+import {
+  PriceFilter,
+  PercentPriceFilter,
+  LotSizeFilter,
+  MinNotionalFilter,
+  IcebergPartsFilter,
+  MarketLotSizeFilter,
+  MaxNumOrdersFilter,
+  MaxNumAlgoOrdersFilter,
+  MaxPositionFilter,
+} from './symbol-filters';
 import { SymbolStatus } from './symbol-status';
 
 export interface ExchangeSymbol {
@@ -17,6 +27,16 @@ export interface ExchangeSymbol {
   quoteOrderQtyMarketAllowed: boolean;
   isSpotTradingAllowed: boolean;
   isMarginTradingAllowed: boolean;
-  filters: SymbolFilters;
+  filters: (
+    | PriceFilter
+    | PercentPriceFilter
+    | LotSizeFilter
+    | MinNotionalFilter
+    | IcebergPartsFilter
+    | MarketLotSizeFilter
+    | MaxNumOrdersFilter
+    | MaxNumAlgoOrdersFilter
+    | MaxPositionFilter
+  )[];
   permissions: ('SPOT' | 'MARGIN')[];
 }
