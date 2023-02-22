@@ -12,7 +12,7 @@ import {
   WEBSOCKET_ENABLED_AT_START,
   WEBSOCKET_START_DELAY,
 } from './shared/config';
-import { formatDecimal } from './shared/helpers';
+import { formatPrice } from './shared/helpers';
 import { WebsocketSubscribeService } from './websocket/services/websocket-subscribe.service';
 import { WebsocketService } from './websocket/services/websocket.service';
 
@@ -36,14 +36,17 @@ export class AppService {
     combineLatest([
       this.globalFacade.globalPair$,
       this.tickerFacade.lastPrice$,
-    ]).subscribe(([globalPair, lastPrice]) => {
-      const title = lastPrice
-        ? globalPair
-          ? `${formatDecimal(lastPrice)} | ${globalPair} | ${APP_SITE_NAME}`
-          : `${formatDecimal(lastPrice)} | ${APP_SITE_NAME}`
-        : globalPair
-        ? `${globalPair} | ${APP_SITE_NAME}`
-        : `${APP_SITE_NAME}`;
+      this.tickerFacade.tickSize$,
+    ]).subscribe(([globalPair, lastPrice, tickSize]) => {
+      const delimiter = ' | ';
+
+      const pricePart =
+        lastPrice && tickSize
+          ? `${formatPrice(lastPrice, tickSize)}${delimiter}`
+          : '';
+
+      const globalPairPart = globalPair ? `${globalPair}${delimiter}` : '';
+      const title = `${pricePart}${globalPairPart}${APP_SITE_NAME}`;
 
       this.titleService.setTitle(title);
     });

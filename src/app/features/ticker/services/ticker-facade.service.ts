@@ -21,6 +21,12 @@ export class TickerFacade {
 
   public lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
 
+  public tickSize$ = this.store$.select(tickerSelectors.tickSize);
+
+  public formattedLastPrice$ = this.store$.select(
+    tickerSelectors.formattedLastPrice
+  );
+
   public prevLastPrice$ = this.store$.select(tickerSelectors.prevLastPrice);
 
   public tickers$ = this.store$.select(tickerSelectors.tickers);
