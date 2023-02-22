@@ -12,6 +12,8 @@ export class TickerChangeComponent {
 
   public priceChange$ = this.tickerFacade.priceChange$.pipe(filter(Boolean));
 
+  public tickSize$ = this.tickerFacade.tickSize$.pipe(filter(Boolean));
+
   public positive$ = this.priceChange$.pipe(map(isPositive));
 
   public constructor(private tickerFacade: TickerFacade) {}

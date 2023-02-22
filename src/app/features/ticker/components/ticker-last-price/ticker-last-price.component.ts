@@ -11,6 +11,7 @@ export class TickerLastPriceComponent implements OnInit {
   public loading$ = this.tickerFacade.isLoading$;
 
   public lastPrice$ = this.tickerFacade.lastPrice$.pipe(filter(Boolean));
+  public tickSize$ = this.tickerFacade.tickSize$.pipe(filter(Boolean));
 
   public prevLastPrice$ = this.tickerFacade.prevLastPrice$.pipe(
     filter(Boolean)
