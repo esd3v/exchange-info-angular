@@ -1,7 +1,7 @@
+import { Big } from 'big.js';
 import { MISC_TOFIXED_DIGITS } from './config';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { Decimal } from 'decimal.js';
 import { Column } from './types/column';
 import { Row } from './types/row';
 import { SortOrder } from './types/sort-order';
@@ -34,19 +34,34 @@ export const parsePair = (pair: string, separator: '/' | '_') => {
 };
 
 export const formatDecimal = (value: number | string) => {
-  const number = new Decimal(value);
-  const formatted = number.valueOf();
+  // e.g 0.00000001 is '0.00000001' instead of 1e-8
+  // also trims zeros at the end
+  // e.g 0.00100000 is 0.001
+  return new Big(value).toFixed();
+};
 
-  // If value is too small (e.g 0.00000041 and it formatted to 4.1e-7)...
-  // ...don't format it, just return the original string
-  return isScientific(formatted) ? value : formatted;
+export const formatPrice = (
+  amount: string | number,
+  stepOrTickSize: string | number
+) => {
+  const stepOrTickSizeFixed = formatDecimal(stepOrTickSize);
+
+  // e.g 0.00100000 === 0.001 === 001.length === 3
+  const precision =
+    Number(stepOrTickSizeFixed) === 0
+      ? 0
+      : stepOrTickSizeFixed.split('.')[1].length;
+
+  return (
+    Math.ceil(Number(amount) / Number(stepOrTickSize)) * Number(stepOrTickSize)
+  ).toFixed(precision);
 };
 
 export const multiplyDecimal = (a: number | string, b: number | string) => {
-  const da = new Decimal(a);
-  const db = new Decimal(b);
+  const da = new Big(a);
+  const db = new Big(b);
 
-  return da.times(db).valueOf();
+  return da.times(db).toFixed();
 };
 
 export function numberWithCommas(x: string, symbol = ',') {
