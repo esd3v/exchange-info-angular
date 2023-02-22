@@ -3,7 +3,6 @@ import { Filter } from './filter';
 export type PriceFilter = Filter<
   'PRICE_FILTER',
   {
-    filterType: 'PRICE_FILTER';
     minPrice: string;
     maxPrice: string;
     tickSize: string;

@@ -14,3 +14,5 @@ export type NgChanges<Component, Props = ExcludeFunctions<Component>> = {
     isFirstChange(): boolean;
   };
 };
+
+export type ValueOf<T> = T[keyof T];

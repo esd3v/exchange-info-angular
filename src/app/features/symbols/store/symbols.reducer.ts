@@ -1,5 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import { symbolsActions } from '.';
+import { PriceFilter } from '../../exchange-info/types/symbol-filters';
 import {
   symbolsAdapter,
   ExchangeSymbolEntity,
@@ -10,9 +11,28 @@ export const symbolsReducer = createReducer(
   initialState,
   on(symbolsActions.create, (state, { symbols }) => {
     const mapped = symbols.map((item) => {
-      const { symbol, baseAsset, quoteAsset, status } = item;
+      const { symbol, baseAsset, quoteAsset, status, filters } = item;
 
-      return { symbol, baseAsset, quoteAsset, status };
+      // TODO Move filter to a new store slice?
+      const priceFilter = filters.find(
+        ({ filterType }) => filterType === 'PRICE_FILTER'
+      ) as PriceFilter | undefined;
+
+      const tickSize = priceFilter?.tickSize;
+      const minPrice = priceFilter?.minPrice;
+      const maxPrice = priceFilter?.maxPrice;
+
+      return {
+        symbol,
+        baseAsset,
+        quoteAsset,
+        status,
+        PRICE_FILTER: {
+          tickSize,
+          maxPrice,
+          minPrice,
+        },
+      };
     }) as ExchangeSymbolEntity[];
 
     return symbolsAdapter.setAll(mapped, state);
