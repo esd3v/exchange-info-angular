@@ -6,10 +6,16 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { combineLatest, map, Observable } from 'rxjs';
+import { combineLatest, filter, map, mergeMap, Observable } from 'rxjs';
+import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
+import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { formatDecimal, multiplyDecimal } from 'src/app/shared/helpers';
+import {
+  formatDecimal,
+  formatPrice,
+  multiplyDecimal,
+} from 'src/app/shared/helpers';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
 import { OrderBookFacade } from '../../services/order-book-facade.service';
@@ -66,11 +72,22 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public columnLabels: string[] = [];
 
-  public loading$ = this.orderBookFacade.isLoading$;
+  // tickSize for price comes from exchangeInfo so we also check exchangeInfo loading
+  public loading$ = combineLatest([
+    this.orderBookFacade.isLoading$,
+    this.exchangeInfoFacade.isLoading$,
+  ]).pipe(
+    map(
+      ([orderBookLoading, exchangeInfoLoading]) =>
+        orderBookLoading === true || exchangeInfoLoading === true
+    )
+  );
 
   public constructor(
     private orderBookFacade: OrderBookFacade,
-    private globalFacade: GlobalFacade
+    private globalFacade: GlobalFacade,
+    private tickerFacade: TickerFacade,
+    private exchangeInfoFacade: ExchangeInfoFacade
   ) {}
 
   public trackRow(_index: number, _item: Row) {
@@ -90,19 +107,25 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   private createRows$(): Observable<Row[]> {
     return this.getOrderBook$().pipe(
-      map((data) => {
+      mergeMap((data) =>
+        this.tickerFacade.tickSize$.pipe(
+          filter(Boolean),
+          map((tickerSize) => [data, tickerSize] as const)
+        )
+      ),
+      map(([data, tickSize]) => {
         return data.map((item) => {
           const [price, quantity] = item;
-          const dPrice = formatDecimal(price);
-          const dQuantity = formatDecimal(quantity);
-          const total = multiplyDecimal(dPrice, dQuantity);
+          const formattedPrice = formatPrice(price, tickSize);
+          const formattedQuantity = formatDecimal(quantity); // TODO use stepSize from LOT_SIZE filter?
+          const total = multiplyDecimal(formattedPrice, formattedQuantity);
 
           return [
             {
-              value: dPrice,
+              value: formattedPrice,
             },
             {
-              value: dQuantity,
+              value: formattedQuantity,
             },
             {
               value: total,

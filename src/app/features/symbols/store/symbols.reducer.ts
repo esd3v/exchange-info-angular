@@ -27,6 +27,7 @@ export const symbolsReducer = createReducer(
         baseAsset,
         quoteAsset,
         status,
+        // TODO Add LOT_SIZE (with stepSize) for quantity formatting
         PRICE_FILTER: {
           tickSize,
           maxPrice,
