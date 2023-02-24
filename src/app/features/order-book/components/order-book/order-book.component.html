@@ -1,7 +1,7 @@
 <app-window [title]="title">
   <table
     mat-table
-    class="order-book"
+    [ngClass]="tableClass"
     [trackBy]="trackRow"
     [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
   >
@@ -11,10 +11,7 @@
       }
     >
       <th
-        [ngClass]="{
-          'order-book__cell': true,
-          'order-book__cell--alignedRight': column.numeric
-        }"
+        [ngClass]="[cellClass, column.numeric ? cellRightClass : '']"
         mat-header-cell
         *matHeaderCellDef
       >
@@ -22,14 +19,14 @@
       </th>
       <td
         *matCellDef="let element"
-        [ngClass]="{
-          'order-book__cell': true,
-          'order-book__cell--alignedRight': column.numeric,
-          'order-book__cell--positive':
-            column.id === 'price' && this.type === 'bids',
-          'order-book__cell--negative':
-            column.id === 'price' && this.type === 'asks'
-        }"
+        [ngClass]="[
+          cellClass,
+          column.numeric ? cellRightClass : '',
+          column.id === 'price' && this.type === 'bids'
+            ? cellPositiveClass
+            : '',
+          column.id === 'price' && this.type === 'asks' ? cellNegativeClass : ''
+        ]"
         mat-cell
       >
         <ng-template [ngIf]="(loading$ | async) === true">
@@ -42,7 +39,7 @@
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns$ | async"></tr>
     <tr
-      class="table__row"
+      [ngClass]="rowClass"
       mat-row
       *matRowDef="let row; columns: displayedColumns$ | async"
     ></tr>

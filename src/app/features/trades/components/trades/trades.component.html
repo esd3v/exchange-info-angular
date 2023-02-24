@@ -1,7 +1,7 @@
 <app-window title="Trades">
   <table
     mat-table
-    class="trades"
+    [ngClass]="tableClass"
     [trackBy]="trackRow"
     [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
   >
@@ -11,10 +11,7 @@
       }
     >
       <th
-        [ngClass]="{
-          trades__cell: true,
-          'trades__cell--alignedRight': column.numeric
-        }"
+        [ngClass]="[cellClass, column.numeric ? cellRightClass : '']"
         mat-header-cell
         *matHeaderCellDef
       >
@@ -23,10 +20,7 @@
       <td
         *matCellDef="let row"
         [class]="row[columnIndex]?.className"
-        [ngClass]="{
-          trades__cell: true,
-          'trades__cell--alignedRight': column.numeric
-        }"
+        [ngClass]="[cellClass, column.numeric ? cellRightClass : '']"
         mat-cell
       >
         <ng-template [ngIf]="(loading$ | async) === true">
@@ -39,7 +33,7 @@
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns$ | async"></tr>
     <tr
-      class="table__row"
+      [ngClass]="rowClass"
       mat-row
       *matRowDef="let row; columns: displayedColumns$ | async"
     ></tr>

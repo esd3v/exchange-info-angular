@@ -21,6 +21,13 @@ import { TradesColumn } from '../../types/trades-column';
 export class TradesComponent implements OnInit {
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
+  public tableClass = 'trades';
+  public rowClass = `${this.tableClass}__row`;
+  public cellClass = `${this.tableClass}__cell`;
+  public cellPositiveClass = `${this.cellClass}--positive`;
+  public cellNegativeClass = `${this.cellClass}--negative`;
+  public cellRightClass = `${this.cellClass}--alignedRight`;
+
   public placeholderRows = Array<Row>(WIDGET_TRADES_DEFAULT_LIMIT).fill([
     { value: '' },
   ]);
@@ -83,8 +90,8 @@ export class TradesComponent implements OnInit {
             {
               value: dPrice,
               className: isBuyerMaker
-                ? 'trades__cell--positive'
-                : 'trades__cell--negative',
+                ? this.cellNegativeClass
+                : this.cellPositiveClass,
             },
             {
               value: dQty,

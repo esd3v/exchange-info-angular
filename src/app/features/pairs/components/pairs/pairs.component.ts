@@ -40,6 +40,13 @@ import { PairColumn } from '../../types/pair-column';
 export class PairsComponent implements OnDestroy, OnInit {
   @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
 
+  public tableClass = 'pairs';
+  public rowClass = `${this.tableClass}__row`;
+  public cellClass = `${this.tableClass}__cell`;
+  public cellPositiveClass = `${this.cellClass}--positive`;
+  public cellNegativeClass = `${this.cellClass}--negative`;
+  public cellRightClass = `${this.cellClass}--alignedRight`;
+
   private tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
   private debounceTime = 1000;
   private pageClicks$ = new Subject<PageEvent>();
@@ -135,9 +142,9 @@ export class PairsComponent implements OnDestroy, OnInit {
             value: formattedPrice,
             className: prevLastPrice
               ? lastPrice > prevLastPrice
-                ? 'pairs__cell--positive'
+                ? this.cellPositiveClass
                 : lastPrice < prevLastPrice
-                ? 'pairs__cell--negative'
+                ? this.cellNegativeClass
                 : null
               : null,
           },
@@ -145,9 +152,9 @@ export class PairsComponent implements OnDestroy, OnInit {
             value: priceChangePercentFormatted,
             className:
               Number(priceChangePercent) > 0
-                ? 'pairs__cell--positive'
+                ? this.cellPositiveClass
                 : Number(priceChangePercent) < 0
-                ? 'pairs__cell--negative'
+                ? this.cellNegativeClass
                 : null,
           },
         ]);

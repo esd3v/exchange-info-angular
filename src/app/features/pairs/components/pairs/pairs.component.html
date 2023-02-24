@@ -1,7 +1,7 @@
 <app-window title="Pairs">
   <table
     mat-table
-    class="pairs"
+    [ngClass]="tableClass"
     [trackBy]="trackRow"
     [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
   >
@@ -11,10 +11,7 @@
       }
     >
       <th
-        [ngClass]="{
-          pairs__cell: true,
-          'pairs__cell--alignedRight': column.numeric
-        }"
+        [ngClass]="[cellClass, column.numeric ? cellRightClass : '']"
         mat-header-cell
         *matHeaderCellDef
       >
@@ -23,10 +20,7 @@
       <td
         *matCellDef="let row"
         [class]="row[columnIndex].className"
-        [ngClass]="{
-          pairs__cell: true,
-          'pairs__cell--alignedRight': column.numeric
-        }"
+        [ngClass]="[cellClass, column.numeric ? cellRightClass : '']"
         mat-cell
       >
         <ng-template [ngIf]="(loading$ | async) === true">
@@ -39,7 +33,7 @@
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr
-      class="pairs__row"
+      [ngClass]="[rowClass]"
       mat-row
       *matRowDef="let row; columns: displayedColumns"
       (click)="handleRowClick(row)"
