@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,7 +7,6 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { Location } from '@angular/common';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
@@ -14,21 +14,21 @@ import { Dictionary } from '@ngrx/entity';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, map, Subject } from 'rxjs';
 import { debounceTime, filter, first } from 'rxjs/operators';
+import { globalActions } from 'src/app/features/global/store';
+import { symbolsSelectors } from 'src/app/features/symbols/store';
+import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
+import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import {
-  formatDecimal,
+  formatPrice,
   getCellByColumnId,
   parsePair,
 } from 'src/app/shared/helpers';
-import { AppState } from 'src/app/store';
-import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
-import { PairColumn } from '../../types/pair-column';
-import { PairsService } from '../../services/pairs.service';
 import { Row } from 'src/app/shared/types/row';
-import { symbolsSelectors } from 'src/app/features/symbols/store';
-import { globalActions } from 'src/app/features/global/store';
-import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
+import { AppState } from 'src/app/store';
+import { PairsService } from '../../services/pairs.service';
+import { PairColumn } from '../../types/pair-column';
 
 @Component({
   selector: 'app-pairs',
@@ -112,14 +112,18 @@ export class PairsComponent implements OnDestroy, OnInit {
   ) {
     const rows: Row[] = [];
 
-    for (const { baseAsset, quoteAsset } of symbols) {
+    for (const {
+      baseAsset,
+      quoteAsset,
+      PRICE_FILTER: { tickSize },
+    } of symbols) {
       const symbol = `${baseAsset}${quoteAsset}`;
       const pair = `${baseAsset}/${quoteAsset}`;
       const ticker = tickers[symbol];
 
       if (ticker) {
         const { lastPrice, priceChangePercent, prevLastPrice } = ticker;
-        const dLastPrice = formatDecimal(lastPrice);
+        const formattedPrice = formatPrice(lastPrice, tickSize);
 
         const priceChangePercentFormatted = `${
           Number(priceChangePercent) > 0 ? '+' : ''
@@ -128,7 +132,7 @@ export class PairsComponent implements OnDestroy, OnInit {
         rows.push([
           { value: pair },
           {
-            value: dLastPrice,
+            value: formattedPrice,
             className: prevLastPrice
               ? lastPrice > prevLastPrice
                 ? 'pairs__cell--positive'

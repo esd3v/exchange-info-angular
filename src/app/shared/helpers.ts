@@ -45,12 +45,14 @@ export const formatPrice = (
   stepOrTickSize: string | number
 ) => {
   const stepOrTickSizeFixed = formatDecimal(stepOrTickSize);
+  const split = stepOrTickSizeFixed.split('.');
 
-  // e.g 0.00100000 === 0.001 === 001.length === 3
   const precision =
-    Number(stepOrTickSizeFixed) === 0
+    // e.g 123456.000 === 123456 === ['123456']
+    split.length <= 1
       ? 0
-      : stepOrTickSizeFixed.split('.')[1].length;
+      : // e.g 0.00100000 === 0.001 === 001.length === 3
+        split[1].length;
 
   return (
     Math.ceil(Number(amount) / Number(stepOrTickSize)) * Number(stepOrTickSize)
