@@ -15,6 +15,7 @@ import {
   formatDecimal,
   formatPrice,
   multiplyDecimal,
+  sortRows,
 } from 'src/app/shared/helpers';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
@@ -141,7 +142,11 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public ngOnInit(): void {
     this.createRows$().subscribe((data) => {
-      this.dataSource.data = data;
+      this.dataSource.data = sortRows({
+        headCellIndex: 0,
+        order: 'desc',
+        rows: data,
+      });
     });
 
     this.columns$.subscribe((data) => {

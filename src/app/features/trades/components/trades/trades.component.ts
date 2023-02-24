@@ -7,6 +7,7 @@ import {
   formatDecimal,
   getFormattedDate,
   multiplyDecimal,
+  sortRows,
 } from 'src/app/shared/helpers';
 import { Row } from 'src/app/shared/types/row';
 import { TradesFacade } from '../../services/trades-facade.service';
@@ -113,7 +114,11 @@ export class TradesComponent implements OnInit {
 
   public ngOnInit(): void {
     this.createRows$().subscribe((data) => {
-      this.dataSource.data = data;
+      this.dataSource.data = sortRows({
+        headCellIndex: 0,
+        order: 'asc',
+        rows: data,
+      });
     });
 
     this.columns$.subscribe((data) => {
