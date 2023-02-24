@@ -1,10 +1,12 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { map, Observable } from 'rxjs';
+import { filter, map, mergeMap, Observable } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
+import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import {
   formatDecimal,
+  formatPrice,
   getFormattedDate,
   multiplyDecimal,
   sortRows,
@@ -71,7 +73,8 @@ export class TradesComponent implements OnInit {
 
   public constructor(
     private globalFacade: GlobalFacade,
-    private tradesFacade: TradesFacade
+    private tradesFacade: TradesFacade,
+    private tickerFacade: TickerFacade
   ) {}
 
   public trackRow(_index: number, _item: Row) {
@@ -80,22 +83,28 @@ export class TradesComponent implements OnInit {
 
   private createRows$(): Observable<Row[]> {
     return this.tradesFacade.trades$.pipe(
-      map((data) => {
+      mergeMap((data) =>
+        this.tickerFacade.tickSize$.pipe(
+          filter(Boolean),
+          map((tickSize) => [data, tickSize] as const)
+        )
+      ),
+      map(([data, tickSize]) => {
         return data.map((item) => {
           const { isBuyerMaker, price, qty, time } = item;
-          const dPrice = formatDecimal(price);
-          const dQty = formatDecimal(qty);
-          const total = multiplyDecimal(dPrice, dQty);
+          const formattedPrice = formatPrice(price, tickSize);
+          const formattedQty = formatDecimal(qty);
+          const total = multiplyDecimal(formattedPrice, formattedQty);
 
           return [
             {
-              value: dPrice,
+              value: formattedPrice,
               className: isBuyerMaker
                 ? this.cellNegativeClass
                 : this.cellPositiveClass,
             },
             {
-              value: dQty,
+              value: formattedQty,
             },
             {
               value: total,
