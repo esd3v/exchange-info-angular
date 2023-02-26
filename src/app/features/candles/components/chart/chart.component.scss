@@ -1,5 +1,6 @@
 .chart {
-  height: #{(592 - 8)-8}px;
+  $pairsHeight: 465;
+  height: #{($pairsHeight - 8)-8}px;
 }
 
 .time {
