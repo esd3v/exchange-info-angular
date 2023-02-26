@@ -32,9 +32,7 @@ export class TradesComponent implements OnInit {
   public cellNegativeClass = `${this.cellClass}--negative`;
   public cellRightClass = `${this.cellClass}--alignedRight`;
 
-  public placeholderRows = Array<Row>(WIDGET_TRADES_DEFAULT_LIMIT).fill([
-    { value: '' },
-  ]);
+  public placeholderRows = Array<Row>(WIDGET_TRADES_DEFAULT_LIMIT).fill([]);
 
   public columns$: Observable<TradesColumn[]> =
     this.globalFacade.currency$.pipe(

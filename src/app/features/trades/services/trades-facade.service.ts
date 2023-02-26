@@ -24,7 +24,9 @@ export class TradesFacade {
     first() // Order shouldn't be changed
   );
 
-  public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
+  public isLoading$ = this.status$.pipe(
+    map((status) => (status === 'init' ? null : status === 'loading'))
+  );
 
   public trades$ = this.store$.select(tradesSelectors.data);
 
