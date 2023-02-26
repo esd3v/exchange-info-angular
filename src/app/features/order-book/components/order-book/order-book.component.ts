@@ -83,7 +83,7 @@ export class OrderBookComponent implements OnInit, OnChanges {
   ]).pipe(
     map(
       ([orderBookLoading, exchangeInfoLoading]) =>
-        orderBookLoading === true || exchangeInfoLoading === true
+        orderBookLoading || exchangeInfoLoading
     )
   );
 

@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { filter, map, mergeMap, Observable } from 'rxjs';
+import { combineLatest, filter, map, mergeMap, Observable } from 'rxjs';
+import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
@@ -69,12 +70,22 @@ export class TradesComponent implements OnInit {
 
   public columnLabels: string[] = [];
 
-  public loading$ = this.tradesFacade.isLoading$;
+  // tickSize for price comes from exchangeInfo so we also check exchangeInfo loading
+  public loading$ = combineLatest([
+    this.tradesFacade.isLoading$,
+    this.exchangeInfoFacade.isLoading$,
+  ]).pipe(
+    map(
+      ([tradesLoading, exchangeInfoLoading]) =>
+        tradesLoading || exchangeInfoLoading
+    )
+  );
 
   public constructor(
     private globalFacade: GlobalFacade,
     private tradesFacade: TradesFacade,
-    private tickerFacade: TickerFacade
+    private tickerFacade: TickerFacade,
+    private exchangeInfoFacade: ExchangeInfoFacade
   ) {}
 
   public trackRow(_index: number, _item: Row) {
