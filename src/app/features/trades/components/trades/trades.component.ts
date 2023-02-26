@@ -102,7 +102,7 @@ export class TradesComponent implements OnInit {
         return data.map((item) => {
           const { isBuyerMaker, price, qty, time } = item;
           const formattedPrice = formatPrice(price, tickSize);
-          const formattedQty = formatDecimal(qty);
+          const formattedQty = formatDecimal(qty); // TODO use stepSize from for quantity formatting
           const total = multiplyDecimal(formattedPrice, formattedQty);
 
           return [

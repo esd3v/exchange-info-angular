@@ -68,15 +68,16 @@ export class TradesFacade {
   }
 
   public handleWebsocketData({ p, q, m, T }: WebsocketTrades) {
-    const trades: TradesEntity = {
-      price: p,
-      qty: q,
-      isBuyerMaker: m,
-      time: T,
-    };
-
-    this.store$.dispatch(tradesActions.add({ trades }));
-    this.store$.dispatch(tradesActions.removeLast());
+    this.store$.dispatch(
+      tradesActions.addAndRemoveLast({
+        trades: {
+          price: p,
+          qty: q,
+          isBuyerMaker: m,
+          time: T,
+        },
+      })
+    );
   }
 
   public loadDataAndSubscribe(
