@@ -3,7 +3,11 @@
     mat-table
     [ngClass]="tableClass"
     [trackBy]="trackRow"
-    [dataSource]="(loading$ | async) === true ? placeholderRows : dataSource"
+    [dataSource]="
+      (loading$ | async) === true || (loading$ | async) === null
+        ? placeholderRows
+        : dataSource
+    "
   >
     <ng-container
       *ngFor="let column of columns$ | async; let columnIndex = index"
@@ -29,11 +33,13 @@
         ]"
         mat-cell
       >
-        <ng-template [ngIf]="(loading$ | async) === true">
+        <ng-template
+          [ngIf]="(loading$ | async) === true || (loading$ | async) === null"
+        >
           <ngx-skeleton-loader appSkeleton width="80%"></ngx-skeleton-loader>
         </ng-template>
         <ng-template [ngIf]="(loading$ | async) === false">
-          {{ element[columnIndex].value }}
+          {{ element[columnIndex]?.value }}
         </ng-template>
       </td>
     </ng-container>

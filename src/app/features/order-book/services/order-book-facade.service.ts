@@ -14,7 +14,9 @@ import { OrderBookWebsocketService } from './order-book-websocket.service';
 export class OrderBookFacade {
   private status$ = this.store$.select(orderBookSelectors.status);
 
-  public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
+  public isLoading$ = this.status$.pipe(
+    map((status) => (status === 'init' ? null : status === 'loading'))
+  );
 
   public successCurrent$ = this.status$.pipe(
     first(), // Order shouldn't be changed

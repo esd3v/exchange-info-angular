@@ -41,9 +41,7 @@ export class OrderBookComponent implements OnInit, OnChanges {
 
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
-  public placeholderRows = Array<Row>(WIDGET_DEPTH_DEFAULT_LIMIT).fill([
-    { value: '' },
-  ]);
+  public placeholderRows = Array<Row>(WIDGET_DEPTH_DEFAULT_LIMIT).fill([]);
 
   public title = this.getTitle(this.type);
 
