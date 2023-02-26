@@ -10,7 +10,9 @@ import { exchangeInfoActions, exchangeInfoSelectors } from '../store';
 export class ExchangeInfoFacade {
   public status$ = this.store$.select(exchangeInfoSelectors.status);
 
-  public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
+  public isLoading$ = this.status$.pipe(
+    map((status) => (status === 'init' ? null : status === 'loading'))
+  );
 
   public constructor(private store$: Store<AppState>) {}
 

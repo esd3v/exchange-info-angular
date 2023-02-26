@@ -14,6 +14,7 @@ import { Dictionary } from '@ngrx/entity';
 import { Store } from '@ngrx/store';
 import { combineLatest, interval, map, Subject } from 'rxjs';
 import { debounceTime, filter, first } from 'rxjs/operators';
+import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
 import { globalActions } from 'src/app/features/global/store';
 import { symbolsSelectors } from 'src/app/features/symbols/store';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
@@ -50,7 +51,6 @@ export class PairsComponent implements OnDestroy, OnInit {
   private tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
   private debounceTime = 1000;
   private pageClicks$ = new Subject<PageEvent>();
-  private tradingSymbolsStatus$ = this.store$.select(symbolsSelectors.status);
   public pageSizeOptions = [15];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
@@ -62,19 +62,15 @@ export class PairsComponent implements OnDestroy, OnInit {
 
   public displayedColumns: string[] = this.columns.map((item) => item.id);
 
-  public placeholderRows = Array<Row>(this.pageSize).fill([
-    { value: '' },
-    { value: '' },
-    { value: '' },
-  ]);
+  public placeholderRows = Array<Row>(this.pageSize).fill([]);
 
   public loading$ = combineLatest([
-    this.tickerFacade.status$,
-    this.tradingSymbolsStatus$,
+    this.tickerFacade.isLoading$,
+    this.exchangeInfoFacade.isLoading$,
   ]).pipe(
     map(
-      ([tickerStatus, tradingSymbolsStatus]) =>
-        tickerStatus === 'loading' || tradingSymbolsStatus === 'loading'
+      ([tickerLoading, exchangeInfoLoading]) =>
+        tickerLoading || exchangeInfoLoading
     )
   );
 
@@ -95,7 +91,8 @@ export class PairsComponent implements OnDestroy, OnInit {
     private tickerFacade: TickerFacade,
     private store$: Store<AppState>,
     private location: Location,
-    private router: Router
+    private router: Router,
+    private exchangeInfoFacade: ExchangeInfoFacade
   ) {}
 
   public trackRow(_index: number, _row: Row) {
@@ -140,22 +137,22 @@ export class PairsComponent implements OnDestroy, OnInit {
           { value: pair },
           {
             value: formattedPrice,
-            className: prevLastPrice
+            classNames: prevLastPrice
               ? lastPrice > prevLastPrice
                 ? this.cellPositiveClass
                 : lastPrice < prevLastPrice
                 ? this.cellNegativeClass
-                : null
-              : null,
+                : ''
+              : '',
           },
           {
             value: priceChangePercentFormatted,
-            className:
+            classNames:
               Number(priceChangePercent) > 0
                 ? this.cellPositiveClass
                 : Number(priceChangePercent) < 0
                 ? this.cellNegativeClass
-                : null,
+                : '',
           },
         ]);
       }
