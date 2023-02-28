@@ -132,6 +132,7 @@ export class CandlesFacade {
       if (ohlcExists) {
         this.store$.dispatch(candlesActions.updateCandle({ candle }));
       } else {
+        // TODO merge functionality with removeFirstCandle, rename to addCandleAndRemoveFirst and remove removeFirstCandle
         this.store$.dispatch(candlesActions.addCandle({ candle }));
         this.store$.dispatch(candlesActions.removeFirstCandle());
       }

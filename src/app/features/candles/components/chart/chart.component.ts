@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { ECharts, EChartsOption } from 'echarts';
-import { combineLatest, filter, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, filter } from 'rxjs';
 import { CandlesFacade } from '../../services/candles-facade.service';
 import { CandleInterval } from '../../types/candle-interval';
 
@@ -11,7 +11,7 @@ import { CandleInterval } from '../../types/candle-interval';
   styleUrls: ['./chart.component.scss'],
 })
 export class ChartComponent implements OnInit {
-  private chartInstance$ = new Subject<ECharts | null>();
+  private chartInstance$ = new BehaviorSubject<ECharts | null>(null);
   private upColor = '#00da3c';
   private downColor = '#ec0000';
   private barMinWidth = 6;
@@ -155,6 +155,8 @@ export class ChartComponent implements OnInit {
     ],
   };
 
+  public mergeOptions: EChartsOption = {};
+
   public constructor(private candlesFacade: CandlesFacade) {}
 
   public onChartInit($event: ECharts) {
@@ -178,7 +180,7 @@ export class ChartComponent implements OnInit {
       this.candlesFacade.dates$.pipe(filter((item) => Boolean(item.length))),
       this.candlesFacade.volumes$.pipe(filter((item) => Boolean(item.length))),
     ]).subscribe(([instance, ohlc, dates, volumes]) => {
-      instance.setOption({
+      this.mergeOptions = {
         xAxis: [
           {
             data: dates,
@@ -195,7 +197,7 @@ export class ChartComponent implements OnInit {
             data: volumes,
           },
         ],
-      });
+      };
     });
   }
 }
