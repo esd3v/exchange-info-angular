@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChartModule } from 'src/app/features/candles/components/chart/chart.module';
 import { OrderBookModule } from 'src/app/features/order-book/components/order-book/order-book.module';
 import { PairsModule } from 'src/app/features/pairs/components/pairs/pairs.module';
@@ -16,6 +17,7 @@ import { HomeComponent } from './home.component';
     ChartModule,
     OrderBookModule,
     TradesModule,
+    MatSnackBarModule,
   ],
   exports: [HomeComponent],
 })
