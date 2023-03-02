@@ -179,7 +179,7 @@ export class ChartComponent implements OnInit {
       this.candlesFacade.ohlc$.pipe(filter((item) => Boolean(item.length))),
       this.candlesFacade.dates$.pipe(filter((item) => Boolean(item.length))),
       this.candlesFacade.volumes$.pipe(filter((item) => Boolean(item.length))),
-    ]).subscribe(([instance, ohlc, dates, volumes]) => {
+    ]).subscribe(([_instance, ohlc, dates, volumes]) => {
       this.mergeOptions = {
         xAxis: [
           {

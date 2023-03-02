@@ -6,7 +6,6 @@ import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
 import { tradesActions, tradesSelectors } from '../store';
-import { TradesEntity } from '../store/trades.state';
 import { WebsocketTrades } from '../types/websocket-trades';
 import { TradesWebsocketService } from './trades-websocket.service';
 
