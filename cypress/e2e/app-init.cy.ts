@@ -2,12 +2,14 @@ import { CandleInterval } from 'src/app/features/candles/types/candle-interval';
 import { createPair } from 'src/app/shared/helpers';
 import {
   API_HTTP_BASEURL,
+  APP_DEFAULT_BASE_CURRENCY,
+  APP_DEFAULT_QUOTE_CURRENCY,
   WIDGET_CHART_DEFAULT_CANDLEINTERVAL,
   WIDGET_DEPTH_DEFAULT_LIMIT,
   WIDGET_TRADES_DEFAULT_LIMIT,
 } from '../../src/app/shared/config';
 
-const pair = createPair('ETH', 'BTC');
+const pair = createPair(APP_DEFAULT_BASE_CURRENCY, APP_DEFAULT_QUOTE_CURRENCY);
 const status = 200;
 const loadCount = 1;
 const interval: CandleInterval = WIDGET_CHART_DEFAULT_CANDLEINTERVAL;
