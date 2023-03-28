@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { map } from 'rxjs';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { WEBSOCKET_ENABLED_AT_START } from '../../config';
+import { WebsocketSwitchService } from './websocket-switch.service';
 
 @Component({
   selector: 'app-websocket-switch',
@@ -10,22 +10,29 @@ import { WEBSOCKET_ENABLED_AT_START } from '../../config';
   styleUrls: ['./websocket-switch.component.scss'],
 })
 export class WebsocketSwitchComponent {
-  public checked = WEBSOCKET_ENABLED_AT_START;
-
   public disabled$ = this.websocketService.status$.pipe(
     map((status) =>
-      status === 'closing' || status === 'connecting' ? true : false
+      status === 'closing' || status === 'connecting' || status === null
+        ? true
+        : false
     )
   );
 
-  public constructor(private websocketService: WebsocketService) {}
+  public constructor(
+    private websocketService: WebsocketService,
+    public websocketSwitchService: WebsocketSwitchService
+  ) {}
 
   public handleChange({ checked }: MatSlideToggleChange) {
     if (checked) {
+      this.websocketSwitchService.checked$.next(true);
+
       this.websocketService.closedOrNullCurrent$.subscribe(() => {
         this.websocketService.connect('switch');
       });
     } else {
+      this.websocketSwitchService.checked$.next(false);
+
       this.websocketService.openCurrent$.subscribe(() => {
         this.websocketService.close();
       });
