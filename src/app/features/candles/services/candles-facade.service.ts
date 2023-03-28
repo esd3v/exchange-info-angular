@@ -17,17 +17,16 @@ import { CandlesWebsocketService } from './candles-websocket.service';
 export class CandlesFacade {
   public interval$ = this.store$.select(candlesSelectors.interval);
   public status$ = this.store$.select(candlesSelectors.status);
-
   public intervalCurrent$ = this.interval$.pipe(first());
 
   public successCurrent$ = this.status$.pipe(
-    first(), // Order shouldn't be changed
+    first(),
     filter((status) => status === 'success')
   );
 
   public successUntil$ = this.status$.pipe(
     filter((status) => status === 'success'),
-    first() // Order shouldn't be changed
+    first()
   );
 
   public isLoading$ = this.status$.pipe(map((status) => status === 'loading'));
@@ -75,22 +74,6 @@ export class CandlesFacade {
 
         this.candlesWebsocketService.subscribe({ symbol, interval });
       });
-  }
-
-  public loadDataAndSubscribe(
-    { interval, symbol }: Parameters<typeof this.loadData>[0],
-    delay: number
-  ) {
-    this.loadData({
-      symbol,
-      interval,
-    });
-
-    combineLatest([this.websocketService.openCurrent$, timer(delay)]).subscribe(
-      () => {
-        this.candlesWebsocketService.subscribe({ interval, symbol });
-      }
-    );
   }
 
   public unsubscribeCurrent() {
@@ -141,5 +124,23 @@ export class CandlesFacade {
 
   public loadData(params: Parameters<typeof candlesActions.load>[0]) {
     this.store$.dispatch(candlesActions.load(params));
+  }
+
+  public loadDataAndSubscribe(
+    { interval, symbol }: Parameters<typeof this.loadData>[0],
+    delay: number
+  ) {
+    this.loadData({
+      symbol,
+      interval,
+    });
+
+    combineLatest([
+      this.successUntil$,
+      this.websocketService.openCurrent$,
+      timer(delay),
+    ]).subscribe(() => {
+      this.candlesWebsocketService.subscribe({ interval, symbol });
+    });
   }
 }

@@ -14,13 +14,13 @@ export class TradesFacade {
   private status$ = this.store$.select(tradesSelectors.status);
 
   public successCurrent$ = this.status$.pipe(
-    first(), // Order shouldn't be changed
+    first(),
     filter((status) => status === 'success')
   );
 
   public successUntil$ = this.status$.pipe(
     filter((status) => status === 'success'),
-    first() // Order shouldn't be changed
+    first()
   );
 
   public isLoading$ = this.status$.pipe(
@@ -39,14 +39,7 @@ export class TradesFacade {
   public onAppInit({
     symbol,
   }: Pick<Parameters<typeof tradesActions.load>[0], 'symbol'>) {
-    this.loadData({ symbol });
-
-    combineLatest([
-      this.successUntil$,
-      this.websocketService.openCurrent$,
-    ]).subscribe(() => {
-      this.tradesWebsocketService.subscribe({ symbol });
-    });
+    this.loadDataAndSubscribe({ symbol }, 0);
   }
 
   public onWebsocketOpen() {
@@ -79,19 +72,6 @@ export class TradesFacade {
     );
   }
 
-  public loadDataAndSubscribe(
-    { symbol }: Parameters<typeof this.loadData>[0],
-    delay: number
-  ) {
-    this.loadData({ symbol });
-
-    combineLatest([this.websocketService.openCurrent$, timer(delay)]).subscribe(
-      () => {
-        this.tradesWebsocketService.subscribe({ symbol });
-      }
-    );
-  }
-
   public unsubscribeCurrent() {
     combineLatest([
       this.globalFacade.globalSymbolCurrent$,
@@ -108,5 +88,20 @@ export class TradesFacade {
     limit = WIDGET_TRADES_DEFAULT_LIMIT,
   }: Parameters<typeof tradesActions.load>[0]) {
     this.store$.dispatch(tradesActions.load({ symbol, limit }));
+  }
+
+  public loadDataAndSubscribe(
+    { symbol }: Parameters<typeof this.loadData>[0],
+    delay: number
+  ) {
+    this.loadData({ symbol });
+
+    combineLatest([
+      this.successUntil$,
+      this.websocketService.openCurrent$,
+      timer(delay),
+    ]).subscribe(() => {
+      this.tradesWebsocketService.subscribe({ symbol });
+    });
   }
 }

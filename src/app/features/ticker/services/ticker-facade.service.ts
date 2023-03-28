@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, mergeMap } from 'rxjs';
+import { combineLatest, filter, first, map, mergeMap, timer } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
@@ -17,7 +17,15 @@ export class TickerFacade {
 
   public success$ = this.status$.pipe(filter((status) => status === 'success'));
 
-  public successCurrent$ = this.success$.pipe(first());
+  public successCurrent$ = this.status$.pipe(
+    first(),
+    filter((status) => status === 'success')
+  );
+
+  public successUntil$ = this.status$.pipe(
+    filter((status) => status === 'success'),
+    first()
+  );
 
   public lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
 
@@ -51,16 +59,7 @@ export class TickerFacade {
   ) {}
 
   public onAppInit(symbol: string) {
-    this.loadData();
-
-    combineLatest([
-      this.successCurrent$,
-      this.websocketService.openCurrent$,
-    ]).subscribe(() => {
-      this.tickerWebsocketService.subscribe({
-        symbols: [symbol],
-      });
-    });
+    this.loadDataAndSubscribe({ symbol }, 0);
   }
 
   // Runs once when websocket is opened
@@ -71,12 +70,9 @@ export class TickerFacade {
         mergeMap(() => {
           return combineLatest([
             this.globalFacade.globalSymbolCurrent$,
-            this.status$.pipe(
-              // Check if data is CURRENTLY loaded
-              // to prevent double loading when data loaded AFTER ws opened
-              first(),
-              filter((status) => status === 'success')
-            ),
+            // Check if data is CURRENTLY loaded
+            // to prevent double loading when data loaded AFTER ws opened
+            this.successCurrent$,
           ]);
         })
       )
@@ -102,5 +98,19 @@ export class TickerFacade {
 
   public loadData() {
     this.store$.dispatch(tickerActions.load());
+  }
+
+  public loadDataAndSubscribe({ symbol }: { symbol: string }, delay: number) {
+    this.loadData();
+
+    combineLatest([
+      this.successUntil$,
+      this.websocketService.openCurrent$,
+      timer(delay),
+    ]).subscribe(() => {
+      this.tickerWebsocketService.subscribe({
+        symbols: [symbol],
+      });
+    });
   }
 }

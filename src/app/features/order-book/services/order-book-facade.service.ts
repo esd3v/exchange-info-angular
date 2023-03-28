@@ -19,13 +19,13 @@ export class OrderBookFacade {
   );
 
   public successCurrent$ = this.status$.pipe(
-    first(), // Order shouldn't be changed
+    first(),
     filter((status) => status === 'success')
   );
 
   public successUntil$ = this.status$.pipe(
     filter((status) => status === 'success'),
-    first() // Order shouldn't be changed
+    first()
   );
 
   public asks$ = this.store$.select(orderBookSelectors.asks);
@@ -71,23 +71,6 @@ export class OrderBookFacade {
     this.store$.dispatch(orderBookActions.set(orderBook));
   }
 
-  public loadDataAndSubscribe(
-    { symbol }: Parameters<typeof this.loadData>[0],
-    delay: number
-  ) {
-    this.loadData({
-      symbol,
-    });
-
-    combineLatest([
-      this.websocketService.openCurrent$,
-      this.successUntil$,
-      timer(delay),
-    ]).subscribe(() => {
-      this.orderBookWebsocketService.subscribe({ symbol });
-    });
-  }
-
   public unsubscribeCurrent() {
     combineLatest([
       this.globalFacade.globalSymbolCurrent$,
@@ -102,5 +85,22 @@ export class OrderBookFacade {
     limit = WIDGET_DEPTH_DEFAULT_LIMIT,
   }: Parameters<typeof orderBookActions.load>[0]) {
     this.store$.dispatch(orderBookActions.load({ symbol, limit }));
+  }
+
+  public loadDataAndSubscribe(
+    { symbol }: Parameters<typeof this.loadData>[0],
+    delay: number
+  ) {
+    this.loadData({
+      symbol,
+    });
+
+    combineLatest([
+      this.successUntil$,
+      this.websocketService.openCurrent$,
+      timer(delay),
+    ]).subscribe(() => {
+      this.orderBookWebsocketService.subscribe({ symbol });
+    });
   }
 }
