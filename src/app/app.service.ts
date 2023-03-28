@@ -7,11 +7,7 @@ import { OrderBookFacade } from './features/order-book/services/order-book-facad
 import { PairsService } from './features/pairs/services/pairs.service';
 import { TickerFacade } from './features/ticker/services/ticker-facade.service';
 import { TradesFacade } from './features/trades/services/trades-facade.service';
-import {
-  APP_SITE_NAME,
-  WEBSOCKET_ENABLED_AT_START,
-  WEBSOCKET_START_DELAY,
-} from './shared/config';
+import { APP_SITE_NAME, WEBSOCKET_START_DELAY } from './shared/config';
 import { formatPrice } from './shared/helpers';
 import { WebsocketSubscribeService } from './websocket/services/websocket-subscribe.service';
 import { WebsocketService } from './websocket/services/websocket.service';
@@ -53,20 +49,20 @@ export class AppService {
   }
 
   public startWebSocket() {
-    if (WEBSOCKET_ENABLED_AT_START) {
-      timer(WEBSOCKET_START_DELAY).subscribe(() => {
-        this.websocketService.connect();
-      });
-    }
+    timer(WEBSOCKET_START_DELAY).subscribe(() => {
+      this.websocketService.connect();
+    });
   }
 
   // App start / switch
   public onWebsocketOpen() {
-    this.candlesFacade.onWebsocketOpen();
-    this.tickerFacade.onWebsocketOpen();
-    this.tradesFacade.onWebsocketOpen();
-    this.orderBookFacade.onWebsocketOpen();
-    this.pairsService.onWebsocketOpen();
+    this.websocketService.open$.subscribe(() => {
+      this.candlesFacade.onWebsocketOpen();
+      this.tickerFacade.onWebsocketOpen();
+      this.tradesFacade.onWebsocketOpen();
+      this.orderBookFacade.onWebsocketOpen();
+      this.pairsService.onWebsocketOpen();
+    });
   }
 
   public onWebsocketMessage() {

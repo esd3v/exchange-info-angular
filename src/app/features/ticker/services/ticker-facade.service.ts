@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, mergeMap, timer } from 'rxjs';
+import { combineLatest, filter, first, map, timer } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
@@ -65,22 +65,16 @@ export class TickerFacade {
   // Runs once when websocket is opened
   // Then subscribe if data is loaded at this moment
   public onWebsocketOpen() {
-    this.websocketService.open$
-      .pipe(
-        mergeMap(() => {
-          return combineLatest([
-            this.globalFacade.globalSymbolCurrent$,
-            // Check if data is CURRENTLY loaded
-            // to prevent double loading when data loaded AFTER ws opened
-            this.successCurrent$,
-          ]);
-        })
-      )
-      .subscribe(([symbol]) => {
-        this.tickerWebsocketService.subscribe({
-          symbols: [symbol],
-        });
+    combineLatest([
+      this.globalFacade.globalSymbolCurrent$,
+      // Check if data is CURRENTLY loaded
+      // to prevent double loading when data loaded AFTER ws opened
+      this.successCurrent$,
+    ]).subscribe(([symbol]) => {
+      this.tickerWebsocketService.subscribe({
+        symbols: [symbol],
       });
+    });
   }
 
   public handleWebsocketData({ s, c, Q, P, p, n }: WebsocketTicker) {
@@ -103,14 +97,12 @@ export class TickerFacade {
   public loadDataAndSubscribe({ symbol }: { symbol: string }, delay: number) {
     this.loadData();
 
-    combineLatest([
-      this.successUntil$,
-      this.websocketService.openCurrent$,
-      timer(delay),
-    ]).subscribe(() => {
-      this.tickerWebsocketService.subscribe({
-        symbols: [symbol],
-      });
+    combineLatest([this.successUntil$, timer(delay)]).subscribe(() => {
+      if (this.websocketService.status$.getValue() === 'open') {
+        this.tickerWebsocketService.subscribe({
+          symbols: [symbol],
+        });
+      }
     });
   }
 }

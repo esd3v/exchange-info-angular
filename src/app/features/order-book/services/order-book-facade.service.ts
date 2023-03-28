@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, mergeMap, timer } from 'rxjs';
+import { combineLatest, filter, first, map, timer } from 'rxjs';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -45,20 +45,14 @@ export class OrderBookFacade {
   }
 
   public onWebsocketOpen() {
-    this.websocketService.open$
-      .pipe(
-        mergeMap(() => {
-          return combineLatest([
-            // Check if data is CURRENTLY loaded
-            // to prevent double loading when data loaded AFTER ws opened
-            this.successCurrent$,
-            this.globalFacade.globalSymbolCurrent$,
-          ]);
-        })
-      )
-      .subscribe(([_tickerStatus, symbol]) => {
-        this.orderBookWebsocketService.subscribe({ symbol });
-      });
+    combineLatest([
+      // Check if data is CURRENTLY loaded
+      // to prevent double loading when data loaded AFTER ws opened
+      this.successCurrent$,
+      this.globalFacade.globalSymbolCurrent$,
+    ]).subscribe(([_tickerStatus, symbol]) => {
+      this.orderBookWebsocketService.subscribe({ symbol });
+    });
   }
 
   public handleWebsocketData({ asks, bids, lastUpdateId }: WebsocketOrderBook) {
@@ -95,12 +89,10 @@ export class OrderBookFacade {
       symbol,
     });
 
-    combineLatest([
-      this.successUntil$,
-      this.websocketService.openCurrent$,
-      timer(delay),
-    ]).subscribe(() => {
-      this.orderBookWebsocketService.subscribe({ symbol });
+    combineLatest([this.successUntil$, timer(delay)]).subscribe(() => {
+      if (this.websocketService.status$.getValue() === 'open') {
+        this.orderBookWebsocketService.subscribe({ symbol });
+      }
     });
   }
 }

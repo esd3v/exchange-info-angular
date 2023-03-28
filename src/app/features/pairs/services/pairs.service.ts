@@ -5,7 +5,6 @@ import {
   filter,
   first,
   map,
-  mergeMap,
   timer,
 } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
@@ -57,14 +56,8 @@ export class PairsService {
   }
 
   public onWebsocketOpen() {
-    this.websocketService.open$
-      .pipe(
-        mergeMap(() =>
-          this.pageSymbolsWithoutGlobalSymbol$.pipe(
-            filter((items) => Boolean(items.length))
-          )
-        )
-      )
+    this.pageSymbolsWithoutGlobalSymbol$
+      .pipe(filter((items) => Boolean(items.length)))
       .subscribe(() => {
         this.subscribeToPageSymbols();
       });

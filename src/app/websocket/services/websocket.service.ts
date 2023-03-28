@@ -38,6 +38,11 @@ export class WebsocketService implements OnDestroy {
     filter((status) => status === 'open')
   );
 
+  public openUntil$ = this.status$.pipe(
+    filter((status) => status === 'open'),
+    first()
+  );
+
   public closedOrNullCurrent$ = this.status$.pipe(
     first(),
     filter((status) => status === 'closed' || status === null)
@@ -101,6 +106,7 @@ export class WebsocketService implements OnDestroy {
   }
 
   public connect(reason?: Reason) {
+    console.time('WS');
     this.status$.next('connecting');
 
     this.reason$.next(
@@ -110,6 +116,7 @@ export class WebsocketService implements OnDestroy {
     this.socket = new WebSocket(this.config.url);
 
     this.socket.onopen = () => {
+      console.timeEnd('WS');
       this.status$.next('open');
       this.reason$.next(this.reason === 'restoring' ? 'restored' : this.reason);
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, mergeMap, take, timer } from 'rxjs';
+import { combineLatest, filter, first, map, take, timer } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -53,27 +53,21 @@ export class CandlesFacade {
   // Runs every time when websocket is opened
   // Then subscribe if data is loaded at this moment
   public onWebsocketOpen() {
-    this.websocketService.open$
-      .pipe(
-        mergeMap(() => {
-          return combineLatest([
-            this.websocketService.reasonCurrent$,
-            this.globalFacade.globalSymbolCurrent$,
-            this.intervalCurrent$,
-            // Check if data is CURRENTLY loaded
-            // to prevent double loading when data loaded AFTER ws opened
-            this.successCurrent$,
-          ]);
-        })
-      )
-      .subscribe(([reason, symbol, interval]) => {
-        // If we enable ws by switch for the first time or re-enable it
-        if (reason === 'switch' || reason === 'restored') {
-          this.loadData({ symbol, interval });
-        }
+    combineLatest([
+      this.websocketService.reasonCurrent$,
+      this.globalFacade.globalSymbolCurrent$,
+      this.intervalCurrent$,
+      // Check if data is CURRENTLY loaded
+      // to prevent double loading when data loaded AFTER ws opened
+      this.successCurrent$,
+    ]).subscribe(([reason, symbol, interval]) => {
+      // If we enable ws by switch for the first time or re-enable it
+      if (reason === 'switch' || reason === 'restored') {
+        this.loadData({ symbol, interval });
+      }
 
-        this.candlesWebsocketService.subscribe({ symbol, interval });
-      });
+      this.candlesWebsocketService.subscribe({ symbol, interval });
+    });
   }
 
   public unsubscribeCurrent() {
@@ -135,12 +129,10 @@ export class CandlesFacade {
       interval,
     });
 
-    combineLatest([
-      this.successUntil$,
-      this.websocketService.openCurrent$,
-      timer(delay),
-    ]).subscribe(() => {
-      this.candlesWebsocketService.subscribe({ interval, symbol });
+    combineLatest([this.successUntil$, timer(delay)]).subscribe(() => {
+      if (this.websocketService.status$.getValue() === 'open') {
+        this.candlesWebsocketService.subscribe({ interval, symbol });
+      }
     });
   }
 }
