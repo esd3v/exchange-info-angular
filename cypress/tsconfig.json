@@ -4,5 +4,9 @@
   "compilerOptions": {
     "sourceMap": false,
     "types": ["cypress"]
-  }
+  },
+  // Fix jasmine/cypress conflict
+  "exclude": [
+    "./cypress.config.ts"
+  ]
 }
