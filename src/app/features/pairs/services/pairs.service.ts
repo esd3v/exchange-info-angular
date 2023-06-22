@@ -1,12 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  BehaviorSubject,
-  combineLatest,
-  filter,
-  first,
-  map,
-  timer,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, first, map } from 'rxjs';
 import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { getCellByColumnId, parsePair } from 'src/app/shared/helpers';
 import { Column } from 'src/app/shared/types/column';
@@ -20,9 +13,8 @@ import { TradesFacade } from '../../trades/services/trades-facade.service';
 
 @Injectable({ providedIn: 'root' })
 export class PairsService {
+  // array of current page symbols for further websocket subcribe/unsubscribe data
   public pageSymbols: string[] = [];
-
-  private delay$ = timer(WEBSOCKET_SUBSCRIPTION_DELAY);
 
   // Exclude globalSymbol because we already subscribed to it
   private pageSymbolsWithoutGlobalSymbol$ =

@@ -110,7 +110,7 @@ export class PairsComponent implements OnDestroy, OnInit {
       });
   }
 
-  private createRows(
+  public createRows(
     symbols: ExchangeSymbolEntity[],
     tickers: Dictionary<TickerEntity>
   ) {
