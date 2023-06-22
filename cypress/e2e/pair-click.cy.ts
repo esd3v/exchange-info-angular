@@ -1,34 +1,44 @@
-import { createPair } from './../../src/app/shared/helpers';
 import {
-  API_HTTP_BASEURL,
   WIDGET_CHART_DEFAULT_CANDLEINTERVAL,
+  WIDGET_DEPTH_DEFAULT_LIMIT,
+  WIDGET_TRADES_DEFAULT_LIMIT,
 } from 'src/app/shared/config';
-import { CandleInterval } from 'src/app/features/candles/types/candle-interval';
+import { createPair } from './../../src/app/shared/helpers';
+import { RootPage } from './RootPage';
 
 it('Pair click', () => {
+  const rootPage = new RootPage();
   const pair = createPair('LTC', 'BTC');
   const status = 200;
   const loadCount = 1;
-  const interval: CandleInterval = WIDGET_CHART_DEFAULT_CANDLEINTERVAL;
-  const url = new URL(`${API_HTTP_BASEURL}/klines`);
 
-  url.searchParams.append('interval', interval);
-  url.searchParams.append('symbol', pair.symbol);
+  rootPage.interceptKlines({
+    interval: WIDGET_CHART_DEFAULT_CANDLEINTERVAL,
+    symbol: pair.symbol,
+  });
 
-  cy.intercept({
-    method: 'GET',
-    url: url.href,
-  }).as('klines');
+  rootPage.interceptTrades({
+    symbol: pair.symbol,
+    limit: WIDGET_TRADES_DEFAULT_LIMIT,
+  });
 
-  cy.visit('/');
+  rootPage.interceptOrderBook({
+    symbol: pair.symbol,
+    limit: WIDGET_DEPTH_DEFAULT_LIMIT,
+  });
 
-  cy.get('.pairs__row').contains(pair.slash).click();
+  rootPage.visit();
+  rootPage.clickPair(pair.slash);
 
-  cy.get('@klines').its('response.statusCode').should('eq', status);
+  rootPage.checkKlinesStatus(status);
+  rootPage.checkKlinesLength(loadCount);
 
-  // Request fires only once
-  cy.get('@klines.all').its('length').should('eq', loadCount);
+  rootPage.checkTradesStatus(status);
+  rootPage.checkTradesLength(loadCount);
 
-  // URL should contain pair route
-  cy.url().should('contain', pair.underscore);
+  rootPage.checkOrderBookStatus(status);
+  rootPage.checkOrderBookLength(loadCount);
+
+  // URL should contain clicked pair
+  rootPage.urlContains(pair.underscore);
 });

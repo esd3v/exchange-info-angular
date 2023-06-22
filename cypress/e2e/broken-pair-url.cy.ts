@@ -3,22 +3,26 @@ import {
   APP_DEFAULT_QUOTE_CURRENCY,
 } from 'src/app/shared/config';
 import { createPair } from 'src/app/shared/helpers';
+import { RootPage } from './RootPage';
 
 it('Fix wrong pair parameter in url', () => {
+  const rootPage = new RootPage();
+
   const pair = createPair(
     APP_DEFAULT_BASE_CURRENCY,
     APP_DEFAULT_QUOTE_CURRENCY
   );
 
-  cy.visit('/ETH_');
+  rootPage.visit('ETH_');
 
-  cy.url().should('contain', pair.underscore);
+  // URL should contain corrected pair route
+  rootPage.urlContains(pair.underscore);
 
-  cy.visit('/123');
+  rootPage.visit('123');
 
-  cy.url().should('contain', pair.underscore);
+  rootPage.urlContains(pair.underscore);
 
-  cy.visit('/.#*@][');
+  rootPage.visit('.#*@][');
 
-  cy.url().should('contain', pair.underscore);
+  rootPage.urlContains(pair.underscore);
 });
