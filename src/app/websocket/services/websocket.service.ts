@@ -137,14 +137,15 @@ export class WebsocketService implements OnDestroy {
     this.socket.onclose = () => {
       // If terminated by server
       if (this.status === 'open') {
+        this.status$.next('closed');
         this.reason$.next('terminated');
 
         if (this.config.reconnect) {
           this.reconnect();
         }
+      } else {
+        this.status$.next('closed');
       }
-
-      this.status$.next('closed');
     };
 
     return this.status$;
