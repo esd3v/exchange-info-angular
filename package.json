@@ -10,6 +10,8 @@
     "test": "ng test --watch=false",
     "test:watch": "ng test",
     "lint": "ng lint",
+    "lint:fix": "ng lint --fix",
+    "check-types": "tsc --skipLibCheck --noEmit",
     "e2e": "ng e2e",
     "analyze": "webpack-bundle-analyzer dist/exchange-info-angular/stats.json",
     "cypress:open": "cypress open",
