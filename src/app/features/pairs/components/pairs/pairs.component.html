@@ -42,9 +42,14 @@
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr
-      [ngClass]="[rowClass]"
       mat-row
       *matRowDef="let row; columns: displayedColumns"
+      [ngClass]="[
+        rowClass,
+        row[0] && (globalPair$ | async) === row[0].value
+          ? rowHighlightClass
+          : ''
+      ]"
       (click)="handleRowClick(row)"
     ></tr>
   </table>

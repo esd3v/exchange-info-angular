@@ -3,11 +3,15 @@
 @mixin common-table {
   width: 100%;
   table-layout: fixed;
+  $highlight: red;
 
   @include override-mat-table();
 
   &__row {
     cursor: pointer;
+    &--highlight {
+      background-color: $hoverColor;
+    }
   }
   &__cell {
     &--alignedRight {

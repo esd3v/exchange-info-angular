@@ -1,6 +1,6 @@
 @use "@angular/material" as mat;
 
-$hoverColor: mat.get-color-from-palette(mat.$grey-palette, 100);
+$hoverColor: mat.get-color-from-palette(mat.$grey-palette, 200);
 
 @mixin override-mat-table {
   $padding: 4px;
