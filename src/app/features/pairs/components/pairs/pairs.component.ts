@@ -30,6 +30,7 @@ import { Row } from 'src/app/shared/types/row';
 import { AppState } from 'src/app/store';
 import { PairsService } from '../../services/pairs.service';
 import { PairColumn } from '../../types/pair-column';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 
 @Component({
   selector: 'app-pairs',
@@ -67,10 +68,11 @@ export class PairsComponent implements OnDestroy, OnInit {
   public loading$ = combineLatest([
     this.tickerFacade.isLoading$,
     this.exchangeInfoFacade.isLoading$,
+    this.websocketService.status$,
   ]).pipe(
     map(
-      ([tickerLoading, exchangeInfoLoading]) =>
-        tickerLoading || exchangeInfoLoading
+      ([tickerLoading, exchangeInfoLoading, websocketStatus]) =>
+        tickerLoading || exchangeInfoLoading || websocketStatus === 'connecting'
     )
   );
 
@@ -92,7 +94,8 @@ export class PairsComponent implements OnDestroy, OnInit {
     private store$: Store<AppState>,
     private location: Location,
     private router: Router,
-    private exchangeInfoFacade: ExchangeInfoFacade
+    private exchangeInfoFacade: ExchangeInfoFacade,
+    private websocketService: WebsocketService
   ) {}
 
   public trackRow(_index: number, _row: Row) {
