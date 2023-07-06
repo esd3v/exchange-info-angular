@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, filter, first, map } from 'rxjs';
-import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 import { getCellByColumnId, parsePair } from 'src/app/shared/helpers';
 import { Column } from 'src/app/shared/types/column';
 import { Row } from 'src/app/shared/types/row';
@@ -10,6 +9,7 @@ import { GlobalFacade } from '../../global/services/global-facade.service';
 import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
 import { TickerWebsocketService } from '../../ticker/services/ticker-websocket.service';
 import { TradesFacade } from '../../trades/services/trades-facade.service';
+import { WEBSOCKET_SUBSCRIPTION_DELAY } from 'src/app/shared/config';
 
 @Injectable({ providedIn: 'root' })
 export class PairsService {
@@ -60,7 +60,10 @@ export class PairsService {
       this.pageSymbolsWithoutGlobalSymbol$,
       this.websocketService.openCurrent$,
     ]).subscribe(([symbols]) => {
-      this.tickerWebsocketService.subscribe({ symbols });
+      this.tickerWebsocketService.subscribe(
+        { symbols },
+        this.tickerWebsocketService.pairsId
+      );
     });
   }
 
@@ -69,7 +72,10 @@ export class PairsService {
       this.pageSymbolsWithoutGlobalSymbol$,
       this.websocketService.openCurrent$,
     ]).subscribe(([symbols]) => {
-      this.tickerWebsocketService.unsubscribe({ symbols });
+      this.tickerWebsocketService.unsubscribe(
+        { symbols },
+        this.tickerWebsocketService.pairsId
+      );
     });
   }
 

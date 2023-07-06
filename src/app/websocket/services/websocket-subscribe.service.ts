@@ -24,25 +24,16 @@ export class WebsocketSubscribeService {
     });
   };
 
-  public subscribe(params: string[]) {
+  public subscribe(params: string[], id: number) {
     const stringifiedParams = JSON.stringify(params);
-    const prevSubscribeId = this.subscriptions[stringifiedParams];
-    const newSubscribeId = Object.keys(this.subscriptions).length + 1;
-    const id = prevSubscribeId || newSubscribeId;
     const subscription = this.createSubscription(params, 'SUBSCRIBE', id);
 
     this.websocketService.send(subscription);
-    this.subscriptions[stringifiedParams] = newSubscribeId;
+    this.subscriptions[stringifiedParams] = id;
   }
 
-  public unsubscribe(params: string[]) {
+  public unsubscribe(params: string[], id: number) {
     const stringifiedParams = JSON.stringify(params);
-    const prevSubscribeId = this.subscriptions[stringifiedParams];
-
-    const id = prevSubscribeId
-      ? prevSubscribeId + WEBSOCKET_UNSUBSCRIBE_BASE_ID
-      : -1; // -1 if trying to unsubscrube if previously wasn't subscribed
-
     const subscription = this.createSubscription(params, 'UNSUBSCRIBE', id);
 
     this.websocketService.send(subscription);

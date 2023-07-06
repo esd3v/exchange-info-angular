@@ -71,9 +71,12 @@ export class TickerFacade {
       // to prevent double loading when data loaded AFTER ws opened
       this.successCurrent$,
     ]).subscribe(([symbol]) => {
-      this.tickerWebsocketService.subscribe({
-        symbols: [symbol],
-      });
+      this.tickerWebsocketService.subscribe(
+        {
+          symbols: [symbol],
+        },
+        this.tickerWebsocketService.singleId
+      );
     });
   }
 
@@ -99,9 +102,12 @@ export class TickerFacade {
 
     combineLatest([this.successUntil$, timer(delay)]).subscribe(() => {
       if (this.websocketService.status$.getValue() === 'open') {
-        this.tickerWebsocketService.subscribe({
-          symbols: [symbol],
-        });
+        this.tickerWebsocketService.subscribe(
+          {
+            symbols: [symbol],
+          },
+          this.tickerWebsocketService.singleId
+        );
       }
     });
   }

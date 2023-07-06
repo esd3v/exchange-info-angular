@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
+import {
+  WEBSOCKET_UNSUBSCRIBE_BASE_ID,
+  WIDGET_DEPTH_DEFAULT_LIMIT,
+} from 'src/app/shared/config';
 import { WithWebsocket } from 'src/app/shared/types/with-websocket';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketOrderBookStreamParams } from '../types/websocket-order-book-stream-params';
@@ -10,6 +13,8 @@ import { WebsocketOrderBookStreamParams } from '../types/websocket-order-book-st
 export class OrderBookWebsocketService
   implements WithWebsocket<WebsocketOrderBookStreamParams>
 {
+  private id = 4;
+
   public constructor(
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
@@ -22,10 +27,16 @@ export class OrderBookWebsocketService
   ];
 
   public subscribe(params: WebsocketOrderBookStreamParams) {
-    this.websocketSubscribeService.subscribe(this.createParams(params));
+    this.websocketSubscribeService.subscribe(
+      this.createParams(params),
+      this.id
+    );
   }
 
   public unsubscribe(params: WebsocketOrderBookStreamParams) {
-    this.websocketSubscribeService.unsubscribe(this.createParams(params));
+    this.websocketSubscribeService.unsubscribe(
+      this.createParams(params),
+      this.id + WEBSOCKET_UNSUBSCRIBE_BASE_ID
+    );
   }
 }

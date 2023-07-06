@@ -43,9 +43,10 @@ describe('CandlesWebsocketService', () => {
 
     service.subscribe(params);
 
-    expect(websocketSubscribeServiceSpy.subscribe).toHaveBeenCalledWith([
-      expected,
-    ]);
+    expect(websocketSubscribeServiceSpy.subscribe).toHaveBeenCalledWith(
+      [expected],
+      0
+    );
   });
 
   it('should unsubscribe', () => {
@@ -53,8 +54,9 @@ describe('CandlesWebsocketService', () => {
 
     service.unsubscribe(params);
 
-    expect(websocketSubscribeServiceSpy.unsubscribe).toHaveBeenCalledWith([
-      expected,
-    ]);
+    expect(websocketSubscribeServiceSpy.unsubscribe).toHaveBeenCalledWith(
+      [expected],
+      0
+    );
   });
 });
