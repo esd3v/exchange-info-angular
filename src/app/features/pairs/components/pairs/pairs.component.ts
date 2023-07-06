@@ -31,6 +31,7 @@ import { AppState } from 'src/app/store';
 import { PairsService } from '../../services/pairs.service';
 import { PairColumn } from '../../types/pair-column';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 
 @Component({
   selector: 'app-pairs',
@@ -49,9 +50,11 @@ export class PairsComponent implements OnDestroy, OnInit {
   public cellNegativeClass = `${this.cellClass}--negative`;
   public cellRightClass = `${this.cellClass}--alignedRight`;
 
+  public globalSymbol$ = this.globalFacade.globalSymbol$;
   private tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
   private debounceTime = 1000;
   private pageClicks$ = new Subject<PageEvent>();
+  public clickedRow: Row = [];
   public pageSizeOptions = [15];
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
 
@@ -95,7 +98,8 @@ export class PairsComponent implements OnDestroy, OnInit {
     private location: Location,
     private router: Router,
     private exchangeInfoFacade: ExchangeInfoFacade,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private globalFacade: GlobalFacade
   ) {}
 
   public trackRow(_index: number, _row: Row) {
@@ -164,7 +168,7 @@ export class PairsComponent implements OnDestroy, OnInit {
     return rows;
   }
 
-  public handleRowClick(row: Row) {
+  private parseRow(row: Row) {
     const pairCell = getCellByColumnId({
       columns: this.columns,
       id: 'pair',
@@ -173,24 +177,56 @@ export class PairsComponent implements OnDestroy, OnInit {
 
     const { base, quote } = parsePair(pairCell.value as string, '/');
 
+    return { base, quote };
+  }
+
+  public changePair(row: Row) {
+    const { base, quote } = this.parseRow(row);
+
     if (!base || !quote) return;
 
     const pair = `${base}_${quote}`;
     const symbol = `${base}${quote}`;
-    const url = this.router.createUrlTree([pair]).toString();
 
-    this.pairsService.handleCandlesOnRowClick({ symbol });
-    this.pairsService.handleOrderBookOnRowClick({ symbol });
-    this.pairsService.handleTradesOnRowClick({ symbol });
+    this.globalSymbol$
+      .pipe(
+        first(),
+        // Dont't change if clicked twtice
+        filter((globalSymbol) => globalSymbol !== symbol)
+      )
+      .subscribe(() => {
+        const url = this.router.createUrlTree([pair]).toString();
 
-    this.store$.dispatch(
-      globalActions.setCurrency({
-        payload: { base, quote },
-      })
-    );
+        this.pairsService.handleCandlesOnRowClick({ symbol });
+        this.pairsService.handleOrderBookOnRowClick({ symbol });
+        this.pairsService.handleTradesOnRowClick({ symbol });
 
-    // Don't navigate with refresh, just replace url
-    this.location.go(url);
+        this.store$.dispatch(
+          globalActions.setCurrency({
+            payload: { base, quote },
+          })
+        );
+
+        // Don't navigate with refresh, just replace url
+        this.location.go(url);
+      });
+  }
+
+  public handleTableClick(event: MouseEvent) {
+    const row = this.clickedRow;
+    const target: any = event.target;
+
+    if (!target) return;
+
+    const tagName = target.tagName;
+
+    if (tagName === 'TD' && row) {
+      this.changePair(row);
+    }
+  }
+
+  public handleRowClick(row: Row) {
+    this.clickedRow = row;
   }
 
   public handlePageChange(event: PageEvent) {

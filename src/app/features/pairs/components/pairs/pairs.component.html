@@ -3,6 +3,7 @@
     mat-table
     [ngClass]="tableClass"
     [trackBy]="trackRow"
+    (click)="handleTableClick($event)"
     [dataSource]="
       (loading$ | async) === true || (loading$ | async) === null
         ? placeholderRows
@@ -12,7 +13,6 @@
     <ng-container
       *ngFor="let column of columns; let columnIndex = index"
       [matColumnDef]="column.id"
-      }
     >
       <th
         [ngClass]="[cellClass, column.numeric ? cellRightClass : '']"
