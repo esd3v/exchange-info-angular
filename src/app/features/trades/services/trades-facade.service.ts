@@ -44,11 +44,17 @@ export class TradesFacade {
 
   public onWebsocketOpen() {
     combineLatest([
+      this.websocketService.reasonCurrent$,
+      this.globalFacade.globalSymbolCurrent$,
       // Check if data is CURRENTLY loaded
       // to prevent double loading when data loaded AFTER ws opened
       this.successCurrent$,
-      this.globalFacade.globalSymbolCurrent$,
-    ]).subscribe(([_tickerStatus, symbol]) => {
+    ]).subscribe(([reason, symbol]) => {
+      // If we enable ws by switch for the first time or re-enable it
+      if (reason === 'switch' || reason === 'restored') {
+        this.loadData({ symbol });
+      }
+
       this.tradesWebsocketService.subscribe({ symbol });
     });
   }
