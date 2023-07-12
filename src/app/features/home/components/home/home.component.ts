@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { globalActions } from 'src/app/features/global/store';
-import { parsePair } from 'src/app/shared/helpers';
 import { AppState } from 'src/app/store';
 import { HomerService } from '../../services/home.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { MISC_SNACKBAR_DURATION } from 'src/app/shared/config';
+import { convertPairToCurrency } from 'src/app/shared/helpers';
 
 @Component({
   selector: 'app-home',
@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit {
       return null;
     }
 
-    const { base, quote } = parsePair(routePair, '_');
+    const { base, quote } = convertPairToCurrency(routePair, '_');
 
     // e.g "ETH_" or "_BTC"
     if (!base || !quote) {
@@ -55,7 +55,7 @@ export class HomeComponent implements OnInit {
     const { base, quote } = parsedRoutePair;
     const symbol = `${base}${quote}`;
 
-    this.homeService.initAppData(symbol);
+    this.homeService.initHomeData(symbol);
 
     this.store$.dispatch(
       globalActions.setCurrency({ payload: { base, quote } })
@@ -84,6 +84,10 @@ export class HomeComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    this.homeService.updateTitle();
+    this.homeService.onWebsocketMessage();
+    this.homeService.startWebSocket();
+
     this.websocketService.status$.subscribe((status) => {
       if (status === 'connecting') {
         this.openSnackBar('Connecting to WebSocket server...');

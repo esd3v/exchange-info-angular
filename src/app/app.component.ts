@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AppService } from './app.service';
 import { HomerService } from './features/home/services/home.service';
 
 @Component({
@@ -9,7 +8,6 @@ import { HomerService } from './features/home/services/home.service';
 })
 export class AppComponent implements OnInit {
   public constructor(
-    private appService: AppService,
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
     private route: ActivatedRoute,
@@ -33,10 +31,5 @@ export class AppComponent implements OnInit {
 
   public ngOnInit(): void {
     this.onRouteEvent();
-
-    this.appService.setTitle();
-    this.appService.onWebsocketOpen();
-    this.appService.onWebsocketMessage();
-    this.appService.startWebSocket();
   }
 }
