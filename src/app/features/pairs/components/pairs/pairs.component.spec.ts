@@ -9,6 +9,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketModule } from 'src/app/websocket/websocket.module';
 import { PairsComponent } from './pairs.component';
+import { PairColumn } from '../../types/pair-column';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('PairsComponent', () => {
   let component: PairsComponent;
@@ -17,6 +19,7 @@ describe('PairsComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
+        HttpClientTestingModule,
         StoreModule.forRoot({}),
         WebsocketModule.forRoot({ url: '' }),
         RouterTestingModule,
@@ -28,6 +31,23 @@ describe('PairsComponent', () => {
 
     fixture = TestBed.createComponent(PairsComponent);
     component = fixture.componentInstance;
+  });
+
+  it('should create array of symbols from rows', () => {
+    const columns: PairColumn[] = [
+      { id: 'pair', numeric: false, label: 'Pair' },
+      { id: 'lastPrice', numeric: true, label: 'Price' },
+      { id: 'priceChangePercent', numeric: true, label: '24h Change' },
+    ];
+
+    const rows: Row[] = [
+      [{ value: 'BTC/USDT' }, { value: 1 }],
+      [{ value: 'ETH/BTC' }, { value: 2 }],
+    ];
+
+    const symbols = component.createSymbolsFromRows(columns, rows);
+
+    expect(symbols).toEqual(['BTCUSDT', 'ETHBTC']);
   });
 
   it('should create rows from symbols and tickers data', () => {
@@ -80,13 +100,25 @@ describe('PairsComponent', () => {
     const expectedRows: Row[] = [
       [
         { value: 'BTC/USDT' },
-        { value: '2000.000000', classNames: component.cellNegativeClass },
-        { value: '-50%', classNames: component.cellNegativeClass },
+        {
+          value: '2000.000000',
+          classNames: component.pairsStyleService.cellNegativeClass,
+        },
+        {
+          value: '-50%',
+          classNames: component.pairsStyleService.cellNegativeClass,
+        },
       ],
       [
         { value: 'ETH/BTC' },
-        { value: '3000.000000', classNames: component.cellPositiveClass },
-        { value: '+50%', classNames: component.cellPositiveClass },
+        {
+          value: '3000.000000',
+          classNames: component.pairsStyleService.cellPositiveClass,
+        },
+        {
+          value: '+50%',
+          classNames: component.pairsStyleService.cellPositiveClass,
+        },
       ],
     ];
 
