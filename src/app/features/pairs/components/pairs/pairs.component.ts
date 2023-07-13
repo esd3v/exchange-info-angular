@@ -50,6 +50,8 @@ export class PairsComponent
 {
   @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
 
+  public styles = this.pairsStyleService;
+  public globalPair$ = this.globalFacade.pair$;
   private debounceTime = 1000;
   private pageClicks$ = new Subject<PageEvent>();
   public clickedRow: Row = [];
@@ -81,9 +83,10 @@ export class PairsComponent
   // Exclude globalSymbol because we already subscribed to it
   private pageSymbolsWithoutGlobalSymbol$ = combineLatest([
     this.globalFacade.symbol$.pipe(first()),
-    this.pageSymbols$,
+    this.pageSymbols$.pipe(
+      filter((pageSymbols) => Boolean(pageSymbols.length))
+    ),
   ]).pipe(
-    filter(([_globalSymbol, pageSymbols]) => Boolean(pageSymbols.length)),
     map(([globalSymbol, pageSymbols]) =>
       pageSymbols.filter((symbol) => symbol !== globalSymbol)
     )
@@ -107,9 +110,9 @@ export class PairsComponent
     private tickerFacade: TickerFacade,
     private exchangeInfoFacade: ExchangeInfoFacade,
     private websocketService: WebsocketService,
-    public pairsStyleService: PairsStyleService,
+    private pairsStyleService: PairsStyleService,
     private tickerWebsocketService: TickerWebsocketService,
-    public globalFacade: GlobalFacade,
+    private globalFacade: GlobalFacade,
     private tradesFacade: TradesFacade,
     private candlesFacade: CandlesFacade,
     private orderBookWebsocketService: OrderBookWebsocketService,
@@ -303,16 +306,6 @@ export class PairsComponent
     this.rows$.subscribe((rows) => {
       this.dataSource.data = rows;
     });
-
-    // Subscribe to ws when page rows are created for the first time
-    this.pageSymbols$
-      .pipe(
-        filter((symbols) => Boolean(symbols.length)),
-        first()
-      )
-      .subscribe(() => {
-        // this.pairsService.subscribeToSymbols();
-      });
 
     // Start listening to page changes
     this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {

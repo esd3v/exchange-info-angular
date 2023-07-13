@@ -1,7 +1,7 @@
 <app-window title="Pairs">
   <table
     mat-table
-    [ngClass]="pairsStyleService.tableClass"
+    [ngClass]="styles.tableClass"
     [trackBy]="trackRow"
     (click)="handleTableClick($event)"
     [dataSource]="
@@ -16,8 +16,8 @@
     >
       <th
         [ngClass]="[
-          pairsStyleService.cellClass,
-          column.numeric ? pairsStyleService.cellRightClass : ''
+          styles.cellClass,
+          column.numeric ? styles.cellRightClass : ''
         ]"
         mat-header-cell
         *matHeaderCellDef
@@ -27,8 +27,8 @@
       <td
         *matCellDef="let row"
         [ngClass]="[
-          pairsStyleService.cellClass,
-          column.numeric ? pairsStyleService.cellRightClass : '',
+          styles.cellClass,
+          column.numeric ? styles.cellRightClass : '',
           row[columnIndex]?.classNames || ''
         ]"
         mat-cell
@@ -48,9 +48,9 @@
       mat-row
       *matRowDef="let row; columns: displayedColumns"
       [ngClass]="[
-        pairsStyleService.rowClass,
-        row[0] && (this.globalFacade.pair$ | async) === row[0].value
-          ? pairsStyleService.rowHighlightClass
+        styles.rowClass,
+        row[0] && (globalPair$ | async) === row[0].value
+          ? styles.rowHighlightClass
           : ''
       ]"
       (click)="handleRowClick(row)"
