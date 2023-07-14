@@ -6,5 +6,5 @@ const SET_CURRENCY = `${PREFIX} SET CURRENCY`;
 
 export const setCurrency = createAction(
   SET_CURRENCY,
-  props<{ payload: string | GlobalState['currency'] }>()
+  props<{ payload: GlobalState['currency'] }>()
 );

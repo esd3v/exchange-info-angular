@@ -11,13 +11,13 @@ export const currency = createSelector(
 export const globalPair = createSelector(featureSelector, (state) => {
   const { base, quote } = state.currency;
 
-  return base ? `${base}/${quote}` : null;
+  return `${base}/${quote}`;
 });
 
 export const globalSymbol = createSelector(globalPair, (state) => {
-  return state?.replace('/', '');
+  return state.replace('/', '');
 });
 
 export const globalPairUnderscore = createSelector(globalPair, (state) => {
-  return state?.replace('/', '_');
+  return state.replace('/', '_');
 });
