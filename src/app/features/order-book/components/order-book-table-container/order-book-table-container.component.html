@@ -1,0 +1,18 @@
+<div class="row">
+  <div class="col-12 col-lg-6">
+    <app-order-book-table
+      type="asks"
+      [loading]="loading"
+      [data]="asksData"
+      [currency]="currency"
+    ></app-order-book-table>
+  </div>
+  <div class="col-12 col-lg-6">
+    <app-order-book-table
+      type="bids"
+      [loading]="loading"
+      [data]="bidsData"
+      [currency]="currency"
+    ></app-order-book-table>
+  </div>
+</div>

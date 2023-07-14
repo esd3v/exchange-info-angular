@@ -1,4 +1,4 @@
 export interface WebsocketOrderBookStreamParams {
   symbol: string;
-  limit?: number;
+  limit: 5 | 10 | 20;
 }
