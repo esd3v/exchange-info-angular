@@ -12,40 +12,35 @@ import {
   WEBSOCKET_MESSAGES_QUEUE_DELAY,
   WEBSOCKET_UNSUBSCRIBE_BASE_ID,
 } from 'src/app/shared/config';
-import { WebsocketMessageIncoming } from '../types/websocket-message-incoming';
-import { WebsocketService } from './websocket.service';
 import { WebsocketMessage } from '../types/websocket-message';
-import { WebsocketMessageParams } from '../types/websocket-message-stream-params';
+import { WebsocketMessageIncoming } from '../types/websocket-message-incoming';
 import { WebsocketMessageStatus } from '../types/websocket-message-status';
+import { WebsocketMessageParams } from '../types/websocket-message-stream-params';
+import { WebsocketService } from './websocket.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WebsocketSubscribeService {
-  private messages: Map<number, WebsocketMessage> = new Map();
-  public messages$ = new BehaviorSubject(this.messages);
-  public message$ = new Subject<WebsocketMessage>();
-  private queue$ = new BehaviorSubject<WebsocketMessageParams | null>(null);
+  public messages: WebsocketMessage[] = [];
+  public messages$ = new Subject<WebsocketMessage[]>();
+  private queue$ = new BehaviorSubject<WebsocketMessage | null>(null);
 
   public constructor(private websocketService: WebsocketService) {
-    // this.message$.subscribe((value) => {
-    //   console.log('MESSAGE', value);
-    // });
-
     // this.messages$.subscribe((value) => {
     //   console.log('MESSAGES', value);
     // });
 
     this.queue$
       .pipe(
-        // emit each value with delay
+        // emit each message with delay
         concatMap((value) =>
           of(value).pipe(delay(WEBSOCKET_MESSAGES_QUEUE_DELAY))
         ),
         filter(Boolean)
       )
-      .subscribe((params) => {
-        this.processQueueParams(params);
+      .subscribe((message) => {
+        this.sendMessage(message);
       });
   }
 
@@ -57,25 +52,29 @@ export class WebsocketSubscribeService {
     };
   }
 
-  private updateStatus(id: number, status: WebsocketMessageStatus) {
-    const message = this.messages.get(id);
+  private setStatus(id: number, status: WebsocketMessageStatus) {
+    const updated = this.messages.map((item) =>
+      item.params.id === id ? { ...item, status } : item
+    );
 
-    if (!message) return;
-
-    this.processMessage({ ...message, status });
+    this.messages = updated;
+    this.messages$.next(updated);
   }
 
-  private processQueueParams(params: WebsocketMessageParams) {
-    const message = this.createMessage(params);
+  private addMessage(message: WebsocketMessage) {
+    const index = this.messages.findIndex(
+      (item) => item.params.id === message.params.id
+    );
 
-    this.processMessage(message);
-    this.sendMessage(message);
-  }
+    const updated =
+      index > -1
+        ? this.messages.map((item) =>
+            item.params.id === message.params.id ? message : item
+          )
+        : [...this.messages, message];
 
-  private processMessage(message: WebsocketMessage) {
-    this.messages.set(message.params.id, message);
-    this.messages$.next(this.messages);
-    this.message$.next(message);
+    this.messages = updated;
+    this.messages$.next(updated);
   }
 
   private sendMessage(message: WebsocketMessage) {
@@ -97,7 +96,10 @@ export class WebsocketSubscribeService {
   };
 
   private addToQueue(params: WebsocketMessageParams) {
-    this.queue$.next(params);
+    const message = this.createMessage(params);
+
+    this.addMessage(message);
+    this.queue$.next(message);
   }
 
   public subscribe(params: string[], id: number) {
@@ -113,9 +115,8 @@ export class WebsocketSubscribeService {
   }
 
   public messageStatusById$(id: number) {
-    return this.message$.pipe(
-      filter((message) => message?.params.id === id),
-      map((subscription) => subscription?.status)
+    return this.messages$.pipe(
+      map((messages) => messages.find((item) => item.params.id === id)?.status)
     );
   }
 
@@ -155,7 +156,7 @@ export class WebsocketSubscribeService {
           }
         }
 
-        this.updateStatus(id, 'done');
+        this.setStatus(id, 'done');
       }
     };
   }
