@@ -5,6 +5,7 @@ import * as utc from 'dayjs/plugin/utc';
 import { Column } from './types/column';
 import { Row } from './types/row';
 import { SortOrder } from './types/sort-order';
+import { Currency } from './types/currency';
 
 dayjs.extend(utc);
 
@@ -24,7 +25,10 @@ export const createPair = (base: string, quote: string) => {
   };
 };
 
-export const parsePair = (pair: string, separator: '/' | '_') => {
+export const convertPairToCurrency = (
+  pair: string,
+  separator: '/' | '_'
+): Currency => {
   const [base, quote] = pair.split(separator);
 
   return {
@@ -72,9 +76,6 @@ export function numberWithCommas(x: string, symbol = ',') {
 
 export const formatPriceChangePercent = (value: string) =>
   `${addPlusIfPositive(Number(value).toFixed(MISC_TOFIXED_DIGITS))}%`;
-
-export const isPositive = (value: string | null) =>
-  value === null || Number(value) === 0 ? null : Number(value) > 0;
 
 export const getFormattedDate = ({
   msec,
