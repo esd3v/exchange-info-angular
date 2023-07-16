@@ -4,10 +4,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-import { TradesComponent } from './trades.component';
+import { TradesTableComponent } from './trades-table.component';
 
 @NgModule({
-  declarations: [TradesComponent],
+  declarations: [TradesTableComponent],
   imports: [
     CommonModule,
     MatTableModule,
@@ -15,6 +15,6 @@ import { TradesComponent } from './trades.component';
     SharedModule,
     NgxSkeletonLoaderModule,
   ],
-  exports: [TradesComponent],
+  exports: [TradesTableComponent],
 })
-export class TradesModule {}
+export class TradesTableModule {}

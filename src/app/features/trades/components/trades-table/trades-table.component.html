@@ -1,0 +1,46 @@
+<app-window title="Trades">
+  <table
+    mat-table
+    [ngClass]="styles.tableClass"
+    [trackBy]="trackRow"
+    [dataSource]="loading ? placeholderRows : dataSource"
+  >
+    <ng-container
+      *ngFor="let column of columns; let columnIndex = index"
+      [matColumnDef]="column.id"
+    >
+      <th
+        [ngClass]="[
+          styles.cellClass,
+          column.numeric ? styles.cellRightClass : ''
+        ]"
+        mat-header-cell
+        *matHeaderCellDef
+      >
+        {{ columnLabels[columnIndex] }}
+      </th>
+      <td
+        *matCellDef="let row"
+        [class]="row[columnIndex]?.className"
+        [ngClass]="[
+          styles.cellClass,
+          column.numeric ? styles.cellRightClass : ''
+        ]"
+        mat-cell
+      >
+        <ng-template [ngIf]="loading">
+          <ngx-skeleton-loader appSkeleton width="80%"></ngx-skeleton-loader>
+        </ng-template>
+        <ng-template [ngIf]="!loading">
+          {{ row[columnIndex]?.value }}
+        </ng-template>
+      </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr
+      [ngClass]="styles.rowClass"
+      mat-row
+      *matRowDef="let row; columns: displayedColumns"
+    ></tr>
+  </table>
+</app-window>

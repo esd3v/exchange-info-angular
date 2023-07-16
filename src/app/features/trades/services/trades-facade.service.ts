@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, filter, first, map, timer } from 'rxjs';
+import { combineLatest, first } from 'rxjs';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -11,22 +11,7 @@ import { TradesWebsocketService } from './trades-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class TradesFacade {
-  private status$ = this.store$.select(tradesSelectors.status);
-
-  public successCurrent$ = this.status$.pipe(
-    first(),
-    filter((status) => status === 'success')
-  );
-
-  public successUntil$ = this.status$.pipe(
-    filter((status) => status === 'success'),
-    first()
-  );
-
-  public isLoading$ = this.status$.pipe(
-    map((status) => (status === 'init' ? null : status === 'loading'))
-  );
-
+  public restStatus$ = this.store$.select(tradesSelectors.status);
   public trades$ = this.store$.select(tradesSelectors.data);
 
   public constructor(
@@ -36,19 +21,13 @@ export class TradesFacade {
     private tradesWebsocketService: TradesWebsocketService
   ) {}
 
-  public onAppInit({
-    symbol,
-  }: Pick<Parameters<typeof tradesActions.load>[0], 'symbol'>) {
-    this.loadDataAndSubscribe({ symbol }, 0);
-  }
-
   public onWebsocketOpen() {
     combineLatest([
-      this.websocketService.reasonCurrent$,
-      this.globalFacade.globalSymbolCurrent$,
+      this.websocketService.reason$.pipe(first()),
+      this.globalFacade.symbol$.pipe(first()),
       // Check if data is CURRENTLY loaded
       // to prevent double loading when data loaded AFTER ws opened
-      this.successCurrent$,
+      // this.successCurrent$,
     ]).subscribe(([reason, symbol]) => {
       // If we enable ws by switch for the first time or re-enable it
       if (reason === 'switch' || reason === 'restored') {
@@ -73,10 +52,7 @@ export class TradesFacade {
   }
 
   public unsubscribeCurrent() {
-    combineLatest([
-      this.globalFacade.globalSymbolCurrent$,
-      this.websocketService.openCurrent$,
-    ]).subscribe(([globalSymbol]) => {
+    this.globalFacade.symbol$.pipe(first()).subscribe((globalSymbol) => {
       this.tradesWebsocketService.unsubscribe({
         symbol: globalSymbol,
       });
@@ -88,18 +64,5 @@ export class TradesFacade {
     limit = WIDGET_TRADES_DEFAULT_LIMIT,
   }: Parameters<typeof tradesActions.load>[0]) {
     this.store$.dispatch(tradesActions.load({ symbol, limit }));
-  }
-
-  public loadDataAndSubscribe(
-    { symbol }: Parameters<typeof this.loadData>[0],
-    delay: number
-  ) {
-    this.loadData({ symbol });
-
-    combineLatest([this.successUntil$, timer(delay)]).subscribe(() => {
-      if (this.websocketService.status$.getValue() === 'open') {
-        this.tradesWebsocketService.subscribe({ symbol });
-      }
-    });
   }
 }
