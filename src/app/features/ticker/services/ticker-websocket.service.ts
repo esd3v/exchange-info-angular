@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { WithWebsocket } from 'src/app/shared/types/with-websocket';
+import { WithWebsocket } from 'src/app/shared/with-websocket';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketTickerStreamParams } from '../types/websocket-ticker-stream-params';
-import { WEBSOCKET_UNSUBSCRIBE_BASE_ID } from 'src/app/shared/config';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +11,18 @@ export class TickerWebsocketService
 {
   private _singleId = 2;
   private _pairsId = 5;
+
+  public subscribeStatusSingle$ =
+    this.websocketSubscribeService.subscribeStatusById$(this._singleId);
+
+  public unsubscribeStatusSingle$ =
+    this.websocketSubscribeService.unsubscribeStatusById$(this._singleId);
+
+  public subscribeStatusPairs$ =
+    this.websocketSubscribeService.subscribeStatusById$(this._pairsId);
+
+  public unsubscribeStatusPairs$ =
+    this.websocketSubscribeService.unsubscribeStatusById$(this._pairsId);
 
   public get singleId() {
     return this._singleId;
@@ -28,17 +39,31 @@ export class TickerWebsocketService
   public createParams = ({ symbols }: WebsocketTickerStreamParams) =>
     symbols.map((item) => `${item.toLowerCase()}@ticker`);
 
-  public subscribe(params: WebsocketTickerStreamParams, customId: number) {
+  public subscribe(params: WebsocketTickerStreamParams) {
     this.websocketSubscribeService.subscribe(
       this.createParams(params),
-      customId
+      this.singleId
     );
   }
 
-  public unsubscribe(params: WebsocketTickerStreamParams, customId: number) {
+  public unsubscribe(params: WebsocketTickerStreamParams) {
     this.websocketSubscribeService.unsubscribe(
       this.createParams(params),
-      customId + WEBSOCKET_UNSUBSCRIBE_BASE_ID
+      this.singleId
+    );
+  }
+
+  public subscribePairs(params: WebsocketTickerStreamParams) {
+    this.websocketSubscribeService.subscribe(
+      this.createParams(params),
+      this.pairsId
+    );
+  }
+
+  public unsubscribePairs(params: WebsocketTickerStreamParams) {
+    this.websocketSubscribeService.unsubscribe(
+      this.createParams(params),
+      this.pairsId
     );
   }
 }

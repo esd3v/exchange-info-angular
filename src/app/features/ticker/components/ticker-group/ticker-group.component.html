@@ -1,18 +1,46 @@
 <div class="col">
-  <app-ticker-pair></app-ticker-pair>
+  <app-ticker-card title="Pair" [value]="pair"></app-ticker-card>
 </div>
 <div class="col">
-  <app-ticker-last-price></app-ticker-last-price>
+  <app-ticker-card
+    title="Last price"
+    [value]="lastPrice"
+    [loading]="lastPriceLoading"
+    [positive]="lastPricePositive"
+  >
+  </app-ticker-card>
 </div>
 <div class="col">
-  <app-ticker-change></app-ticker-change>
+  <app-ticker-card
+    title="24 change"
+    [value]="priceChange"
+    [loading]="priceChangeLoading"
+    [positive]="priceChangePositive"
+  >
+  </app-ticker-card>
 </div>
 <div class="col">
-  <app-ticker-change-percent></app-ticker-change-percent>
+  <app-ticker-card
+    title="24 change percent"
+    [value]="priceChangePercent"
+    [loading]="priceChangePercentLoading"
+    [positive]="priceChangePercentPositive"
+  >
+  </app-ticker-card>
 </div>
 <div class="col">
-  <app-ticker-last-quantity></app-ticker-last-quantity>
+  <app-ticker-card
+    title="Last quantity"
+    [value]="lastQuantity"
+    [loading]="lastQuantityLoading"
+  >
+  </app-ticker-card>
 </div>
 <div class="col">
-  <app-ticker-trades></app-ticker-trades>
+  <app-ticker-card
+    title="Trades"
+    [value]="numberOfTrades"
+    [loading]="numberOfTradesLoading"
+  >
+  </app-ticker-card>
 </div>

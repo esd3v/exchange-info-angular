@@ -10,9 +10,6 @@
     <ng-template [ngIf]="loading">
       <ngx-skeleton-loader appSkeleton></ngx-skeleton-loader>
     </ng-template>
-    <ng-template [ngIf]="value === null && !loading"> N/A </ng-template>
-    <ng-template [ngIf]="!loading && value !== null">
-      {{ value }}
-    </ng-template>
+    <ng-template [ngIf]="!loading"> {{ value }}</ng-template>
   </div>
 </mat-card>

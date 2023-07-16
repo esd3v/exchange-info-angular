@@ -71,9 +71,8 @@ export class HomerService {
     });
   }
 
-  public initHomeData(symbol: string) {
+  public initHomeData() {
     this.exchangeInfoFacade.loadData();
-    this.tickerFacade.onAppInit(symbol);
   }
 
   public onWebsocketMessage() {

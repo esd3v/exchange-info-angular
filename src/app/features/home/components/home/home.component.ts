@@ -53,9 +53,8 @@ export class HomeComponent implements OnInit {
     }
 
     const { base, quote } = parsedRoutePair;
-    const symbol = `${base}${quote}`;
 
-    this.homeService.initHomeData(symbol);
+    this.homeService.initHomeData();
 
     this.store$.dispatch(
       globalActions.setCurrency({ payload: { base, quote } })

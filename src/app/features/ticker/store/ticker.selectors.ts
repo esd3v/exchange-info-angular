@@ -24,7 +24,7 @@ export const currentTicker = createSelector(
   featureSelector,
   globalSymbol,
   (state, globalSymbol) => {
-    return globalSymbol ? state.entities[globalSymbol] : null;
+    return state.entities[globalSymbol];
   }
 );
 
@@ -54,7 +54,7 @@ export const lastQuantity = createSelector(
 );
 
 export const tickSize = createSelector(
-  symbolsSelector,
+  symbolsSelector, // comes from exchangeinfo
   globalSymbol,
   (state, globalSymbol) =>
     globalSymbol && state.entities[globalSymbol]?.PRICE_FILTER.tickSize
