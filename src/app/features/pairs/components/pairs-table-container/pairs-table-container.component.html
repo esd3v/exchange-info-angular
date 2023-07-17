@@ -1,0 +1,10 @@
+<app-window title="Pairs"
+  ><app-pairs-table
+    [data]="data"
+    [loading]="loading"
+    (pageChange)="handlePageChange($event)"
+    [pageSizeOptions]="pageSizeOptions"
+    (rowClick)="handleRowClick($event)"
+    (pageDataInit)="handlePageDataInit($event)"
+  ></app-pairs-table
+></app-window>

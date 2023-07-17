@@ -1,14 +1,5 @@
 import { Location } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  ViewEncapsulation,
-} from '@angular/core';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Dictionary } from '@ngrx/entity';
 import { Subject, combineLatest, map } from 'rxjs';
@@ -24,85 +15,36 @@ import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.ser
 import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesFacade } from 'src/app/features/trades/services/trades-facade.service';
-import {
-  convertPairToCurrency,
-  formatPrice,
-  getCellByColumnId,
-} from 'src/app/shared/helpers';
-import { Column } from 'src/app/shared/types/column';
+import { TradesWebsocketService } from 'src/app/features/trades/services/trades-websocket.service';
+import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
+import { LoadingController } from 'src/app/shared/loading-controller';
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { PairsStyleService } from '../../services/pairs-style.service';
-import { PairColumn } from '../../types/pair-column';
-import { LoadingController } from 'src/app/shared/loading-controller';
+import { PairsTableStyleService } from '../../services/pairs-table-style.service';
 
 @Component({
-  selector: 'app-pairs',
-  templateUrl: './pairs.component.html',
-  styleUrls: ['./pairs.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-pairs-table-container',
+  templateUrl: './pairs-table-container.component.html',
 })
-export class PairsComponent
+export class PairsTableContainerComponent
   extends LoadingController
   implements OnDestroy, OnInit
 {
-  @ViewChild(MatPaginator, { static: true }) private paginator!: MatPaginator;
-
-  public styles = this.pairsStyleService;
-  public globalPair$ = this.globalFacade.pair$;
   private debounceTime = 1000;
-  private pageClicks$ = new Subject<PageEvent>();
-  public clickedRow: Row = [];
-  public pageSizeOptions = [15];
-  public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
+  private pageClicks$ = new Subject<void>();
+  private prevPageRows: Row[] = [];
+  private pageRows: Row[] = [];
 
-  public columns: PairColumn[] = [
-    { id: 'pair', numeric: false, label: 'Pair' },
-    { id: 'lastPrice', numeric: true, label: 'Price' },
-    { id: 'priceChangePercent', numeric: true, label: '24h Change' },
-  ];
-
-  public displayedColumns: string[] = this.columns.map((item) => item.id);
-
-  public placeholderRows = Array<Row>(this.pageSize).fill([]);
-
-  public rows$ = combineLatest([
+  private data$ = combineLatest([
     this.exchangeInfoFacade.tradingSymbols$,
     this.tickerFacade.tickers$,
   ]).pipe(
     map(([tradingSymbols, tickers]) => this.createRows(tradingSymbols, tickers))
   );
 
-  // array of current page symbols for further websocket subcribe/unsubscribe data
-  private pageSymbols$ = this.pageRows$.pipe(
-    map((rows) => this.createSymbolsFromRows(this.columns, rows))
-  );
-
-  // Exclude globalSymbol because we already subscribed to it
-  private pageSymbolsWithoutGlobalSymbol$ = combineLatest([
-    this.globalFacade.symbol$.pipe(first()),
-    this.pageSymbols$.pipe(
-      filter((pageSymbols) => Boolean(pageSymbols.length))
-    ),
-  ]).pipe(
-    map(([globalSymbol, pageSymbols]) =>
-      pageSymbols.filter((symbol) => symbol !== globalSymbol)
-    )
-  );
-
-  private get pageSize() {
-    return this.paginator?.pageSize || this.pageSizeOptions[0];
-  }
-
-  public get length$() {
-    return this.rows$.pipe(map((data) => data.length));
-  }
-
-  private get pageRows$() {
-    return this.dataSource.connect();
-  }
+  public data: Row[] = [];
+  public pageSizeOptions = [15];
 
   public constructor(
     private router: Router,
@@ -110,12 +52,13 @@ export class PairsComponent
     private tickerFacade: TickerFacade,
     private exchangeInfoFacade: ExchangeInfoFacade,
     private websocketService: WebsocketService,
-    private pairsStyleService: PairsStyleService,
+    private pairsTableStyleService: PairsTableStyleService,
     private tickerWebsocketService: TickerWebsocketService,
     private globalFacade: GlobalFacade,
     private tradesFacade: TradesFacade,
     private candlesFacade: CandlesFacade,
     private orderBookWebsocketService: OrderBookWebsocketService,
+    private tradesWebsocketService: TradesWebsocketService,
     private orderBookFacade: OrderBookFacade,
     private chartService: ChartService
   ) {
@@ -123,13 +66,14 @@ export class PairsComponent
     super(true);
   }
 
-  public trackRow(_index: number, _row: Row) {
-    return _index;
+  // Exclude globalSymbol because we already subscribed to it
+  private filterSymbol(symbols: string[], symbol: string) {
+    return symbols.filter((item) => item !== symbol);
   }
 
-  public createSymbolsFromRows = (columns: Column[], rows: Row[]) => {
+  public createSymbolsFromRows(rows: Row[]) {
     return rows.map((row) => {
-      const pairCell = getCellByColumnId({ columns, id: 'pair', row });
+      const pairCell = row[0];
 
       const { base, quote } = convertPairToCurrency(
         pairCell.value as string,
@@ -138,7 +82,7 @@ export class PairsComponent
 
       return `${base}${quote}`;
     });
-  };
+  }
 
   public createRows(
     symbols: ExchangeSymbolEntity[],
@@ -169,9 +113,9 @@ export class PairsComponent
             value: formattedPrice,
             classNames: prevLastPrice
               ? lastPrice > prevLastPrice
-                ? this.pairsStyleService.cellPositiveClass
+                ? this.pairsTableStyleService.cellPositiveClass
                 : lastPrice < prevLastPrice
-                ? this.pairsStyleService.cellNegativeClass
+                ? this.pairsTableStyleService.cellNegativeClass
                 : ''
               : '',
           },
@@ -179,9 +123,9 @@ export class PairsComponent
             value: priceChangePercentFormatted,
             classNames:
               Number(priceChangePercent) > 0
-                ? this.pairsStyleService.cellPositiveClass
+                ? this.pairsTableStyleService.cellPositiveClass
                 : Number(priceChangePercent) < 0
-                ? this.pairsStyleService.cellNegativeClass
+                ? this.pairsTableStyleService.cellNegativeClass
                 : '',
           },
         ]);
@@ -189,11 +133,6 @@ export class PairsComponent
     }
 
     return rows;
-  }
-
-  private handlePageChangeDebounced() {
-    this.unsubscribeFromPageSymbols();
-    this.subscribeToPageSymbols();
   }
 
   public handleCandlesOnRowClick({
@@ -210,16 +149,23 @@ export class PairsComponent
   public handleOrderBookOnRowClick({
     symbol,
   }: Parameters<typeof this.orderBookFacade.loadData>[0]) {
-    this.orderBookFacade.loadData({ symbol });
     this.orderBookFacade.unsubscribeCurrent();
     this.orderBookWebsocketService.subscribe({ symbol });
+
+    this.orderBookWebsocketService.resubscribed$.pipe(first()).subscribe(() => {
+      this.orderBookFacade.loadData({ symbol });
+    });
   }
 
   public handleTradesOnRowClick({
     symbol,
   }: Parameters<typeof this.tradesFacade.loadData>[0]) {
     this.tradesFacade.unsubscribeCurrent();
-    this.tradesFacade.loadDataAndSubscribe({ symbol });
+    this.tradesWebsocketService.subscribe({ symbol });
+
+    this.tradesWebsocketService.resubscribed$.pipe(first()).subscribe(() => {
+      this.tradesFacade.loadData({ symbol });
+    });
   }
 
   public changePair({ base, quote }: Currency) {
@@ -239,7 +185,7 @@ export class PairsComponent
 
         // this.pairsService.handleCandlesOnRowClick({ symbol });
         this.handleOrderBookOnRowClick({ symbol });
-        // this.pairsService.handleTradesOnRowClick({ symbol });
+        this.handleTradesOnRowClick({ symbol });
 
         this.globalFacade.setCurrency({ base, quote });
 
@@ -248,27 +194,8 @@ export class PairsComponent
       });
   }
 
-  public handleTableClick(event: MouseEvent) {
-    const row = this.clickedRow;
-    const target: any = event.target;
-
-    if (!target) return;
-
-    const tagName = target.tagName;
-
-    if (tagName === 'TD' && row) {
-      const currency = this.getRowCurrency(row);
-
-      this.changePair(currency);
-    }
-  }
-
   private getRowCurrency(row: Row) {
-    const pairCell = getCellByColumnId({
-      columns: this.columns,
-      id: 'pair',
-      row,
-    });
+    const pairCell = row[0];
 
     const { base, quote } = convertPairToCurrency(
       pairCell.value as string,
@@ -278,51 +205,93 @@ export class PairsComponent
     return { base, quote };
   }
 
+  public subscribeToPageSymbols(symbols: string[]) {
+    this.tickerWebsocketService.subscribePairs({ symbols });
+  }
+
+  public unsubscribeFromPageSymbols(symbols: string[]) {
+    this.tickerWebsocketService.unsubscribePairs({ symbols });
+  }
+
   public handleRowClick(row: Row) {
-    this.clickedRow = row;
+    const currency = this.getRowCurrency(row);
+
+    this.changePair(currency);
   }
 
-  public handlePageChange(event: PageEvent) {
-    this.pageClicks$.next(event);
+  public handlePageDataInit(rows: Row[]) {
+    this.pageRows = rows;
+    this.prevPageRows = rows;
   }
 
-  public subscribeToPageSymbols() {
-    this.pageSymbolsWithoutGlobalSymbol$.pipe(first()).subscribe((symbols) => {
-      this.tickerWebsocketService.subscribePairs({ symbols });
-    });
-  }
-
-  public unsubscribeFromPageSymbols() {
-    this.pageSymbolsWithoutGlobalSymbol$.pipe(first()).subscribe((symbols) => {
-      this.tickerWebsocketService.unsubscribePairs({ symbols });
-    });
+  public handlePageChange(rows: Row[]) {
+    this.pageRows = rows;
+    this.pageClicks$.next();
   }
 
   public ngOnInit(): void {
-    // Create paginator before setting dataSource, for optimization
-    this.dataSource.paginator = this.paginator;
-
     // Update data
-    this.rows$.subscribe((rows) => {
-      this.dataSource.data = rows;
+    this.data$.subscribe((data) => {
+      this.data = data;
     });
 
-    // Start listening to page changes
-    this.pageClicks$.pipe(debounceTime(this.debounceTime)).subscribe(() => {
-      this.handlePageChangeDebounced();
+    // On websocket start
+    combineLatest([
+      this.globalFacade.symbol$.pipe(first()),
+      this.websocketService.status$.pipe(filter((status) => status === 'open')),
+    ]).subscribe(([globalSymbol]) => {
+      const symbols = this.filterSymbol(
+        this.createSymbolsFromRows(this.pageRows),
+        globalSymbol
+      );
+
+      this.subscribeToPageSymbols(symbols);
     });
 
-    this.websocketService.status$
-      .pipe(filter((status) => status === 'open'))
-      .subscribe(() => {
-        this.subscribeToPageSymbols();
-      });
+    // On page change debounced
+    combineLatest([
+      this.globalFacade.symbol$.pipe(first()),
+      this.pageClicks$.pipe(debounceTime(this.debounceTime)),
+    ]).subscribe(([globalSymbol]) => {
+      const prevSymbols = this.filterSymbol(
+        this.createSymbolsFromRows(this.prevPageRows),
+        globalSymbol
+      );
 
-    // Manage loading
-    this.rows$.subscribe((rows) => {
-      if (rows.length && this.loading) {
-        this.setLoading(false);
-      }
+      const symbols = this.filterSymbol(
+        this.createSymbolsFromRows(this.pageRows),
+        globalSymbol
+      );
+
+      this.unsubscribeFromPageSymbols(prevSymbols);
+      this.subscribeToPageSymbols(symbols);
+
+      this.prevPageRows = this.pageRows;
+    });
+
+    // REST loading
+    combineLatest([
+      this.tickerFacade.restStatus$.pipe(
+        filter((status) => status === 'loading')
+      ),
+      this.exchangeInfoFacade.restStatus$.pipe(
+        filter((status) => status === 'loading')
+      ),
+    ]).subscribe(() => {
+      this.setLoading(true);
+    });
+
+    // REST and data complete
+    combineLatest([
+      this.tradesFacade.restStatus$.pipe(
+        filter((status) => status === 'success')
+      ),
+      this.exchangeInfoFacade.restStatus$.pipe(
+        filter((status) => status === 'success')
+      ),
+      this.data$.pipe(filter((data) => Boolean(data.length))),
+    ]).subscribe(() => {
+      this.setLoading(false);
     });
   }
 

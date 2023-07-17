@@ -8,14 +8,13 @@ import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.sta
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketModule } from 'src/app/websocket/websocket.module';
-import { PairsStyleService } from '../../services/pairs-style.service';
-import { PairColumn } from '../../types/pair-column';
-import { PairsComponent } from './pairs.component';
+import { PairsTableStyleService } from '../../services/pairs-table-style.service';
+import { PairsTableContainerComponent } from './pairs-table-container.component';
 
 describe('PairsComponent', () => {
-  let component: PairsComponent;
-  let pairsStyleService: PairsStyleService;
-  let fixture: ComponentFixture<PairsComponent>;
+  let component: PairsTableContainerComponent;
+  let pairsTableStyleService: PairsTableStyleService;
+  let fixture: ComponentFixture<PairsTableContainerComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -26,28 +25,21 @@ describe('PairsComponent', () => {
         RouterTestingModule,
         MatPaginatorModule,
       ],
-      declarations: [PairsComponent],
+      declarations: [PairsTableContainerComponent],
     });
 
-    fixture = TestBed.createComponent(PairsComponent);
-    pairsStyleService = TestBed.inject(PairsStyleService);
-
+    fixture = TestBed.createComponent(PairsTableContainerComponent);
+    pairsTableStyleService = TestBed.inject(PairsTableStyleService);
     component = fixture.componentInstance;
   });
 
   it('should create array of symbols from rows', () => {
-    const columns: PairColumn[] = [
-      { id: 'pair', numeric: false, label: 'Pair' },
-      { id: 'lastPrice', numeric: true, label: 'Price' },
-      { id: 'priceChangePercent', numeric: true, label: '24h Change' },
-    ];
-
     const rows: Row[] = [
       [{ value: 'BTC/USDT' }, { value: 1 }],
       [{ value: 'ETH/BTC' }, { value: 2 }],
     ];
 
-    const symbols = component.createSymbolsFromRows(columns, rows);
+    const symbols = component.createSymbolsFromRows(rows);
 
     expect(symbols).toEqual(['BTCUSDT', 'ETHBTC']);
   });
@@ -104,22 +96,22 @@ describe('PairsComponent', () => {
         { value: 'BTC/USDT' },
         {
           value: '2000.000000',
-          classNames: pairsStyleService.cellNegativeClass,
+          classNames: pairsTableStyleService.cellNegativeClass,
         },
         {
           value: '-50%',
-          classNames: pairsStyleService.cellNegativeClass,
+          classNames: pairsTableStyleService.cellNegativeClass,
         },
       ],
       [
         { value: 'ETH/BTC' },
         {
           value: '3000.000000',
-          classNames: pairsStyleService.cellPositiveClass,
+          classNames: pairsTableStyleService.cellPositiveClass,
         },
         {
           value: '+50%',
-          classNames: pairsStyleService.cellPositiveClass,
+          classNames: pairsTableStyleService.cellPositiveClass,
         },
       ],
     ];

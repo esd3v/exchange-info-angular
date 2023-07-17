@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
-export class PairsStyleService {
+export class PairsTableStyleService {
   public tableClass = 'pairs';
   public rowClass = `${this.tableClass}__row`;
   public rowHighlightClass = `${this.rowClass}--highlight`;

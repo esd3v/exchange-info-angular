@@ -73,6 +73,7 @@ export class HomerService {
 
   public initHomeData() {
     this.exchangeInfoFacade.loadData();
+    this.tickerFacade.loadData();
   }
 
   public onWebsocketMessage() {
