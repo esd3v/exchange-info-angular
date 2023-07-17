@@ -3,7 +3,7 @@ import { ChartComponent } from './chart.component';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { WindowModule } from 'src/app/shared/components/window/window.module';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from 'src/app/shared/shared.module';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [ChartComponent],
@@ -13,7 +13,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
       echarts: () => import('echarts'),
     }),
     WindowModule,
-    SharedModule,
+    MatSelectModule,
   ],
   exports: [ChartComponent],
 })

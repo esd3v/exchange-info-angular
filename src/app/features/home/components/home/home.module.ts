@@ -5,13 +5,13 @@ import { OrderBookTableContainerModule } from 'src/app/features/order-book/compo
 import { PairsModule } from 'src/app/features/pairs/components/pairs/pairs.module';
 import { TickerGroupModule } from 'src/app/features/ticker/components/ticker-group/ticker-group.module';
 import { TradesTableContainerModule } from 'src/app/features/trades/components/trades-table-container/trades-table-container.module';
-import { SharedModule } from 'src/app/shared/shared.module';
 import { HomeComponent } from './home.component';
+import { HeaderModule } from 'src/app/shared/components/header/header.module';
 
 @NgModule({
   declarations: [HomeComponent],
   imports: [
-    SharedModule,
+    HeaderModule,
     PairsModule,
     TickerGroupModule,
     ChartModule,

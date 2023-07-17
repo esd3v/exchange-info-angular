@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { PairsComponent } from './pairs.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { SharedModule } from 'src/app/shared/shared.module';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { WindowModule } from 'src/app/shared/components/window/window.module';
 
 @NgModule({
   declarations: [PairsComponent],
@@ -12,8 +12,8 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
     CommonModule,
     MatTableModule,
     MatPaginatorModule,
-    SharedModule,
     NgxSkeletonLoaderModule,
+    WindowModule,
   ],
   exports: [PairsComponent],
 })
