@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { first, filter } from 'rxjs';
-import { globalSelectors } from 'src/app/features/global/store';
+import { globalActions, globalSelectors } from 'src/app/features/global/store';
 import { AppState } from 'src/app/store';
 
 @Injectable({
@@ -9,24 +8,23 @@ import { AppState } from 'src/app/store';
 })
 export class GlobalFacade {
   public currency$ = this.store$.select(globalSelectors.currency);
-  public globalSymbol$ = this.store$.select(globalSelectors.globalSymbol);
-  public globalPair$ = this.store$.select(globalSelectors.globalPair);
+  public symbol$ = this.store$.select(globalSelectors.globalSymbol);
+  public pair$ = this.store$.select(globalSelectors.globalPair);
 
-  public globalPairUnderscore$ = this.store$.select(
+  public pairUnderscore$ = this.store$.select(
     globalSelectors.globalPairUnderscore
   );
 
-  public globalPairCurrent$ = this.globalPair$.pipe(first(), filter(Boolean));
-
-  public globalSymbolCurrent$ = this.globalSymbol$.pipe(
-    first(),
-    filter(Boolean)
-  );
-
-  public globalPairUnderscoreCurrent$ = this.globalPairUnderscore$.pipe(
-    first(),
-    filter(Boolean)
-  );
-
   public constructor(private store$: Store<AppState>) {}
+
+  public setCurrency({
+    base,
+    quote,
+  }: Parameters<typeof globalActions.setCurrency>[0]['payload']) {
+    this.store$.dispatch(
+      globalActions.setCurrency({
+        payload: { base, quote },
+      })
+    );
+  }
 }

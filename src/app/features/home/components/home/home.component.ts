@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { globalActions } from 'src/app/features/global/store';
-import { AppState } from 'src/app/store';
-import { HomerService } from '../../services/home.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { MISC_SNACKBAR_DURATION } from 'src/app/shared/config';
 import { convertPairToCurrency } from 'src/app/shared/helpers';
+import { AppState } from 'src/app/store';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { HomerService } from '../../services/home.service';
 
 @Component({
   selector: 'app-home',
@@ -23,7 +23,8 @@ export class HomeComponent implements OnInit {
     private route: ActivatedRoute,
     private homeService: HomerService,
     private snackBar: MatSnackBar,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private globalFacade: GlobalFacade
   ) {
     this.onRouteEvent();
   }
@@ -55,10 +56,7 @@ export class HomeComponent implements OnInit {
     const { base, quote } = parsedRoutePair;
 
     this.homeService.initHomeData();
-
-    this.store$.dispatch(
-      globalActions.setCurrency({ payload: { base, quote } })
-    );
+    this.globalFacade.setCurrency({ base, quote });
   }
 
   public onRouteEvent() {
