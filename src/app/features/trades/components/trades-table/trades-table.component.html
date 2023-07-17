@@ -29,7 +29,7 @@
         mat-cell
       >
         <ng-template [ngIf]="loading">
-          <ngx-skeleton-loader appSkeleton width="80%"></ngx-skeleton-loader>
+          <app-skeleton width="80%"></app-skeleton>
         </ng-template>
         <ng-template [ngIf]="!loading">
           {{ row[columnIndex]?.value }}

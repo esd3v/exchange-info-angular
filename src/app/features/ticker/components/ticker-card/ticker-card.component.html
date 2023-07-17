@@ -8,7 +8,7 @@
     }"
   >
     <ng-template [ngIf]="loading">
-      <ngx-skeleton-loader appSkeleton></ngx-skeleton-loader>
+      <app-skeleton></app-skeleton>
     </ng-template>
     <ng-template [ngIf]="!loading"> {{ value }}</ng-template>
   </div>
