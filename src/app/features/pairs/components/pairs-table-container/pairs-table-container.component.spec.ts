@@ -35,8 +35,8 @@ describe('PairsComponent', () => {
 
   it('should create array of symbols from rows', () => {
     const rows: Row[] = [
-      [{ value: 'BTC/USDT' }, { value: 1 }],
-      [{ value: 'ETH/BTC' }, { value: 2 }],
+      { cells: [{ value: 'BTC/USDT' }, { value: 1 }] },
+      { cells: [{ value: 'ETH/BTC' }, { value: 2 }] },
     ];
 
     const symbols = component.createSymbolsFromRows(rows);
@@ -92,28 +92,32 @@ describe('PairsComponent', () => {
     };
 
     const expectedRows: Row[] = [
-      [
-        { value: 'BTC/USDT' },
-        {
-          value: '2000.000000',
-          classNames: pairsTableStyleService.cellNegativeClass,
-        },
-        {
-          value: '-50%',
-          classNames: pairsTableStyleService.cellNegativeClass,
-        },
-      ],
-      [
-        { value: 'ETH/BTC' },
-        {
-          value: '3000.000000',
-          classNames: pairsTableStyleService.cellPositiveClass,
-        },
-        {
-          value: '+50%',
-          classNames: pairsTableStyleService.cellPositiveClass,
-        },
-      ],
+      {
+        cells: [
+          { value: 'BTC/USDT' },
+          {
+            value: '2000.000000',
+            classNames: pairsTableStyleService.cellNegativeClass,
+          },
+          {
+            value: '-50%',
+            classNames: pairsTableStyleService.cellNegativeClass,
+          },
+        ],
+      },
+      {
+        cells: [
+          { value: 'ETH/BTC' },
+          {
+            value: '3000.000000',
+            classNames: pairsTableStyleService.cellPositiveClass,
+          },
+          {
+            value: '+50%',
+            classNames: pairsTableStyleService.cellPositiveClass,
+          },
+        ],
+      },
     ];
 
     const rows = component.createRows(symbols, tickers);

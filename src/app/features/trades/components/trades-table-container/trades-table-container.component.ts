@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, combineLatest, filter, first, map } from 'rxjs';
+import { combineLatest, filter, first, map } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import {
@@ -31,7 +31,11 @@ export class TradesTableContainerComponent
   public currency$ = this.globalFacade.currency$;
   public currency!: Currency;
 
-  public data$ = this.getData$();
+  public data$ = combineLatest([
+    this.tradesFacade.trades$,
+    this.tickerFacade.tickSize$.pipe(filter(Boolean)),
+  ]).pipe(map(([trades, tickSize]) => this.createRows(trades, tickSize)));
+
   public data: Row[] = [];
 
   public constructor(
@@ -46,13 +50,6 @@ export class TradesTableContainerComponent
     super(true);
   }
 
-  private getData$(): Observable<Row[]> {
-    return combineLatest([
-      this.tradesFacade.trades$,
-      this.tickerFacade.tickSize$.pipe(filter(Boolean)),
-    ]).pipe(map(([trades, tickSize]) => this.createRows(trades, tickSize)));
-  }
-
   private createRows(trades: TradesEntity[], tickSize: string): Row[] {
     return trades.map((item) => {
       const { isBuyerMaker, price, qty, time } = item;
@@ -60,26 +57,29 @@ export class TradesTableContainerComponent
       const formattedQty = formatDecimal(qty); // TODO use stepSize from for quantity formatting
       const total = multiplyDecimal(formattedPrice, formattedQty);
 
-      return [
-        {
-          value: formattedPrice,
-          className: isBuyerMaker
-            ? this.styles.cellNegativeClass
-            : this.styles.cellPositiveClass,
-        },
-        {
-          value: formattedQty,
-        },
-        {
-          value: total,
-        },
-        {
-          value: getFormattedDate({
-            msec: time,
-            format: 'HH:mm:ss:SSS',
-          }),
-        },
-      ];
+      return {
+        cells: [
+          {
+            value: formattedPrice,
+            className: isBuyerMaker
+              ? this.styles.cellNegativeClass
+              : this.styles.cellPositiveClass,
+          },
+          {
+            value: formattedQty,
+          },
+          {
+            value: total,
+          },
+          {
+            value: getFormattedDate({
+              msec: time,
+              format: 'HH:mm:ss:SSS',
+            }),
+          },
+        ],
+        classNames: '',
+      };
     });
   }
 

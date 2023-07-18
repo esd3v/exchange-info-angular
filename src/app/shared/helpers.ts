@@ -114,23 +114,23 @@ export function sortRows<T extends Row[]>({
   rows: T;
   order: SortOrder;
   headCellIndex: number;
-}) {
+}): Row[] {
   type Column = [any, number][];
 
   // Make an array where 0 is cell of a column and 1 is cell's row index
   const getColumn = (rows: T, headCellIndex: number): Column => {
-    return rows.map((cells, rowIndex) => {
-      const cell = cells[headCellIndex];
+    return rows.map((row, rowIndex) => {
+      const cell = row.cells[headCellIndex];
 
       return [cell['value'], rowIndex];
     });
   };
 
   const applyColumn = (rows: T, column: Column, headCellIndex: number) =>
-    rows.map((row, rowIndex) =>
-      row.map((_cell, cellIndex) => {
+    rows.map(({ cells, classNames }, rowIndex) => ({
+      cells: cells.map((_cell, cellIndex) => {
         const originalRow = column[rowIndex][1];
-        const originalCell = rows[originalRow][cellIndex];
+        const originalCell = rows[originalRow]['cells'][cellIndex];
 
         const cellToReplace = {
           ...originalCell,
@@ -138,8 +138,9 @@ export function sortRows<T extends Row[]>({
         };
 
         return cellIndex === headCellIndex ? cellToReplace : originalCell;
-      })
-    );
+      }),
+      classNames,
+    }));
 
   const column = getColumn(rows, headCellIndex);
 
@@ -163,5 +164,5 @@ export const getCellByColumnId = ({
 }) => {
   const columnId = columns.findIndex((item) => item.id === id);
 
-  return row[columnId];
+  return row.cells[columnId];
 };

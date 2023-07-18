@@ -40,7 +40,11 @@ export class PairsTableComponent implements OnInit, OnChanges {
 
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
   public styles = this.pairsTableStyleService;
-  public placeholderRows = Array<Row>(this.pageSizeOptions[0]).fill([]);
+
+  public placeholderRows = Array<Row>(this.pageSizeOptions[0]).fill({
+    cells: [],
+  });
+
   public displayedColumns = this.columns.map((item) => item.id);
   public globalPair$ = this.globalFacade.pair$;
 

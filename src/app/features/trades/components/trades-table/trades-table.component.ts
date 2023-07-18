@@ -23,7 +23,11 @@ export class TradesTableComponent implements OnChanges {
 
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
   public styles = this.tradesStyleService;
-  public placeholderRows = Array<Row>(WIDGET_TRADES_DEFAULT_LIMIT).fill([]);
+
+  public placeholderRows = Array<Row>(WIDGET_TRADES_DEFAULT_LIMIT).fill({
+    cells: [],
+  });
+
   public displayedColumns = this.columns.map((item) => item.id);
 
   public get columns(): TradesColumn[] {

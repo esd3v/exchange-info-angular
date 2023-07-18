@@ -28,7 +28,9 @@ export class OrderBookTableComponent implements OnChanges {
     quote: null,
   };
 
-  public placeholderRows = Array<Row>(WIDGET_DEPTH_DEFAULT_LIMIT).fill([]);
+  public placeholderRows = Array<Row>(WIDGET_DEPTH_DEFAULT_LIMIT).fill({
+    cells: [],
+  });
 
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource(
     this.data
@@ -75,7 +77,7 @@ export class OrderBookTableComponent implements OnChanges {
   }
 
   public ngOnChanges({ type, data }: SimpleChanges) {
-    if (data?.currentValue) {  
+    if (data?.currentValue) {
       this.dataSource.data = data.currentValue;
     }
 

@@ -73,7 +73,7 @@ export class PairsTableContainerComponent
 
   public createSymbolsFromRows(rows: Row[]) {
     return rows.map((row) => {
-      const pairCell = row[0];
+      const pairCell = row.cells[0];
 
       const { base, quote } = convertPairToCurrency(
         pairCell.value as string,
@@ -107,28 +107,31 @@ export class PairsTableContainerComponent
           Number(priceChangePercent) > 0 ? '+' : ''
         }${priceChangePercent}%`;
 
-        rows.push([
-          { value: pair },
-          {
-            value: formattedPrice,
-            classNames: prevLastPrice
-              ? lastPrice > prevLastPrice
-                ? this.pairsTableStyleService.cellPositiveClass
-                : lastPrice < prevLastPrice
-                ? this.pairsTableStyleService.cellNegativeClass
-                : ''
-              : '',
-          },
-          {
-            value: priceChangePercentFormatted,
-            classNames:
-              Number(priceChangePercent) > 0
-                ? this.pairsTableStyleService.cellPositiveClass
-                : Number(priceChangePercent) < 0
-                ? this.pairsTableStyleService.cellNegativeClass
+        rows.push({
+          cells: [
+            { value: pair },
+            {
+              value: formattedPrice,
+              classNames: prevLastPrice
+                ? lastPrice > prevLastPrice
+                  ? this.pairsTableStyleService.cellPositiveClass
+                  : lastPrice < prevLastPrice
+                  ? this.pairsTableStyleService.cellNegativeClass
+                  : ''
                 : '',
-          },
-        ]);
+            },
+            {
+              value: priceChangePercentFormatted,
+              classNames:
+                Number(priceChangePercent) > 0
+                  ? this.pairsTableStyleService.cellPositiveClass
+                  : Number(priceChangePercent) < 0
+                  ? this.pairsTableStyleService.cellNegativeClass
+                  : '',
+            },
+          ],
+          classNames: '',
+        });
       }
     }
 
@@ -195,7 +198,7 @@ export class PairsTableContainerComponent
   }
 
   private getRowCurrency(row: Row) {
-    const pairCell = row[0];
+    const pairCell = row.cells[0];
 
     const { base, quote } = convertPairToCurrency(
       pairCell.value as string,

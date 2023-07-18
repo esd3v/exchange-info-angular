@@ -23,7 +23,7 @@
       [ngClass]="[
         styles.cellClass,
         column.numeric ? styles.cellRightClass : '',
-        row[columnIndex]?.classNames || ''
+        row.cells[columnIndex]?.classNames || ''
       ]"
       mat-cell
     >
@@ -31,7 +31,7 @@
         <app-skeleton width="80%"></app-skeleton>
       </ng-template>
       <ng-template [ngIf]="!loading">
-        {{ row[columnIndex]?.value }}
+        {{ row.cells[columnIndex]?.value }}
       </ng-template>
     </td>
   </ng-container>
@@ -41,7 +41,8 @@
     *matRowDef="let row; columns: displayedColumns"
     [ngClass]="[
       styles.rowClass,
-      row[0] && (globalPair$ | async) === row[0].value
+      row.classNames || '',
+      row.cells[0] && (globalPair$ | async) === row.cells[0].value
         ? styles.rowHighlightClass
         : ''
     ]"

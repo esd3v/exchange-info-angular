@@ -1,3 +1,6 @@
 import { Cell } from './cell';
 
-export type Row = Cell[];
+export type Row = {
+  cells: Cell[];
+  classNames?: string;
+};

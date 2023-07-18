@@ -21,7 +21,7 @@
       </th>
       <td
         *matCellDef="let row"
-        [class]="row[columnIndex]?.className"
+        [class]="row.cells[columnIndex]?.className"
         [ngClass]="[
           styles.cellClass,
           column.numeric ? styles.cellRightClass : ''
@@ -32,7 +32,7 @@
           <app-skeleton width="80%"></app-skeleton>
         </ng-template>
         <ng-template [ngIf]="!loading">
-          {{ row[columnIndex]?.value }}
+          {{ row.cells[columnIndex]?.value }}
         </ng-template>
       </td>
     </ng-container>

@@ -58,24 +58,27 @@ export class OrderBookTableContainerComponent
   public createRows(
     orderBook: OrderBook['asks'] | OrderBook['bids'],
     tickSize: string
-  ) {
+  ): Row[] {
     return orderBook.map((item) => {
       const [price, quantity] = item;
       const formattedPrice = formatPrice(price, tickSize);
       const formattedQuantity = formatDecimal(quantity); // TODO use stepSize from LOT_SIZE filter?
       const total = multiplyDecimal(formattedPrice, formattedQuantity);
 
-      return [
-        {
-          value: formattedPrice,
-        },
-        {
-          value: formattedQuantity,
-        },
-        {
-          value: total,
-        },
-      ];
+      return {
+        cells: [
+          {
+            value: formattedPrice,
+          },
+          {
+            value: formattedQuantity,
+          },
+          {
+            value: total,
+          },
+        ],
+        classNames: '',
+      };
     });
   }
 
