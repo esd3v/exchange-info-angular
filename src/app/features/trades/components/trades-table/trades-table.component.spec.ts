@@ -1,17 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { TradesTableContainerComponent } from './trades-table-container.component';
+import { TradesTableComponent } from './trades-table.component';
 
 describe('TradesTableContainerComponent', () => {
-  let component: TradesTableContainerComponent;
-  let fixture: ComponentFixture<TradesTableContainerComponent>;
+  let component: TradesTableComponent;
+  let fixture: ComponentFixture<TradesTableComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TradesTableContainerComponent],
+      declarations: [TradesTableComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TradesTableContainerComponent);
+    fixture = TestBed.createComponent(TradesTableComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

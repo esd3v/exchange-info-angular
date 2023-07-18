@@ -1,6 +1,6 @@
-@import "./overrides.scss";
+@import "/src/styles/overrides.scss";
 
-@mixin common-table {
+.table {
   width: 100%;
   table-layout: fixed;
   $highlight: red;

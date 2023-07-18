@@ -1,35 +1,35 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Dictionary } from '@ngrx/entity';
-import { StoreModule } from '@ngrx/store';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
+import { TableModule } from 'src/app/shared/components/table/table.module';
 import { Row } from 'src/app/shared/types/row';
+import { AppStoreModule } from 'src/app/store/store.module';
 import { WebsocketModule } from 'src/app/websocket/websocket.module';
-import { PairsTableStyleService } from '../../services/pairs-table-style.service';
-import { PairsTableContainerComponent } from './pairs-table-container.component';
+import { PairsTableComponent } from './pairs-table.component';
+import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 
 describe('PairsComponent', () => {
-  let component: PairsTableContainerComponent;
-  let pairsTableStyleService: PairsTableStyleService;
-  let fixture: ComponentFixture<PairsTableContainerComponent>;
+  let component: PairsTableComponent;
+  let tableStyleService: TableStyleService;
+  let fixture: ComponentFixture<PairsTableComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
         HttpClientTestingModule,
-        StoreModule.forRoot({}),
+        AppStoreModule,
         WebsocketModule.forRoot({ url: '' }),
         RouterTestingModule,
-        MatPaginatorModule,
+        TableModule,
       ],
-      declarations: [PairsTableContainerComponent],
+      declarations: [PairsTableComponent],
     });
 
-    fixture = TestBed.createComponent(PairsTableContainerComponent);
-    pairsTableStyleService = TestBed.inject(PairsTableStyleService);
+    fixture = TestBed.createComponent(PairsTableComponent);
+    tableStyleService = TestBed.inject(TableStyleService);
     component = fixture.componentInstance;
   });
 
@@ -97,26 +97,28 @@ describe('PairsComponent', () => {
           { value: 'BTC/USDT' },
           {
             value: '2000.000000',
-            classNames: pairsTableStyleService.cellNegativeClass,
+            classNames: tableStyleService.cellNegativeClass,
           },
           {
             value: '-50%',
-            classNames: pairsTableStyleService.cellNegativeClass,
+            classNames: tableStyleService.cellNegativeClass,
           },
         ],
+        classNames: '',
       },
       {
         cells: [
           { value: 'ETH/BTC' },
           {
             value: '3000.000000',
-            classNames: pairsTableStyleService.cellPositiveClass,
+            classNames: tableStyleService.cellPositiveClass,
           },
           {
             value: '+50%',
-            classNames: pairsTableStyleService.cellPositiveClass,
+            classNames: tableStyleService.cellPositiveClass,
           },
         ],
+        classNames: '',
       },
     ];
 

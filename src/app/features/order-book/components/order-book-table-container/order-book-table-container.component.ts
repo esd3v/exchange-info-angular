@@ -15,6 +15,8 @@ import { OrderBookFacade } from '../../services/order-book-facade.service';
 import { OrderBookRestService } from '../../services/order-book-rest.service';
 import { OrderBookWebsocketService } from '../../services/order-book-websocket.service';
 import { OrderBook } from '../../types/order-book';
+import { OrderBookColumn } from '../../types/order-book-column';
+import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 
 @Component({
   selector: 'app-order-book-table-container',
@@ -26,7 +28,6 @@ export class OrderBookTableContainerComponent
   implements OnInit
 {
   public currency$ = this.globalFacade.currency$;
-  public currency!: Currency;
 
   public asksData$ = this.getData$('asks');
   public bidsData$ = this.getData$('bids');
@@ -34,16 +35,39 @@ export class OrderBookTableContainerComponent
   public asksData: Row[] = [];
   public bidsData: Row[] = [];
 
+  public columns: OrderBookColumn[] = [];
+
   public constructor(
     private orderBookWebsocketService: OrderBookWebsocketService,
     private orderBookRestService: OrderBookRestService,
     private tickerFacade: TickerFacade,
     private orderBookFacade: OrderBookFacade,
     private globalFacade: GlobalFacade,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
+    private tableStyleService: TableStyleService
   ) {
     // Set loading
     super(true);
+  }
+
+  private createColumns({ base, quote }: Currency): OrderBookColumn[] {
+    return [
+      {
+        id: 'price',
+        numeric: false,
+        label: `Price${quote ? ` (${quote})` : ''}`,
+      },
+      {
+        id: 'amount',
+        numeric: true,
+        label: `Amount${base ? ` (${base})` : ''}`,
+      },
+      {
+        id: 'total',
+        numeric: true,
+        label: 'Total',
+      },
+    ];
   }
 
   private getData$(type: 'asks' | 'bids') {
@@ -51,13 +75,14 @@ export class OrderBookTableContainerComponent
       type === 'asks' ? this.orderBookFacade.asks$ : this.orderBookFacade.bids$,
       this.tickerFacade.tickSize$.pipe(filter(Boolean)),
     ]).pipe(
-      map(([orderBook, tickSize]) => this.createRows(orderBook, tickSize))
+      map(([orderBook, tickSize]) => this.createRows(orderBook, tickSize, type))
     );
   }
 
   public createRows(
     orderBook: OrderBook['asks'] | OrderBook['bids'],
-    tickSize: string
+    tickSize: string,
+    type: 'asks' | 'bids'
   ): Row[] {
     return orderBook.map((item) => {
       const [price, quantity] = item;
@@ -69,6 +94,10 @@ export class OrderBookTableContainerComponent
         cells: [
           {
             value: formattedPrice,
+            classNames:
+              type === 'bids'
+                ? this.tableStyleService.cellPositiveClass
+                : this.tableStyleService.cellNegativeClass,
           },
           {
             value: formattedQuantity,
@@ -99,7 +128,7 @@ export class OrderBookTableContainerComponent
     });
 
     this.currency$.subscribe((currency) => {
-      this.currency = currency;
+      this.columns = this.createColumns(currency);
     });
 
     this.asksData$.subscribe((data) => {

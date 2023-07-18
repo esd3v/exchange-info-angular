@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class TradesStyleService {
-  public tableClass = 'trades';
+  public tableClass = 'table';
   public rowClass = `${this.tableClass}__row`;
   public cellClass = `${this.tableClass}__cell`;
   public cellPositiveClass = `${this.cellClass}--positive`;

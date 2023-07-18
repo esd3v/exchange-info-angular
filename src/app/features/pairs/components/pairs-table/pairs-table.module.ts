@@ -1,13 +1,11 @@
-import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatTableModule } from '@angular/material/table';
+import { TableModule } from 'src/app/shared/components/table/table.module';
 import { PairsTableComponent } from './pairs-table.component';
-import { SkeletonModule } from 'src/app/shared/components/skeleton/skeleton.module';
+import { WindowModule } from 'src/app/shared/components/window/window.module';
 
 @NgModule({
   declarations: [PairsTableComponent],
-  imports: [CommonModule, MatTableModule, MatPaginatorModule, SkeletonModule],
+  imports: [TableModule, WindowModule],
   exports: [PairsTableComponent],
 })
 export class PairsTableModule {}

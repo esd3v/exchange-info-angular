@@ -1,18 +1,24 @@
 <div class="row">
   <div class="col-12 col-lg-6">
-    <app-order-book-table
-      type="asks"
-      [loading]="loading"
-      [data]="asksData"
-      [currency]="currency"
-    ></app-order-book-table>
+    <app-window title="Sell orders">
+      <app-table
+        type="asks"
+        [loading]="loading"
+        [data]="asksData"
+        [columns]="columns"
+        [paginatorEnabled]="false"
+      ></app-table>
+    </app-window>
   </div>
   <div class="col-12 col-lg-6">
-    <app-order-book-table
-      type="bids"
-      [loading]="loading"
-      [data]="bidsData"
-      [currency]="currency"
-    ></app-order-book-table>
+    <app-window title="Buy orders">
+      <app-table
+        type="bids"
+        [loading]="loading"
+        [data]="bidsData"
+        [columns]="columns"
+        [paginatorEnabled]="false"
+      ></app-table>
+    </app-window>
   </div>
 </div>
