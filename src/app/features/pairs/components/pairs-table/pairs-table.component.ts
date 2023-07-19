@@ -333,7 +333,7 @@ export class PairsTableComponent
 
     // REST and data complete
     combineLatest([
-      this.tradesFacade.restStatus$.pipe(
+      this.tickerFacade.restStatus$.pipe(
         filter((status) => status === 'success')
       ),
       this.exchangeInfoFacade.restStatus$.pipe(
