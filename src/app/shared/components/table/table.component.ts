@@ -13,7 +13,6 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { filter, first, skip } from 'rxjs';
 import { TradesStyleService } from 'src/app/features/trades/services/trades-style.service';
-import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
 import { Column } from '../../types/column';
@@ -28,9 +27,12 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
   @ViewChild(MatPaginator, { static: false }) private paginator!: MatPaginator;
   @Input() public data: Row[] = [];
   @Input() public columns: Column[] = [];
-  @Input() public loading?: Boolean = false;
-  @Input() public paginatorEnabled?: boolean = false;
-  @Input() public paginatorPageSizeOptions?: number[];
+  @Input() public loading: Boolean = false;
+  @Input() public paginatorEnabled: boolean = false;
+  @Input() public paginatorPageSizeOptions: number[] = [15];
+
+  @Input() public placeholderRowsCount: number =
+    this.paginatorPageSizeOptions[0];
 
   @Output() public paginatorPageChange: EventEmitter<Row[]> =
     new EventEmitter();
@@ -43,9 +45,11 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
   public styles = this.tradesStyleService;
 
-  public placeholderRows = Array<Row>(WIDGET_TRADES_DEFAULT_LIMIT).fill({
-    cells: [],
-  });
+  public get placeholderRows() {
+    return Array<Row>(this.placeholderRowsCount).fill({
+      cells: [],
+    });
+  }
 
   public get displayedColumns() {
     return this.columns.map((item) => item.id);

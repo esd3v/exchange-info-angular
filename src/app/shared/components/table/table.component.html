@@ -27,9 +27,7 @@
       ]"
       mat-cell
     >
-      <ng-template [ngIf]="loading">
-        <app-skeleton width="80%"></app-skeleton>
-      </ng-template>
+      <app-skeleton *ngIf="loading" width="80%"></app-skeleton>
       <ng-template [ngIf]="!loading">
         {{ row.cells[columnIndex]?.value }}
       </ng-template>
@@ -45,7 +43,7 @@
 </table>
 <mat-paginator
   *ngIf="paginatorEnabled"
-  [pageSizeOptions]="paginatorPageSizeOptions || [15]"
+  [pageSizeOptions]="paginatorPageSizeOptions"
   showFirstLastButtons
   aria-label="Select page"
   [length]="paginatorLength"

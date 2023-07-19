@@ -17,6 +17,7 @@ import { OrderBookWebsocketService } from '../../services/order-book-websocket.s
 import { OrderBook } from '../../types/order-book';
 import { OrderBookColumn } from '../../types/order-book-column';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 
 @Component({
   selector: 'app-order-book-table-container',
@@ -36,6 +37,7 @@ export class OrderBookTableContainerComponent
   public bidsData: Row[] = [];
 
   public columns: OrderBookColumn[] = [];
+  public placeholderRowsCount = WIDGET_DEPTH_DEFAULT_LIMIT;
 
   public constructor(
     private orderBookWebsocketService: OrderBookWebsocketService,

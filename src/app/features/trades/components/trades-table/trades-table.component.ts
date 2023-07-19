@@ -2,6 +2,8 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { combineLatest, filter, first, map } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
+import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
+import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import {
   formatDecimal,
   formatPrice,
@@ -17,7 +19,6 @@ import { TradesFacade } from '../../services/trades-facade.service';
 import { TradesWebsocketService } from '../../services/trades-websocket.service';
 import { TradesEntity } from '../../store/trades.state';
 import { TradesColumn } from '../../types/trades-column';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 
 @Component({
   selector: 'app-trades-table',
@@ -34,6 +35,7 @@ export class TradesTableComponent extends LoadingController implements OnInit {
 
   public data: Row[] = [];
   public columns: TradesColumn[] = [];
+  public placeholderRowsCount = WIDGET_TRADES_DEFAULT_LIMIT;
 
   public constructor(
     private tableStyleService: TableStyleService,
