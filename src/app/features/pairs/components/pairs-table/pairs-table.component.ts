@@ -12,7 +12,6 @@ import {
   map,
   switchMap,
 } from 'rxjs';
-import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
 import { CandlesFacade } from 'src/app/features/candles/services/candles-facade.service';
 import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
@@ -31,6 +30,7 @@ import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
+import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -79,7 +79,7 @@ export class PairsTableComponent
     private orderBookWebsocketService: OrderBookWebsocketService,
     private tradesWebsocketService: TradesWebsocketService,
     private orderBookFacade: OrderBookFacade,
-    private chartService: ChartService
+    private candlesWebsocketService: CandlesWebsocketService
   ) {
     // Set loading
     super(true);
@@ -164,11 +164,17 @@ export class PairsTableComponent
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesFacade.loadData>[0], 'symbol'>) {
-    this.chartService.setLoading(true);
     this.candlesFacade.unsubscribeCurrent();
 
-    this.candlesFacade.intervalCurrent$.subscribe((interval) => {
-      this.candlesFacade.loadDataAndSubscribe({ symbol, interval });
+    this.candlesFacade.interval$.pipe(first()).subscribe((interval) => {
+      this.candlesWebsocketService.subscribe({ symbol, interval });
+    });
+
+    combineLatest([
+      this.candlesFacade.interval$.pipe(first()),
+      this.candlesWebsocketService.resubscribed$.pipe(first()),
+    ]).subscribe(([interval]) => {
+      this.candlesFacade.loadData({ symbol, interval });
     });
   }
 
@@ -209,7 +215,7 @@ export class PairsTableComponent
       .subscribe(() => {
         const url = this.router.createUrlTree([pair]).toString();
 
-        // this.pairsService.handleCandlesOnRowClick({ symbol });
+        this.handleCandlesOnRowClick({ symbol });
         this.handleOrderBookOnRowClick({ symbol });
         this.handleTradesOnRowClick({ symbol });
 

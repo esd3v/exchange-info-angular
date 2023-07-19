@@ -1,16 +1,47 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { ECharts, EChartsOption } from 'echarts';
-import { BehaviorSubject, combineLatest, filter } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  filter,
+  first,
+  map,
+  switchMap,
+} from 'rxjs';
 import { CandlesFacade } from '../../services/candles-facade.service';
 import { CandleInterval } from '../../types/candle-interval';
+import { LoadingController } from 'src/app/shared/loading-controller';
+import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
+import { CandlesWebsocketService } from '../../services/candles-websocket.service';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { CandlesRestService } from '../../services/candles-rest.service';
+
+type Options = {
+  xAxis: [
+    {
+      data: string[];
+    },
+    {
+      data: string[];
+    }
+  ];
+  series: [
+    {
+      data: (string | number)[][];
+    },
+    {
+      data: string[];
+    }
+  ];
+};
 
 @Component({
   selector: 'app-chart',
   templateUrl: './chart.component.html',
   styleUrls: ['./chart.component.scss'],
 })
-export class ChartComponent implements OnInit {
+export class ChartComponent extends LoadingController implements OnInit {
   private chartInstance$ = new BehaviorSubject<ECharts | null>(null);
   private upColor = '#00da3c';
   private downColor = '#ec0000';
@@ -34,9 +65,19 @@ export class ChartComponent implements OnInit {
     '8h',
   ];
 
-  public interval!: CandleInterval;
+  public interval$ = this.candlesFacade.interval$;
 
-  public loading$ = this.candlesFacade.isLoading$;
+  private options$ = combineLatest([
+    this.candlesFacade.dates$,
+    this.candlesFacade.volumes$,
+    this.candlesFacade.ohlc$,
+  ]).pipe(
+    map(([dates, volumes, ohlc]) =>
+      dates.length && volumes.length && ohlc.length
+        ? this.createOptions(dates, volumes, ohlc)
+        : null
+    )
+  );
 
   public chartOptions: EChartsOption = {
     backgroundColor: '#fff',
@@ -157,47 +198,115 @@ export class ChartComponent implements OnInit {
 
   public mergeOptions: EChartsOption = {};
 
-  public constructor(private candlesFacade: CandlesFacade) {}
+  public constructor(
+    private candlesFacade: CandlesFacade,
+    private globalFacade: GlobalFacade,
+    private candlesWebsocketService: CandlesWebsocketService,
+    private websocketService: WebsocketService,
+    private candlesRestService: CandlesRestService
+  ) {
+    // Set loading
+    super(true);
+  }
 
   public onChartInit($event: ECharts) {
     this.chartInstance$.next($event);
   }
 
+  private createOptions(
+    dates: string[],
+    volumes: string[],
+    ohlc: (string | number)[][]
+  ): Options {
+    return {
+      xAxis: [
+        {
+          data: dates,
+        },
+        {
+          data: volumes,
+        },
+      ],
+      series: [
+        {
+          data: ohlc,
+        },
+        {
+          data: volumes,
+        },
+      ],
+    };
+  }
+
   public handleIntervalChange(event: MatSelectChange) {
     const interval = event.value as CandleInterval;
 
-    this.candlesFacade.onIntervalChange(interval);
-  }
+    this.candlesFacade.unsubscribeCurrent();
 
-  public ngOnInit(): void {
-    this.candlesFacade.intervalCurrent$.subscribe((data) => {
-      this.interval = data;
+    this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
+      this.candlesWebsocketService.subscribe({ symbol, interval });
     });
 
     combineLatest([
-      this.chartInstance$.pipe(filter(Boolean)),
-      this.candlesFacade.ohlc$.pipe(filter((item) => Boolean(item.length))),
-      this.candlesFacade.dates$.pipe(filter((item) => Boolean(item.length))),
-      this.candlesFacade.volumes$.pipe(filter((item) => Boolean(item.length))),
-    ]).subscribe(([_instance, ohlc, dates, volumes]) => {
-      this.mergeOptions = {
-        xAxis: [
-          {
-            data: dates,
-          },
-          {
-            data: volumes,
-          },
-        ],
-        series: [
-          {
-            data: ohlc,
-          },
-          {
-            data: volumes,
-          },
-        ],
-      };
+      this.globalFacade.symbol$.pipe(first()),
+      this.candlesWebsocketService.resubscribed$.pipe(first()),
+    ]).subscribe(([symbol]) => {
+      this.candlesFacade.loadData({ symbol, interval });
     });
+  }
+
+  public ngOnInit(): void {
+    // Initial data load
+    combineLatest([
+      this.globalFacade.symbol$.pipe(first()),
+      this.candlesFacade.interval$.pipe(first()),
+    ]).subscribe(([symbol, interval]) => {
+      this.candlesFacade.loadData({ symbol, interval });
+    });
+
+    // On websocket start
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() =>
+          combineLatest([
+            this.globalFacade.symbol$.pipe(first()),
+            this.candlesFacade.interval$.pipe(first()),
+          ])
+        )
+      )
+      .subscribe(([symbol, interval]) => {
+        this.candlesWebsocketService.subscribe({ symbol, interval });
+      });
+
+    // REST loading
+    this.candlesRestService.status$
+      .pipe(filter((status) => status === 'loading'))
+      .subscribe(() => {
+        this.setLoading(true);
+      });
+
+    // REST and data complete
+    combineLatest([
+      this.candlesRestService.status$.pipe(
+        filter((status) => status === 'success')
+      ),
+      this.options$.pipe(
+        filter((options): options is Options => options !== null)
+      ),
+    ]).subscribe(() => {
+      this.setLoading(false);
+    });
+
+    // Update data
+    this.chartInstance$
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.options$)
+      )
+      .pipe(filter((options): options is Options => options !== null))
+      .subscribe((options) => {
+        this.mergeOptions = options;
+      });
   }
 }

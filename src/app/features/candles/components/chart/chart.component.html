@@ -1,4 +1,4 @@
-<app-window title="Chart" [loading]="(loading$ | async) === true">
+<app-window title="Chart" [loading]="loading">
   <div
     echarts
     [options]="chartOptions"
@@ -12,7 +12,7 @@
       <mat-label>Time</mat-label>
       <mat-select
         panelOpen="false"
-        [value]="interval"
+        [value]="interval$ | async"
         (selectionChange)="handleIntervalChange($event)"
         ><mat-option *ngFor="let interval of intervals" [value]="interval">
           {{ interval }}
