@@ -1,12 +1,5 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import {
-  BehaviorSubject,
-  filter,
-  first,
-  interval,
-  Subject,
-  takeUntil,
-} from 'rxjs';
+import { BehaviorSubject, Subject, filter, interval, takeUntil } from 'rxjs';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
 type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing' | null;
@@ -21,54 +14,48 @@ export type Reason =
 
 @Injectable()
 export class WebsocketService implements OnDestroy {
-  private socket!: WebSocket | null;
-  private _messages$ = new Subject<MessageEvent<string>>();
-  private status!: WebsocketStatus;
-  private reason!: Reason;
-
-  public reason$ = new BehaviorSubject<Reason>(null);
-  public status$ = new BehaviorSubject<WebsocketStatus>(null);
-
-  public open$ = this.status$.pipe(filter((status) => status === 'open'));
-
-  // Don't replace with this.open$.pipe(first())
-  // because first() should come first
-  public openCurrent$ = this.status$.pipe(
-    first(),
-    filter((status) => status === 'open')
-  );
-
-  public openUntil$ = this.status$.pipe(
-    filter((status) => status === 'open'),
-    first()
-  );
-
-  public closedOrNullCurrent$ = this.status$.pipe(
-    first(),
-    filter((status) => status === 'closed' || status === null)
-  );
-
-  public reasonCurrent$ = this.reason$.pipe(first());
+  #socket!: WebSocket | null;
+  #messages$ = new Subject<MessageEvent<string>>();
+  #status!: WebsocketStatus;
+  #reason!: Reason;
+  #reason$ = new BehaviorSubject<Reason>(null);
+  #status$ = new BehaviorSubject<WebsocketStatus>(null);
 
   public get messages$() {
-    return this._messages$;
+    return this.#messages$;
+  }
+
+  public get status() {
+    return this.#status;
+  }
+
+  public get reason() {
+    return this.#reason;
+  }
+
+  public get status$() {
+    return this.#status$;
+  }
+
+  public get reason$() {
+    return this.#reason$;
   }
 
   public constructor(
     @Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig
   ) {
-    this.status$.subscribe((status) => {
-      this.status = status;
+    this.#status$.subscribe((status) => {
+      this.#status = status;
     });
 
-    this.reason$.subscribe((reason) => {
-      this.reason = reason;
+    this.#reason$.subscribe((reason) => {
+      this.#reason = reason;
     });
   }
 
-  private keepAlive() {
+  #keepAlive() {
     if (this.config.keepAlive?.msec) {
-      const stop$ = this.status$.pipe(filter((status) => status === 'open'));
+      const stop$ = this.#status$.pipe(filter((status) => status === 'open'));
 
       interval(this.config.keepAlive.msec)
         .pipe(takeUntil(stop$))
@@ -80,25 +67,25 @@ export class WebsocketService implements OnDestroy {
     }
   }
 
-  private reconnect() {
-    if (this.config.reconnect) {
-      const stop$ = this.status$.pipe(filter((status) => status === 'open'));
+  #reconnect() {
+    const stop$ = this.#status$.pipe(filter((status) => status === 'open'));
 
-      interval(this.config.reconnect)
-        .pipe(takeUntil(stop$))
-        .subscribe(() => {
-          this.connect();
-        });
-    }
+    interval(this.config.reconnect)
+      .pipe(takeUntil(stop$))
+      .subscribe(() => {
+        this.connect();
+      });
   }
 
   public close() {
-    this.status$.next('closing');
-    this.socket?.close();
+    this.#status$.next('closing');
+    this.#socket?.close();
   }
 
   public send(msg: string | Record<string, any>): void {
-    this.socket?.send(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    if (this.#status === 'open') {
+      this.#socket?.send(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    }
   }
 
   public ngOnDestroy() {
@@ -107,47 +94,50 @@ export class WebsocketService implements OnDestroy {
 
   public connect(reason?: Reason) {
     console.time('WS');
-    this.status$.next('connecting');
+    this.#status$.next('connecting');
 
-    this.reason$.next(
-      reason || (this.reason === 'terminated' ? 'restoring' : this.reason)
+    this.#reason$.next(
+      reason || (this.#reason === 'terminated' ? 'restoring' : this.#reason)
     );
 
-    this.socket = new WebSocket(this.config.url);
+    this.#socket = new WebSocket(this.config.url);
 
-    this.socket.onopen = () => {
+    this.#socket.onopen = () => {
       console.timeEnd('WS');
-      this.status$.next('open');
-      this.reason$.next(this.reason === 'restoring' ? 'restored' : this.reason);
+      this.#status$.next('open');
+
+      this.#reason$.next(
+        this.#reason === 'restoring' ? 'restored' : this.#reason
+      );
 
       if (this.config.keepAlive) {
-        this.keepAlive();
+        this.#keepAlive();
       }
     };
 
-    this.socket.onmessage = (event) => {
+    this.#socket.onmessage = (event) => {
       this.messages$.next(event);
     };
 
-    this.socket.onerror = () => {
-      this.status$.next('closed');
-      this.reason$.next('failed');
+    this.#socket.onerror = () => {
+      this.#status$.next('closed');
+      this.#reason$.next('failed');
     };
 
-    this.socket.onclose = () => {
+    this.#socket.onclose = () => {
       // If terminated by server
-      if (this.status === 'open') {
-        this.status$.next('closed');
-        this.reason$.next('terminated');
+      if (this.#status === 'open') {
+        this.#status$.next('closed');
+        this.#reason$.next('terminated');
 
         if (this.config.reconnect) {
-          this.reconnect();
+          this.#reconnect();
         }
       } else {
-        this.status$.next('closed');
+        this.#status$.next('closed');
       }
     };
 
-    return this.status$;
+    return this.#status$;
   }
 }
