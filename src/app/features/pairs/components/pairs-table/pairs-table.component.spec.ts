@@ -45,6 +45,8 @@ describe('PairsComponent', () => {
   });
 
   it('should create rows from symbols and tickers data', () => {
+    const globalSymbol = 'ETHBTC';
+
     const symbols: ExchangeSymbolEntity[] = [
       {
         symbol: 'BTCUSDT',
@@ -118,11 +120,11 @@ describe('PairsComponent', () => {
             classNames: tableStyleService.cellPositiveClass,
           },
         ],
-        classNames: '',
+        classNames: tableStyleService.rowHighlightClass,
       },
     ];
 
-    const rows = component.createRows(symbols, tickers);
+    const rows = component.createRows(symbols, tickers, globalSymbol);
 
     expect(rows).toEqual(expectedRows);
   });

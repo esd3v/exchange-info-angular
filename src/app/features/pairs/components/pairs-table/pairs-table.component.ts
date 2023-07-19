@@ -2,7 +2,16 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Dictionary } from '@ngrx/entity';
-import { Subject, combineLatest, debounceTime, filter, first, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  combineLatest,
+  debounceTime,
+  filter,
+  first,
+  map,
+  switchMap,
+} from 'rxjs';
 import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
 import { CandlesFacade } from 'src/app/features/candles/services/candles-facade.service';
 import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
@@ -34,14 +43,17 @@ export class PairsTableComponent
 {
   private debounceTime = 1000;
   private pageClicks$ = new Subject<void>();
-  private prevPageRows: Row[] = [];
-  private pageRows: Row[] = [];
+  private prevPageRows$ = new BehaviorSubject<Row[]>([]);
+  private pageRows$ = new BehaviorSubject<Row[]>([]);
 
   private data$ = combineLatest([
     this.exchangeInfoFacade.tradingSymbols$,
     this.tickerFacade.tickers$,
+    this.globalFacade.symbol$,
   ]).pipe(
-    map(([tradingSymbols, tickers]) => this.createRows(tradingSymbols, tickers))
+    map(([tradingSymbols, tickers, globalSymbol]) =>
+      this.createRows(tradingSymbols, tickers, globalSymbol)
+    )
   );
 
   public data: Row[] = [];
@@ -93,7 +105,8 @@ export class PairsTableComponent
 
   public createRows(
     symbols: ExchangeSymbolEntity[],
-    tickers: Dictionary<TickerEntity>
+    tickers: Dictionary<TickerEntity>,
+    globalSymbol: string
   ) {
     const rows: Row[] = [];
 
@@ -137,7 +150,10 @@ export class PairsTableComponent
                   : '',
             },
           ],
-          classNames: '',
+          classNames:
+            symbol === globalSymbol
+              ? this.tableStyleService.rowHighlightClass
+              : '',
         });
       }
     }
@@ -230,12 +246,12 @@ export class PairsTableComponent
   }
 
   public handlePageDataInit(rows: Row[]) {
-    this.pageRows = rows;
-    this.prevPageRows = rows;
+    this.pageRows$.next(rows);
+    this.prevPageRows$.next(rows);
   }
 
   public handlePageChange(rows: Row[]) {
-    this.pageRows = rows;
+    this.pageRows$.next(rows);
     this.pageClicks$.next();
   }
 
@@ -246,38 +262,56 @@ export class PairsTableComponent
     });
 
     // On websocket start
-    combineLatest([
-      this.globalFacade.symbol$.pipe(first()),
-      this.websocketService.status$.pipe(filter((status) => status === 'open')),
-    ]).subscribe(([globalSymbol]) => {
-      const symbols = this.filterSymbol(
-        this.createSymbolsFromRows(this.pageRows),
-        globalSymbol
-      );
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() =>
+          combineLatest([
+            this.globalFacade.symbol$.pipe(first()),
+            this.pageRows$.pipe(
+              filter((rows) => Boolean(rows.length)),
+              first()
+            ),
+          ])
+        )
+      )
+      .subscribe(([globalSymbol, pageRows]) => {
+        const symbols = this.filterSymbol(
+          this.createSymbolsFromRows(pageRows),
+          globalSymbol
+        );
 
-      this.subscribeToPageSymbols(symbols);
-    });
+        this.subscribeToPageSymbols(symbols);
+      });
 
     // On page change debounced
-    combineLatest([
-      this.globalFacade.symbol$.pipe(first()),
-      this.pageClicks$.pipe(debounceTime(this.debounceTime)),
-    ]).subscribe(([globalSymbol]) => {
-      const prevSymbols = this.filterSymbol(
-        this.createSymbolsFromRows(this.prevPageRows),
-        globalSymbol
-      );
+    this.pageClicks$
+      .pipe(
+        debounceTime(this.debounceTime),
+        switchMap(() =>
+          combineLatest([
+            this.globalFacade.symbol$.pipe(first()),
+            this.pageRows$.pipe(first()),
+            this.prevPageRows$.pipe(first()),
+          ])
+        )
+      )
+      .subscribe(([globalSymbol, pageRows, prevPageRows]) => {
+        const prevSymbols = this.filterSymbol(
+          this.createSymbolsFromRows(prevPageRows),
+          globalSymbol
+        );
 
-      const symbols = this.filterSymbol(
-        this.createSymbolsFromRows(this.pageRows),
-        globalSymbol
-      );
+        const symbols = this.filterSymbol(
+          this.createSymbolsFromRows(pageRows),
+          globalSymbol
+        );
 
-      this.unsubscribeFromPageSymbols(prevSymbols);
-      this.subscribeToPageSymbols(symbols);
+        this.unsubscribeFromPageSymbols(prevSymbols);
+        this.subscribeToPageSymbols(symbols);
 
-      this.prevPageRows = this.pageRows;
-    });
+        this.prevPageRows$.next(pageRows);
+      });
 
     // REST loading
     combineLatest([
