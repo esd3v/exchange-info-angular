@@ -1,7 +1,7 @@
 <mat-slide-toggle
   [disabled]="disabled$ | async"
   (change)="handleChange($event)"
-  [checked]="this.websocketSwitchService.checked$ | async"
+  [checked]="checked$ | async"
 >
   Live updates
 </mat-slide-toggle>
