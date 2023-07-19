@@ -43,9 +43,6 @@ export class TickerGroupComponent implements OnInit {
     return Number(value) > 0;
   }
   public ngOnInit(): void {
-    // Initial data load
-    this.tickerFacade.loadData();
-
     // On websocket open
     combineLatest([
       this.globalFacade.symbol$.pipe(first()),
