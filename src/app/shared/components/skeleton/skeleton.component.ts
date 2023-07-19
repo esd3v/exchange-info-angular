@@ -1,6 +1,5 @@
 import {
   Component,
-  ComponentFactoryResolver,
   ComponentRef,
   HostBinding,
   Input,
@@ -8,8 +7,8 @@ import {
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
-import { SkeletonProps } from './skeleton-props';
 import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
+import { SkeletonProps } from './skeleton-props';
 
 @Component({
   selector: 'app-skeleton',
@@ -36,10 +35,9 @@ export class SkeletonComponent implements OnInit {
 
     this.ngxSkeleton.instance.theme = {
       display: 'inline-block',
-      height: '1em',
+      height: '0.75em',
       width: this.width,
       'margin-bottom.px': 0,
-      'font-size.px': 16,
       'vertical-align': 'middle',
     };
   }
