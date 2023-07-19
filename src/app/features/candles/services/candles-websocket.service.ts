@@ -48,4 +48,8 @@ export class CandlesWebsocketService
       this.id
     );
   }
+
+  public unsubscribeCurrent() {
+    this.websocketSubscribeService.unsubscribeCurrent(this.id);
+  }
 }

@@ -1,12 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, first, take } from 'rxjs';
+import { take } from 'rxjs';
 import { AppState } from 'src/app/store';
-import { GlobalFacade } from '../../global/services/global-facade.service';
 import { candlesActions, candlesSelectors } from '../store';
 import { Candle } from '../types/candle';
 import { WebsocketCandle } from '../types/websocket-candle';
-import { CandlesWebsocketService } from './candles-websocket.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,23 +15,7 @@ export class CandlesFacade {
   public dates$ = this.store$.select(candlesSelectors.dates);
   public volumes$ = this.store$.select(candlesSelectors.volumes);
 
-  public constructor(
-    private globalFacade: GlobalFacade,
-    private candlesWebsocketService: CandlesWebsocketService,
-    private store$: Store<AppState>
-  ) {}
-
-  public unsubscribeCurrent() {
-    combineLatest([
-      this.interval$.pipe(first()),
-      this.globalFacade.symbol$.pipe(first()),
-    ]).subscribe(([currentInterval, globalSymbol]) => {
-      this.candlesWebsocketService.unsubscribe({
-        interval: currentInterval,
-        symbol: globalSymbol,
-      });
-    });
-  }
+  public constructor(private store$: Store<AppState>) {}
 
   public handleWebsocketData({
     k: { t, o, h, l, c, v, T, B, n, q, V, Q },

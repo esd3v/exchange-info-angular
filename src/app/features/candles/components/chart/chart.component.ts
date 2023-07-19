@@ -241,7 +241,7 @@ export class ChartComponent extends LoadingController implements OnInit {
   public handleIntervalChange(event: MatSelectChange) {
     const interval = event.value as CandleInterval;
 
-    this.candlesFacade.unsubscribeCurrent();
+    this.candlesWebsocketService.unsubscribeCurrent();
 
     this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
       this.candlesWebsocketService.subscribe({ symbol, interval });

@@ -45,4 +45,8 @@ export class TradesWebsocketService
       this.id
     );
   }
+
+  public unsubscribeCurrent() {
+    this.websocketSubscribeService.unsubscribeCurrent(this.id);
+  }
 }

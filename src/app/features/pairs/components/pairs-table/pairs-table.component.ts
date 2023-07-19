@@ -164,7 +164,7 @@ export class PairsTableComponent
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesFacade.loadData>[0], 'symbol'>) {
-    this.candlesFacade.unsubscribeCurrent();
+    this.candlesWebsocketService.unsubscribeCurrent();
 
     this.candlesFacade.interval$.pipe(first()).subscribe((interval) => {
       this.candlesWebsocketService.subscribe({ symbol, interval });
@@ -181,7 +181,7 @@ export class PairsTableComponent
   public handleOrderBookOnRowClick({
     symbol,
   }: Parameters<typeof this.orderBookFacade.loadData>[0]) {
-    this.orderBookFacade.unsubscribeCurrent();
+    this.orderBookWebsocketService.unsubscribeCurrent();
     this.orderBookWebsocketService.subscribe({ symbol });
 
     this.orderBookWebsocketService.resubscribed$.pipe(first()).subscribe(() => {
@@ -192,7 +192,7 @@ export class PairsTableComponent
   public handleTradesOnRowClick({
     symbol,
   }: Parameters<typeof this.tradesFacade.loadData>[0]) {
-    this.tradesFacade.unsubscribeCurrent();
+    this.tradesWebsocketService.unsubscribeCurrent();
     this.tradesWebsocketService.subscribe({ symbol });
 
     this.tradesWebsocketService.resubscribed$.pipe(first()).subscribe(() => {

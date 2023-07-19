@@ -51,14 +51,6 @@ export class TradesFacade {
     );
   }
 
-  public unsubscribeCurrent() {
-    this.globalFacade.symbol$.pipe(first()).subscribe((globalSymbol) => {
-      this.tradesWebsocketService.unsubscribe({
-        symbol: globalSymbol,
-      });
-    });
-  }
-
   public loadData({
     symbol,
     limit = WIDGET_TRADES_DEFAULT_LIMIT,

@@ -53,4 +53,8 @@ export class OrderBookWebsocketService
       this.id
     );
   }
+
+  public unsubscribeCurrent() {
+    this.websocketSubscribeService.unsubscribeCurrent(this.id);
+  }
 }

@@ -114,6 +114,14 @@ export class WebsocketSubscribeService {
     });
   }
 
+  public unsubscribeCurrent(id: number) {
+    const message = this.messages.find((item) => item.params.id === id);
+
+    if (!message) return;
+
+    this.unsubscribe(message.params.params, id);
+  }
+
   public messageStatusById$(id: number) {
     return this.messages$.pipe(
       map((messages) => messages.find((item) => item.params.id === id)?.status)
