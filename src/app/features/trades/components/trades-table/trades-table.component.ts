@@ -85,7 +85,7 @@ export class TradesTableComponent extends LoadingController implements OnInit {
         cells: [
           {
             value: formattedPrice,
-            className: isBuyerMaker
+            classNames: isBuyerMaker
               ? this.tableStyleService.cellNegativeClass
               : this.tableStyleService.cellPositiveClass,
           },

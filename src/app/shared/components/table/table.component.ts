@@ -12,10 +12,10 @@ import {
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { filter, first, skip } from 'rxjs';
-import { TradesStyleService } from 'src/app/features/trades/services/trades-style.service';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Row } from 'src/app/shared/types/row';
 import { Column } from '../../types/column';
+import { TableStyleService } from './table-style.service';
 
 @Component({
   selector: 'app-table',
@@ -43,7 +43,7 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
     new EventEmitter();
 
   public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
-  public styles = this.tradesStyleService;
+  public styles = this.tableStyleService;
 
   public get placeholderRows() {
     return Array<Row>(this.placeholderRowsCount).fill({
@@ -67,7 +67,7 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
     return this.data.length;
   }
 
-  public constructor(private tradesStyleService: TradesStyleService) {}
+  public constructor(private tableStyleService: TableStyleService) {}
 
   public trackRow(_index: number, _item: Row) {
     return _index;
