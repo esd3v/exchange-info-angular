@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { combineLatest, first } from 'rxjs';
-import { ExchangeInfoFacade } from '../../exchange-info/services/exchange-info-facade.service';
-import { GlobalFacade } from '../../global/services/global-facade.service';
-import { TickerFacade } from '../../ticker/services/ticker-facade.service';
 import { APP_SITE_NAME } from 'src/app/shared/config';
 import { formatPrice } from 'src/app/shared/helpers';
-import { Title } from '@angular/platform-browser';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
-import { CandlesFacade } from '../../candles/services/candles-facade.service';
-import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
-import { TradesFacade } from '../../trades/services/trades-facade.service';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { CandlesWebsocketService } from '../../candles/services/candles-websocket.service';
+import { ExchangeInfoFacade } from '../../exchange-info/services/exchange-info-facade.service';
+import { GlobalFacade } from '../../global/services/global-facade.service';
+import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
+import { TickerFacade } from '../../ticker/services/ticker-facade.service';
+import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
+import { TickerWebsocketService } from '../../ticker/services/ticker-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class HomerService {
@@ -19,13 +20,14 @@ export class HomerService {
     private globalFacade: GlobalFacade,
     private router: Router,
     private exchangeInfoFacade: ExchangeInfoFacade,
-    private tickerFacade: TickerFacade,
     private titleService: Title,
     private websocketService: WebsocketService,
+    private tickerFacade: TickerFacade,
+    private tickerWebsocketService: TickerWebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private orderBookFacade: OrderBookFacade,
-    private tradesFacade: TradesFacade,
-    private candlesFacade: CandlesFacade
+    private orderBookWebsocketService: OrderBookWebsocketService,
+    private tradesWebsocketService: TradesWebsocketService,
+    private candlesWebsocketService: CandlesWebsocketService
   ) {}
 
   public createTitle({
@@ -82,15 +84,15 @@ export class HomerService {
         onData: (data) => {
           if ('e' in data) {
             if (data.e === 'kline') {
-              this.candlesFacade.handleWebsocketData(data);
+              this.candlesWebsocketService.handleWebsocketData(data);
             } else if (data.e === '24hrTicker') {
-              this.tickerFacade.handleWebsocketData(data);
+              this.tickerWebsocketService.handleWebsocketData(data);
             } else if (data.e === 'trade') {
-              this.tradesFacade.handleWebsocketData(data);
+              this.tradesWebsocketService.handleWebsocketData(data);
             }
           } else {
             if ('lastUpdateId' in data) {
-              this.orderBookFacade.handleWebsocketData(data);
+              this.orderBookWebsocketService.handleWebsocketData(data);
             }
           }
         },

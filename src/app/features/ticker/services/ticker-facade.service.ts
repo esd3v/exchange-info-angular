@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { AppState } from 'src/app/store';
 import { tickerActions, tickerSelectors } from '../store';
 import { TickerEntity } from '../store/ticker.state';
-import { WebsocketTicker } from '../types/websocket-ticker';
 
 @Injectable({
   providedIn: 'root',
@@ -35,20 +34,11 @@ export class TickerFacade {
 
   public constructor(private store$: Store<AppState>) {}
 
-  public handleWebsocketData({ s, c, Q, P, p, n }: WebsocketTicker) {
-    const ticker: TickerEntity = {
-      symbol: s,
-      lastPrice: c,
-      lastQty: Q,
-      priceChange: p,
-      priceChangePercent: P,
-      count: n,
-    };
-
-    this.store$.dispatch(tickerActions.update({ data: ticker }));
-  }
-
   public loadData() {
     this.store$.dispatch(tickerActions.load());
+  }
+
+  public updateTicker(ticker: TickerEntity) {
+    this.store$.dispatch(tickerActions.update({ data: ticker }));
   }
 }

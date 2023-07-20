@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-
-import { TradesStyleService } from './trades-style.service';
+import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 
 describe('TradesStyleService', () => {
-  let service: TradesStyleService;
+  let service: TableStyleService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(TradesStyleService);
+    service = TestBed.inject(TableStyleService);
   });
 
   it('should be created', () => {
