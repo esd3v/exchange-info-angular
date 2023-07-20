@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { combineLatest } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { MISC_SNACKBAR_DURATION } from 'src/app/shared/config';
 import { convertPairToCurrency } from 'src/app/shared/helpers';
@@ -85,11 +86,18 @@ export class HomeComponent implements OnInit {
     this.homeService.onWebsocketMessage();
     this.homeService.startWebSocket();
 
-    this.websocketService.status$.subscribe((status) => {
+    combineLatest([
+      this.websocketService.status$,
+      this.websocketService.reason$,
+    ]).subscribe(([status, reason]) => {
       if (status === 'connecting') {
         this.openSnackBar('Connecting to WebSocket server...');
       } else if (status === 'closed') {
-        this.openSnackBar('WebSocket connection closed');
+        if (reason === 'terminated') {
+          this.openSnackBar('WebSocket connection terminated');
+        } else {
+          this.openSnackBar('WebSocket connection closed');
+        }
       } else if (status === 'closing') {
         this.openSnackBar('Closing WebSocket connection...');
       } else if (status === 'open') {

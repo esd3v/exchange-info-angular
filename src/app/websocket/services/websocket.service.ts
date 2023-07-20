@@ -1,5 +1,14 @@
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Subject, filter, interval, takeUntil } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  filter,
+  first,
+  interval,
+  switchMap,
+  takeUntil,
+  timer,
+} from 'rxjs';
 import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
 
 type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing' | null;
@@ -67,19 +76,16 @@ export class WebsocketService implements OnDestroy {
     }
   }
 
-  #reconnect() {
-    const stop$ = this.#status$.pipe(filter((status) => status === 'open'));
+  public close(reason: Reason) {
+    // Close websocket only of status is currently open
+    // because we also can close it by switch
+    // when if it's currently closed (with terminated reason) and attempting to reconnect
+    if (this.status === 'open') {
+      this.#status$.next('closing');
+      this.#socket?.close();
+    }
 
-    interval(this.config.reconnect)
-      .pipe(takeUntil(stop$))
-      .subscribe(() => {
-        this.connect();
-      });
-  }
-
-  public close() {
-    this.#status$.next('closing');
-    this.#socket?.close();
+    this.#reason$.next(reason);
   }
 
   public send(msg: string | Record<string, any>): void {
@@ -89,7 +95,7 @@ export class WebsocketService implements OnDestroy {
   }
 
   public ngOnDestroy() {
-    this.close();
+    this.close(null);
   }
 
   public connect(reason?: Reason) {
@@ -131,7 +137,20 @@ export class WebsocketService implements OnDestroy {
         this.#reason$.next('terminated');
 
         if (this.config.reconnect) {
-          this.#reconnect();
+          timer(this.config.reconnect)
+            .pipe(
+              switchMap(() =>
+                // Check if reason is still 'terminated'
+                // e.g it wasn't switched off by websocket switch
+                this.reason$.pipe(
+                  first(),
+                  filter((reason) => reason === 'terminated')
+                )
+              )
+            )
+            .subscribe(() => {
+              this.connect();
+            });
         }
       } else {
         this.#status$.next('closed');

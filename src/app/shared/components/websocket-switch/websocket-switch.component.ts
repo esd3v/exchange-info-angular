@@ -34,10 +34,7 @@ export class WebsocketSwitchComponent {
       }
     } else {
       this.checked$.next(false);
-
-      if (this.websocketService.status === 'open') {
-        this.websocketService.close();
-      }
+      this.websocketService.close('switch');
     }
   }
 }
