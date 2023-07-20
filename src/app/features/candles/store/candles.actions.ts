@@ -7,8 +7,7 @@ const PREFIX = '[CANDLES]';
 const LOAD = `${PREFIX} LOAD`;
 const SUCCESS = `${PREFIX} SUCCESS`;
 const SET_INTERVAL = `${PREFIX} SET INTERVAL`;
-const ADD_CANDLE = `${PREFIX} ADD CANDLE`;
-const REMOVE_FIRST_CANDLE = `${PREFIX} REMOVE FIRST CANDLE`;
+const ADD_CANDLE_AND_REMOVE_FIRST = `${PREFIX} ADD CANDLE AND REMOVE FIRST`;
 const UPDATE_CANDLE = `${PREFIX} UPDATE CANDLE`;
 
 export const load = createAction(LOAD, props<CandlesGetParams>());
@@ -23,9 +22,10 @@ export const setInterval = createAction(
   props<{ interval: CandleInterval }>()
 );
 
-export const addCandle = createAction(ADD_CANDLE, props<{ candle: Candle }>());
-
-export const removeFirstCandle = createAction(REMOVE_FIRST_CANDLE);
+export const addCandleAndRemoveFirst = createAction(
+  ADD_CANDLE_AND_REMOVE_FIRST,
+  props<{ candle: Candle }>()
+);
 
 export const updateCandle = createAction(
   UPDATE_CANDLE,

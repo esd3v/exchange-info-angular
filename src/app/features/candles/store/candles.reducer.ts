@@ -36,13 +36,12 @@ export const candlesReducer = createReducer(
       interval,
     };
   }),
-  on(candlesActions.addCandle, (state, { candle }) => {
-    return candlesAdapter.addOne(createCandleEntity(candle), state);
-  }),
-  on(candlesActions.removeFirstCandle, (state) => {
+  on(candlesActions.addCandleAndRemoveFirst, (state, { candle }) => {
     const id = state.ids[0] as string;
+    const added = candlesAdapter.addOne(createCandleEntity(candle), state);
+    const final = candlesAdapter.removeOne(id, added);
 
-    return candlesAdapter.removeOne(id, state);
+    return final;
   }),
   on(candlesActions.updateCandle, (state, { candle }) => {
     const entity = createCandleEntity(candle);

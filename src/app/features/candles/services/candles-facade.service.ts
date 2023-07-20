@@ -24,8 +24,6 @@ export class CandlesFacade {
   }
 
   public addCandleAndRemoveFirst(candle: Candle) {
-    // TODO merge functionality with removeFirstCandle, rename to addCandleAndRemoveFirst and remove removeFirstCandle
-    this.store$.dispatch(candlesActions.addCandle({ candle }));
-    this.store$.dispatch(candlesActions.removeFirstCandle());
+    this.store$.dispatch(candlesActions.addCandleAndRemoveFirst({ candle }));
   }
 }
