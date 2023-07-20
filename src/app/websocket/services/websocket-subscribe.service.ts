@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   Subject,
+  combineLatest,
   concatMap,
   delay,
   filter,
@@ -128,12 +129,19 @@ export class WebsocketSubscribeService {
     );
   }
 
-  public subscribeStatusById$(id: number) {
+  public subscribeStatus$(id: number) {
     return this.messageStatusById$(id);
   }
 
-  public unsubscribeStatusById$(id: number) {
+  public unsubscribeStatus$(id: number) {
     return this.messageStatusById$(id + WEBSOCKET_UNSUBSCRIBE_BASE_ID);
+  }
+
+  public resubscribed$(id: number) {
+    return combineLatest([
+      this.unsubscribeStatus$(id).pipe(filter((status) => status === 'done')),
+      this.subscribeStatus$(id).pipe(filter((status) => status === 'done')),
+    ]);
   }
 
   public handleWebsocketMessage(message: string) {

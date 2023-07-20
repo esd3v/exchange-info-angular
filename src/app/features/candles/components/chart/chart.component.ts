@@ -241,15 +241,15 @@ export class ChartComponent extends LoadingController implements OnInit {
   public handleIntervalChange(event: MatSelectChange) {
     const interval = event.value as CandleInterval;
 
-    this.candlesWebsocketService.unsubscribeCurrent();
+    this.candlesWebsocketService.subscriber.unsubscribeCurrent();
 
     this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
-      this.candlesWebsocketService.subscribe({ symbol, interval });
+      this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
     });
 
     combineLatest([
       this.globalFacade.symbol$.pipe(first()),
-      this.candlesWebsocketService.resubscribed$.pipe(first()),
+      this.candlesWebsocketService.subscriber.resubscribed$.pipe(first()),
     ]).subscribe(([symbol]) => {
       this.candlesFacade.loadData({ symbol, interval });
     });
@@ -276,7 +276,7 @@ export class ChartComponent extends LoadingController implements OnInit {
         )
       )
       .subscribe(([symbol, interval]) => {
-        this.candlesWebsocketService.subscribe({ symbol, interval });
+        this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
       });
 
     // REST loading

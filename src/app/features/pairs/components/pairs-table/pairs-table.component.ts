@@ -19,7 +19,6 @@ import { OrderBookFacade } from 'src/app/features/order-book/services/order-book
 import { OrderBookWebsocketService } from 'src/app/features/order-book/services/order-book-websocket.service';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
-import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesFacade } from 'src/app/features/trades/services/trades-facade.service';
 import { TradesWebsocketService } from 'src/app/features/trades/services/trades-websocket.service';
@@ -31,6 +30,7 @@ import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
+import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -164,15 +164,15 @@ export class PairsTableComponent
   public handleCandlesOnRowClick({
     symbol,
   }: Pick<Parameters<typeof this.candlesFacade.loadData>[0], 'symbol'>) {
-    this.candlesWebsocketService.unsubscribeCurrent();
+    this.candlesWebsocketService.subscriber.unsubscribeCurrent();
 
     this.candlesFacade.interval$.pipe(first()).subscribe((interval) => {
-      this.candlesWebsocketService.subscribe({ symbol, interval });
+      this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
     });
 
     combineLatest([
       this.candlesFacade.interval$.pipe(first()),
-      this.candlesWebsocketService.resubscribed$.pipe(first()),
+      this.candlesWebsocketService.subscriber.resubscribed$.pipe(first()),
     ]).subscribe(([interval]) => {
       this.candlesFacade.loadData({ symbol, interval });
     });
@@ -181,23 +181,27 @@ export class PairsTableComponent
   public handleOrderBookOnRowClick({
     symbol,
   }: Parameters<typeof this.orderBookFacade.loadData>[0]) {
-    this.orderBookWebsocketService.unsubscribeCurrent();
-    this.orderBookWebsocketService.subscribe({ symbol });
+    this.orderBookWebsocketService.subscriber.unsubscribeCurrent();
+    this.orderBookWebsocketService.subscriber.subscribe({ symbol });
 
-    this.orderBookWebsocketService.resubscribed$.pipe(first()).subscribe(() => {
-      this.orderBookFacade.loadData({ symbol });
-    });
+    this.orderBookWebsocketService.subscriber.resubscribed$
+      .pipe(first())
+      .subscribe(() => {
+        this.orderBookFacade.loadData({ symbol });
+      });
   }
 
   public handleTradesOnRowClick({
     symbol,
   }: Parameters<typeof this.tradesFacade.loadData>[0]) {
-    this.tradesWebsocketService.unsubscribeCurrent();
-    this.tradesWebsocketService.subscribe({ symbol });
+    this.tradesWebsocketService.subscriber.unsubscribeCurrent();
+    this.tradesWebsocketService.subscriber.subscribe({ symbol });
 
-    this.tradesWebsocketService.resubscribed$.pipe(first()).subscribe(() => {
-      this.tradesFacade.loadData({ symbol });
-    });
+    this.tradesWebsocketService.subscriber.resubscribed$
+      .pipe(first())
+      .subscribe(() => {
+        this.tradesFacade.loadData({ symbol });
+      });
   }
 
   public changePair({ base, quote }: Currency) {
@@ -238,11 +242,11 @@ export class PairsTableComponent
   }
 
   public subscribeToPageSymbols(symbols: string[]) {
-    this.tickerWebsocketService.subscribePairs({ symbols });
+    this.tickerWebsocketService.multipleSubscriber.subscribe({ symbols });
   }
 
   public unsubscribeFromPageSymbols(symbols: string[]) {
-    this.tickerWebsocketService.unsubscribePairs({ symbols });
+    this.tickerWebsocketService.multipleSubscriber.unsubscribe({ symbols });
   }
 
   public handleRowClick(row: Row) {

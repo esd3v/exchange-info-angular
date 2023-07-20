@@ -41,7 +41,7 @@ describe('CandlesWebsocketService', () => {
   it('should subscribe', () => {
     const params: WebsocketCandlesStreamParams = { symbol, interval };
 
-    service.subscribe(params);
+    service.subscriber.subscribe(params);
 
     expect(websocketSubscribeServiceSpy.subscribe).toHaveBeenCalledWith(
       [expected],
@@ -52,7 +52,7 @@ describe('CandlesWebsocketService', () => {
   it('should unsubscribe', () => {
     const params: WebsocketCandlesStreamParams = { symbol, interval };
 
-    service.unsubscribe(params);
+    service.subscriber.unsubscribe(params);
 
     expect(websocketSubscribeServiceSpy.unsubscribe).toHaveBeenCalledWith(
       [expected],

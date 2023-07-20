@@ -124,7 +124,7 @@ export class OrderBookTableContainerComponent
       this.websocketService.status$.pipe(filter((status) => status === 'open')),
       this.globalFacade.symbol$.pipe(first()),
     ]).subscribe(([_status, symbol]) => {
-      this.orderBookWebsocketService.subscribe({
+      this.orderBookWebsocketService.subscriber.subscribe({
         symbol,
       });
     });

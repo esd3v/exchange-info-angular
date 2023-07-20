@@ -48,7 +48,9 @@ export class TickerGroupComponent implements OnInit {
       this.globalFacade.symbol$.pipe(first()),
       this.websocketService.status$.pipe(filter((status) => status === 'open')),
     ]).subscribe(([symbol]) => {
-      this.tickerWebsocketService.subscribe({ symbols: [symbol] });
+      this.tickerWebsocketService.singleSubscriber.subscribe({
+        symbols: [symbol],
+      });
     });
 
     // Loading with tickSize

@@ -34,7 +34,7 @@ export class TradesFacade {
         this.loadData({ symbol });
       }
 
-      this.tradesWebsocketService.subscribe({ symbol });
+      this.tradesWebsocketService.subscriber.subscribe({ symbol });
     });
   }
 
