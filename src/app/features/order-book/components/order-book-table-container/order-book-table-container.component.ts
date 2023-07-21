@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { combineLatest, filter, first, map } from 'rxjs';
+import { combineLatest, filter, first, map, switchMap } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import {
@@ -120,14 +120,16 @@ export class OrderBookTableContainerComponent
     });
 
     // On websocket start
-    combineLatest([
-      this.websocketService.status$.pipe(filter((status) => status === 'open')),
-      this.globalFacade.symbol$.pipe(first()),
-    ]).subscribe(([_status, symbol]) => {
-      this.orderBookWebsocketService.subscriber.subscribe({
-        symbol,
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() => this.globalFacade.symbol$.pipe(first()))
+      )
+      .subscribe((symbol) => {
+        this.orderBookWebsocketService.subscriber.subscribe({
+          symbol,
+        });
       });
-    });
 
     this.currency$.subscribe((currency) => {
       this.columns = this.createColumns(currency);

@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { combineLatest, filter, first, map } from 'rxjs';
+import { combineLatest, filter, first, map, switchMap } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
@@ -114,12 +114,14 @@ export class TradesTableComponent extends LoadingController implements OnInit {
     });
 
     // On websocket start
-    combineLatest([
-      this.globalFacade.symbol$.pipe(first()),
-      this.websocketService.status$.pipe(filter((status) => status === 'open')),
-    ]).subscribe(([symbol]) => {
-      this.tradesWebsocketService.subscriber.subscribe({ symbol });
-    });
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() => this.globalFacade.symbol$.pipe(first()))
+      )
+      .subscribe((symbol) => {
+        this.tradesWebsocketService.subscriber.subscribe({ symbol });
+      });
 
     this.data$.subscribe((data) => {
       this.data = sortRows({

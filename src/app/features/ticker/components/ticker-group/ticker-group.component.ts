@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, filter, first, map } from 'rxjs';
+import { combineLatest, filter, first, map, switchMap } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
 import { TickerFacade } from '../../services/ticker-facade.service';
@@ -43,15 +43,17 @@ export class TickerGroupComponent implements OnInit {
     return Number(value) > 0;
   }
   public ngOnInit(): void {
-    // On websocket open
-    combineLatest([
-      this.globalFacade.symbol$.pipe(first()),
-      this.websocketService.status$.pipe(filter((status) => status === 'open')),
-    ]).subscribe(([symbol]) => {
-      this.tickerWebsocketService.singleSubscriber.subscribe({
-        symbols: [symbol],
+    // On websocket start
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() => this.globalFacade.symbol$.pipe(first()))
+      )
+      .subscribe((symbol) => {
+        this.tickerWebsocketService.singleSubscriber.subscribe({
+          symbols: [symbol],
+        });
       });
-    });
 
     // Loading with tickSize
     combineLatest([
