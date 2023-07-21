@@ -264,21 +264,6 @@ export class ChartComponent extends LoadingController implements OnInit {
       this.candlesFacade.loadData({ symbol, interval });
     });
 
-    // On websocket start
-    this.websocketService.status$
-      .pipe(
-        filter((status) => status === 'open'),
-        switchMap(() =>
-          combineLatest([
-            this.globalFacade.symbol$.pipe(first()),
-            this.candlesFacade.interval$.pipe(first()),
-          ])
-        )
-      )
-      .subscribe(([symbol, interval]) => {
-        this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
-      });
-
     // REST loading
     this.candlesRestService.status$
       .pipe(filter((status) => status === 'loading'))

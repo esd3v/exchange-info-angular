@@ -83,6 +83,7 @@ export class HomeComponent implements OnInit {
 
   public ngOnInit(): void {
     this.homeService.updateTitle();
+    this.homeService.onWebsocketStart();
     this.homeService.onWebsocketMessage();
     this.homeService.startWebSocket();
 

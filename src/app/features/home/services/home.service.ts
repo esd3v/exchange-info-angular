@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { combineLatest, first } from 'rxjs';
-import { APP_SITE_NAME } from 'src/app/shared/config';
+import { combineLatest, filter, first, switchMap } from 'rxjs';
+import {
+  APP_SITE_NAME,
+  WIDGET_DEPTH_DEFAULT_LIMIT,
+} from 'src/app/shared/config';
 import { formatPrice } from 'src/app/shared/helpers';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -13,6 +16,8 @@ import { OrderBookWebsocketService } from '../../order-book/services/order-book-
 import { TickerFacade } from '../../ticker/services/ticker-facade.service';
 import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
 import { TickerWebsocketService } from '../../ticker/services/ticker-websocket.service';
+import { CandlesFacade } from '../../candles/services/candles-facade.service';
+import { HomeWebsocketService } from './home-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class HomerService {
@@ -27,7 +32,9 @@ export class HomerService {
     private websocketSubscribeService: WebsocketSubscribeService,
     private orderBookWebsocketService: OrderBookWebsocketService,
     private tradesWebsocketService: TradesWebsocketService,
-    private candlesWebsocketService: CandlesWebsocketService
+    private candlesWebsocketService: CandlesWebsocketService,
+    private candlesFacade: CandlesFacade,
+    private homeWebsocketService: HomeWebsocketService
   ) {}
 
   public createTitle({
@@ -76,6 +83,34 @@ export class HomerService {
   public initHomeData() {
     this.exchangeInfoFacade.loadData();
     this.tickerFacade.loadData();
+  }
+
+  public onWebsocketStart() {
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() =>
+          combineLatest([
+            this.globalFacade.symbol$.pipe(first()),
+            this.candlesFacade.interval$.pipe(first()),
+          ])
+        )
+      )
+      .subscribe(([symbol, interval]) => {
+        this.homeWebsocketService.widgetsUpdateSubscriber.subscribe({
+          candlesParams: {
+            interval,
+            symbol,
+          },
+          orderBookParams: {
+            limit: WIDGET_DEPTH_DEFAULT_LIMIT,
+            symbol,
+          },
+          tradesParams: {
+            symbol,
+          },
+        });
+      });
   }
 
   public onWebsocketMessage() {

@@ -119,18 +119,6 @@ export class OrderBookTableContainerComponent
       this.orderBookFacade.loadData({ symbol });
     });
 
-    // On websocket start
-    this.websocketService.status$
-      .pipe(
-        filter((status) => status === 'open'),
-        switchMap(() => this.globalFacade.symbol$.pipe(first()))
-      )
-      .subscribe((symbol) => {
-        this.orderBookWebsocketService.subscriber.subscribe({
-          symbol,
-        });
-      });
-
     this.currency$.subscribe((currency) => {
       this.columns = this.createColumns(currency);
     });

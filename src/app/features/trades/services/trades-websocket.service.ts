@@ -18,7 +18,7 @@ export class TradesWebsocketService {
     this.tradesFacade.addTrades({ price: p, qty: q, isBuyerMaker: m, time: T });
   }
 
-  private createParams = ({ symbol }: WebsocketTradesStreamParams) => [
+  public createParams = ({ symbol }: WebsocketTradesStreamParams) => [
     `${symbol.toLowerCase()}@trade`,
   ];
 

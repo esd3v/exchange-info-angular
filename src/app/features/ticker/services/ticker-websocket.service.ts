@@ -25,7 +25,7 @@ export class TickerWebsocketService {
     });
   }
 
-  private createParams = ({ symbols }: WebsocketTickerStreamParams) =>
+  public createParams = ({ symbols }: WebsocketTickerStreamParams) =>
     symbols.map((item) => `${item.toLowerCase()}@ticker`);
 
   public singleSubscriber = new WebsocketSubscriber(

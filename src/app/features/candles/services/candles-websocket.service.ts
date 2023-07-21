@@ -32,7 +32,7 @@ export class CandlesWebsocketService {
     });
   }
 
-  private createParams = ({
+  public createParams = ({
     symbol,
     interval,
   }: WebsocketCandlesStreamParams) => [

@@ -31,6 +31,8 @@ import { PairColumn } from '../../types/pair-column';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
 import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
+import { HomeWebsocketService } from 'src/app/features/home/services/home-websocket.service';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 
 @Component({
   selector: 'app-pairs-table',
@@ -79,7 +81,8 @@ export class PairsTableComponent
     private orderBookWebsocketService: OrderBookWebsocketService,
     private tradesWebsocketService: TradesWebsocketService,
     private orderBookFacade: OrderBookFacade,
-    private candlesWebsocketService: CandlesWebsocketService
+    private candlesWebsocketService: CandlesWebsocketService,
+    private homeWebsocketService: HomeWebsocketService
   ) {
     // Set loading
     super(true);
@@ -161,45 +164,33 @@ export class PairsTableComponent
     return rows;
   }
 
-  public handleCandlesOnRowClick({
-    symbol,
-  }: Pick<Parameters<typeof this.candlesFacade.loadData>[0], 'symbol'>) {
-    this.candlesWebsocketService.subscriber.unsubscribeCurrent();
+  private updateWidgetsData(symbol: string) {
+    this.homeWebsocketService.widgetsUpdateSubscriber.unsubscribeCurrent();
 
     this.candlesFacade.interval$.pipe(first()).subscribe((interval) => {
-      this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
-    });
-
-    combineLatest([
-      this.candlesFacade.interval$.pipe(first()),
-      this.candlesWebsocketService.subscriber.resubscribed$.pipe(first()),
-    ]).subscribe(([interval]) => {
-      this.candlesFacade.loadData({ symbol, interval });
-    });
-  }
-
-  public handleOrderBookOnRowClick({
-    symbol,
-  }: Parameters<typeof this.orderBookFacade.loadData>[0]) {
-    this.orderBookWebsocketService.subscriber.unsubscribeCurrent();
-    this.orderBookWebsocketService.subscriber.subscribe({ symbol });
-
-    this.orderBookWebsocketService.subscriber.resubscribed$
-      .pipe(first())
-      .subscribe(() => {
-        this.orderBookFacade.loadData({ symbol });
+      this.homeWebsocketService.widgetsUpdateSubscriber.subscribe({
+        candlesParams: {
+          interval,
+          symbol,
+        },
+        orderBookParams: {
+          symbol,
+          limit: WIDGET_DEPTH_DEFAULT_LIMIT,
+        },
+        tradesParams: {
+          symbol,
+        },
       });
-  }
+    });
 
-  public handleTradesOnRowClick({
-    symbol,
-  }: Parameters<typeof this.tradesFacade.loadData>[0]) {
-    this.tradesWebsocketService.subscriber.unsubscribeCurrent();
-    this.tradesWebsocketService.subscriber.subscribe({ symbol });
-
-    this.tradesWebsocketService.subscriber.resubscribed$
-      .pipe(first())
-      .subscribe(() => {
+    this.homeWebsocketService.widgetsUpdateSubscriber.resubscribed$
+      .pipe(
+        first(),
+        switchMap(() => this.candlesFacade.interval$.pipe(first()))
+      )
+      .subscribe((interval) => {
+        this.candlesFacade.loadData({ symbol, interval });
+        this.orderBookFacade.loadData({ symbol });
         this.tradesFacade.loadData({ symbol });
       });
   }
@@ -219,10 +210,7 @@ export class PairsTableComponent
       .subscribe(() => {
         const url = this.router.createUrlTree([pair]).toString();
 
-        this.handleCandlesOnRowClick({ symbol });
-        this.handleOrderBookOnRowClick({ symbol });
-        this.handleTradesOnRowClick({ symbol });
-
+        this.updateWidgetsData(symbol);
         this.globalFacade.setCurrency({ base, quote });
 
         // Don't navigate with refresh, just replace url

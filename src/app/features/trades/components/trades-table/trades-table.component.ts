@@ -112,16 +112,6 @@ export class TradesTableComponent extends LoadingController implements OnInit {
       this.tradesFacade.loadData({ symbol });
     });
 
-    // On websocket start
-    this.websocketService.status$
-      .pipe(
-        filter((status) => status === 'open'),
-        switchMap(() => this.globalFacade.symbol$.pipe(first()))
-      )
-      .subscribe((symbol) => {
-        this.tradesWebsocketService.subscriber.subscribe({ symbol });
-      });
-
     this.data$.subscribe((data) => {
       this.data = data;
     });
