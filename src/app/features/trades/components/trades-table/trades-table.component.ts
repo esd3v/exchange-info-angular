@@ -9,7 +9,6 @@ import {
   formatPrice,
   getFormattedDate,
   multiplyDecimal,
-  sortRows,
 } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
 import { Currency } from 'src/app/shared/types/currency';
@@ -124,11 +123,7 @@ export class TradesTableComponent extends LoadingController implements OnInit {
       });
 
     this.data$.subscribe((data) => {
-      this.data = sortRows({
-        headCellIndex: 0,
-        order: 'asc',
-        rows: data,
-      });
+      this.data = data;
     });
 
     this.currency$.subscribe((currency) => {
