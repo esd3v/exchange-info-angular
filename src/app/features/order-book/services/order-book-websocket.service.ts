@@ -9,12 +9,12 @@ import { OrderBookFacade } from './order-book-facade.service';
   providedIn: 'root',
 })
 export class OrderBookWebsocketService {
-  public constructor(
+  constructor(
     private orderBookFacade: OrderBookFacade,
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  public handleWebsocketData({ asks, bids, lastUpdateId }: WebsocketOrderBook) {
+  handleWebsocketData({ asks, bids, lastUpdateId }: WebsocketOrderBook) {
     this.orderBookFacade.setOrderBook({
       asks,
       bids,
@@ -22,11 +22,11 @@ export class OrderBookWebsocketService {
     });
   }
 
-  public createParams = ({ symbol, limit }: WebsocketOrderBookStreamParams) => [
+  createParams = ({ symbol, limit }: WebsocketOrderBookStreamParams) => [
     `${symbol.toLowerCase()}@depth${limit}@1000ms`,
   ];
 
-  public subscriber = new WebsocketSubscriber(
+  subscriber = new WebsocketSubscriber(
     4,
     this.createParams,
     this.websocketSubscribeService

@@ -7,7 +7,7 @@ import { HomerService } from './features/home/services/home.service';
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
-  public constructor(
+  constructor(
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
     private route: ActivatedRoute,
@@ -29,7 +29,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     this.onRouteEvent();
   }
 }

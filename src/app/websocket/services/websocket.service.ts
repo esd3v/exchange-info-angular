@@ -28,35 +28,38 @@ export type Reason =
 })
 export class WebsocketService implements OnDestroy {
   #socket!: WebSocket | null;
+
   #messages$ = new Subject<MessageEvent<string>>();
+
   #status!: WebsocketStatus;
+
   #reason!: Reason;
+
   #reason$ = new BehaviorSubject<Reason>(null);
+
   #status$ = new BehaviorSubject<WebsocketStatus>(null);
 
-  public get messages$() {
+  get messages$() {
     return this.#messages$;
   }
 
-  public get status() {
+  get status() {
     return this.#status;
   }
 
-  public get reason() {
+  get reason() {
     return this.#reason;
   }
 
-  public get status$() {
+  get status$() {
     return this.#status$;
   }
 
-  public get reason$() {
+  get reason$() {
     return this.#reason$;
   }
 
-  public constructor(
-    @Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig
-  ) {
+  constructor(@Inject(TOKEN_WEBSOCKET_CONFIG) private config: WebsocketConfig) {
     this.#status$.subscribe((status) => {
       this.#status = status;
     });
@@ -80,7 +83,7 @@ export class WebsocketService implements OnDestroy {
     }
   }
 
-  public close(reason: Reason) {
+  close(reason: Reason) {
     // Close websocket only of status is currently open
     // because we also can close it by switch
     // when if it's currently closed (with terminated reason) and attempting to reconnect
@@ -92,17 +95,17 @@ export class WebsocketService implements OnDestroy {
     this.#reason$.next(reason);
   }
 
-  public send(msg: string | Record<string, any>): void {
+  send(msg: string | Record<string, any>): void {
     if (this.#status === 'open') {
       this.#socket?.send(typeof msg === 'string' ? msg : JSON.stringify(msg));
     }
   }
 
-  public ngOnDestroy() {
+  ngOnDestroy() {
     this.close(null);
   }
 
-  public connect(reason?: Reason) {
+  connect(reason?: Reason) {
     console.time('WS');
     this.#status$.next('connecting');
 

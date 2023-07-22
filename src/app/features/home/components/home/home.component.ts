@@ -14,7 +14,7 @@ import { HomerService } from '../../services/home.service';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  public constructor(
+  constructor(
     private router: Router,
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
@@ -24,10 +24,10 @@ export class HomeComponent implements OnInit {
     private websocketService: WebsocketService,
     private globalFacade: GlobalFacade
   ) {
-    this.onRouteEvent();
+    this.#onRouteEvent();
   }
 
-  public getParsedRoutePair() {
+  #getParsedRoutePair() {
     const routePair = this.route.snapshot.paramMap.get('pair');
 
     if (routePair === null) {
@@ -44,8 +44,8 @@ export class HomeComponent implements OnInit {
     return { base, quote };
   }
 
-  public handleNavigationEnd() {
-    const parsedRoutePair = this.getParsedRoutePair();
+  #handleNavigationEnd() {
+    const parsedRoutePair = this.#getParsedRoutePair();
 
     if (!parsedRoutePair) {
       return this.homeService.navigateToDefaultPair();
@@ -57,7 +57,7 @@ export class HomeComponent implements OnInit {
     this.globalFacade.setCurrency({ base, quote });
   }
 
-  public onRouteEvent() {
+  #onRouteEvent() {
     const routeEvents$ = this.router.events;
 
     routeEvents$.subscribe((data: unknown) => {
@@ -65,12 +65,12 @@ export class HomeComponent implements OnInit {
 
       // If navigation ended
       if (Number(type) === 1) {
-        this.handleNavigationEnd();
+        this.#handleNavigationEnd();
       }
     });
   }
 
-  public openSnackBar(msg: string) {
+  #openSnackBar(msg: string) {
     this.snackBar.open(msg, 'Close', {
       duration: MISC_SNACKBAR_DURATION,
       horizontalPosition: 'right',
@@ -78,7 +78,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     this.homeService.updateTitle();
     this.homeService.onWebsocketStart();
     this.homeService.onWebsocketMessage();
@@ -89,17 +89,17 @@ export class HomeComponent implements OnInit {
       this.websocketService.reason$,
     ]).subscribe(([status, reason]) => {
       if (status === 'connecting') {
-        this.openSnackBar('Connecting to WebSocket server...');
+        this.#openSnackBar('Connecting to WebSocket server...');
       } else if (status === 'closed') {
         if (reason === 'terminated') {
-          this.openSnackBar('WebSocket connection terminated');
+          this.#openSnackBar('WebSocket connection terminated');
         } else {
-          this.openSnackBar('WebSocket connection closed');
+          this.#openSnackBar('WebSocket connection closed');
         }
       } else if (status === 'closing') {
-        this.openSnackBar('Closing WebSocket connection...');
+        this.#openSnackBar('Closing WebSocket connection...');
       } else if (status === 'open') {
-        this.openSnackBar('WebSocket connection has been opened');
+        this.#openSnackBar('WebSocket connection has been opened');
       }
     });
   }

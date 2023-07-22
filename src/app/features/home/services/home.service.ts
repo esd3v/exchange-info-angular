@@ -20,7 +20,7 @@ import { HomeWebsocketService } from './home-websocket.service';
 
 @Injectable({ providedIn: 'root' })
 export class HomerService {
-  public constructor(
+  constructor(
     private globalFacade: GlobalFacade,
     private router: Router,
     private exchangeInfoFacade: ExchangeInfoFacade,
@@ -35,7 +35,7 @@ export class HomerService {
     private homeWebsocketService: HomeWebsocketService
   ) {}
 
-  public createTitle({
+  #createTitle({
     lastPrice,
     pair,
     tickSize,
@@ -56,34 +56,34 @@ export class HomerService {
     return `${pricePart}${globalPairPart}${APP_SITE_NAME}`;
   }
 
-  public updateTitle() {
+  updateTitle() {
     combineLatest([
       this.globalFacade.pair$,
       this.tickerFacade.lastPrice$,
       this.tickerFacade.tickSize$,
     ]).subscribe(([pair, lastPrice, tickSize]) => {
-      const title = this.createTitle({ pair, lastPrice, tickSize });
+      const title = this.#createTitle({ pair, lastPrice, tickSize });
 
       this.titleService.setTitle(title);
     });
   }
 
-  public startWebSocket() {
+  startWebSocket() {
     this.websocketService.connect();
   }
 
-  public navigateToDefaultPair() {
+  navigateToDefaultPair() {
     this.globalFacade.pairUnderscore$.pipe(first()).subscribe((pair) => {
       this.router.navigate([pair]);
     });
   }
 
-  public initHomeData() {
+  initHomeData() {
     this.exchangeInfoFacade.loadData();
     this.tickerFacade.loadData();
   }
 
-  public onWebsocketStart() {
+  onWebsocketStart() {
     this.websocketService.status$
       .pipe(
         filter((status) => status === 'open'),
@@ -102,7 +102,7 @@ export class HomerService {
       });
   }
 
-  public onWebsocketMessage() {
+  onWebsocketMessage() {
     this.websocketService.messages$.subscribe(({ data }) => {
       this.websocketSubscribeService.handleWebsocketMessage(data)({
         onData: (data) => {

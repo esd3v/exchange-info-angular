@@ -7,19 +7,20 @@ import { OrderBook } from '../types/order-book';
 
 @Injectable({ providedIn: 'root' })
 export class OrderBookFacade {
-  public asks$ = this.store$.select(orderBookSelectors.asks);
-  public bids$ = this.store$.select(orderBookSelectors.bids);
+  asks$ = this.store$.select(orderBookSelectors.asks);
 
-  public constructor(private store$: Store<AppState>) {}
+  bids$ = this.store$.select(orderBookSelectors.bids);
 
-  public loadData({
+  constructor(private store$: Store<AppState>) {}
+
+  loadData({
     symbol,
     limit = WIDGET_DEPTH_DEFAULT_LIMIT,
   }: Parameters<typeof orderBookActions.load>[0]) {
     this.store$.dispatch(orderBookActions.load({ symbol, limit }));
   }
 
-  public setOrderBook(orderBook: OrderBook) {
+  setOrderBook(orderBook: OrderBook) {
     this.store$.dispatch(orderBookActions.set(orderBook));
   }
 }

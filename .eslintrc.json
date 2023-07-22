@@ -15,26 +15,40 @@
         "plugin:prettier/recommended"
       ],
       "rules": {
+        // https://stackoverflow.com/a/71468931
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "ClassDeclaration[superClass]",
+            "message": "Extending other classes via inheritance isn't allowed. Use composition instead."
+          }
+        ],
         "rxjs/finnish": ["error"],
         "rxjs/no-nested-subscribe": ["warn"],
         "@typescript-eslint/no-unused-vars": [
           "warn",
           { "argsIgnorePattern": "^_" }
         ],
-        "@typescript-eslint/explicit-member-accessibility": ["error"],
+        "@typescript-eslint/explicit-member-accessibility": ["error", {
+          "overrides": {
+            "accessors": "no-public",
+            "constructors": "no-public",
+            "methods": "no-public",
+            "properties": "no-public",
+            "parameterProperties": "no-public"
+          }
+        }],
+        "@typescript-eslint/lines-between-class-members": ["error", "always", {
+          "exceptAfterOverload": true 
+        }],
         "@typescript-eslint/member-ordering": [
-          "error",
+          "warn",
           {
             "default": [
               "decorated-field",
-              "field",
-              "get",
-              "set",
               "decorated-get",
               "decorated-set",
-              "constructor",
-              "method",
-              "decorated-method"
+              "constructor"
             ]
           }
         ],

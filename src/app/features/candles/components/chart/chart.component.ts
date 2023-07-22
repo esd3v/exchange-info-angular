@@ -42,12 +42,15 @@ type Options = {
   styleUrls: ['./chart.component.scss'],
 })
 export class ChartComponent implements OnInit {
-  private chartInstance$ = new BehaviorSubject<ECharts | null>(null);
-  private upColor = '#00da3c';
-  private downColor = '#ec0000';
-  private barMinWidth = 6;
+  #chartInstance$ = new BehaviorSubject<ECharts | null>(null);
 
-  public intervals: CandleInterval[] = [
+  #upColor = '#00da3c';
+
+  #downColor = '#ec0000';
+
+  #barMinWidth = 6;
+
+  intervals: CandleInterval[] = [
     '12h',
     '15m',
     '1M',
@@ -65,21 +68,21 @@ export class ChartComponent implements OnInit {
     '8h',
   ];
 
-  public interval$ = this.candlesFacade.interval$;
+  interval$ = this.candlesFacade.interval$;
 
-  public get loading() {
+  get loading() {
     return this.chartService.loadingController.loading;
   }
 
-  private options$ = combineLatest([
+  #options$ = combineLatest([
     this.candlesFacade.dates$.pipe(filter((item) => Boolean(item.length))),
     this.candlesFacade.volumes$.pipe(filter((item) => Boolean(item.length))),
     this.candlesFacade.ohlc$.pipe(filter((item) => Boolean(item.length))),
   ]).pipe(
-    map(([dates, volumes, ohlc]) => this.createOptions(dates, volumes, ohlc))
+    map(([dates, volumes, ohlc]) => this.#createOptions(dates, volumes, ohlc))
   );
 
-  public chartOptions: EChartsOption = {
+  chartOptions: EChartsOption = {
     backgroundColor: '#fff',
     animation: false,
     tooltip: {
@@ -106,13 +109,13 @@ export class ChartComponent implements OnInit {
         height: '70%',
         top: 8,
         left: 45,
-        right: this.barMinWidth,
+        right: this.#barMinWidth,
       },
       {
         width: 'auto',
         height: '15%',
         left: 40,
-        right: this.barMinWidth,
+        right: this.#barMinWidth,
         bottom: 19,
       },
     ],
@@ -171,12 +174,12 @@ export class ChartComponent implements OnInit {
         name: 'OHLC',
         type: 'candlestick',
         data: [],
-        barMinWidth: this.barMinWidth,
+        barMinWidth: this.#barMinWidth,
         xAxisIndex: 0,
         yAxisIndex: 0,
         itemStyle: {
-          color: this.upColor,
-          color0: this.downColor,
+          color: this.#upColor,
+          color0: this.#downColor,
           borderColor: undefined,
           borderColor0: undefined,
         },
@@ -185,7 +188,7 @@ export class ChartComponent implements OnInit {
         name: 'Volume',
         type: 'bar',
         data: [],
-        barMinWidth: this.barMinWidth,
+        barMinWidth: this.#barMinWidth,
         xAxisIndex: 1,
         yAxisIndex: 1,
         itemStyle: {
@@ -196,9 +199,9 @@ export class ChartComponent implements OnInit {
     ],
   };
 
-  public mergeOptions: EChartsOption = {};
+  mergeOptions: EChartsOption = {};
 
-  public constructor(
+  constructor(
     private candlesFacade: CandlesFacade,
     private globalFacade: GlobalFacade,
     private candlesWebsocketService: CandlesWebsocketService,
@@ -207,11 +210,11 @@ export class ChartComponent implements OnInit {
     private websocketService: WebsocketService
   ) {}
 
-  public onChartInit($event: ECharts) {
-    this.chartInstance$.next($event);
+  onChartInit($event: ECharts) {
+    this.#chartInstance$.next($event);
   }
 
-  private createOptions(
+  #createOptions(
     dates: string[],
     volumes: string[],
     ohlc: (string | number)[][]
@@ -236,7 +239,7 @@ export class ChartComponent implements OnInit {
     };
   }
 
-  public handleIntervalChange(event: MatSelectChange) {
+  handleIntervalChange(event: MatSelectChange) {
     this.chartService.loadingController.setLoading(true);
 
     const interval = event.value as CandleInterval;
@@ -255,7 +258,7 @@ export class ChartComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     // Initial data load
     combineLatest([
       this.globalFacade.symbol$.pipe(first()),
@@ -294,10 +297,10 @@ export class ChartComponent implements OnInit {
       });
 
     // Update data
-    this.chartInstance$
+    this.#chartInstance$
       .pipe(
         filter(Boolean),
-        switchMap(() => this.options$)
+        switchMap(() => this.#options$)
       )
       .subscribe((options) => {
         this.mergeOptions = options;

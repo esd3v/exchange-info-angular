@@ -11,14 +11,11 @@ import { tradesSelectors } from '../store';
   providedIn: 'root',
 })
 export class TradesRestService {
-  public status$ = this.store$.select(tradesSelectors.status);
+  status$ = this.store$.select(tradesSelectors.status);
 
-  public constructor(
-    private http: HttpClient,
-    private store$: Store<AppState>
-  ) {}
+  constructor(private http: HttpClient, private store$: Store<AppState>) {}
 
-  public get$(params: TradesGetParams): Observable<Trades[]> {
+  get$(params: TradesGetParams): Observable<Trades[]> {
     return this.http.get<Trades[]>('trades', { params });
   }
 }

@@ -24,16 +24,18 @@ import { WebsocketModule } from '../websocket.module';
   providedIn: WebsocketModule,
 })
 export class WebsocketSubscribeService {
-  public messages: WebsocketMessage[] = [];
-  public messages$ = new Subject<WebsocketMessage[]>();
-  private queue$ = new BehaviorSubject<WebsocketMessage | null>(null);
+  #messages: WebsocketMessage[] = [];
 
-  public constructor(private websocketService: WebsocketService) {
-    // this.messages$.subscribe((value) => {
+  #messages$ = new Subject<WebsocketMessage[]>();
+
+  #queue$ = new BehaviorSubject<WebsocketMessage | null>(null);
+
+  constructor(private websocketService: WebsocketService) {
+    // this.#messages$.subscribe((value) => {
     //   console.log('MESSAGES', value);
     // });
 
-    this.queue$
+    this.#queue$
       .pipe(
         // emit each message with delay
         concatMap((value) =>
@@ -42,50 +44,50 @@ export class WebsocketSubscribeService {
         filter(Boolean)
       )
       .subscribe((message) => {
-        this.sendMessage(message);
+        this.#sendMessage(message);
       });
   }
 
-  private createMessage(params: WebsocketMessageParams): WebsocketMessage {
+  #createMessage(params: WebsocketMessageParams): WebsocketMessage {
     return {
       params,
-      stringified: this.stringifyParams(params),
+      stringified: this.#stringifyParams(params),
       status: 'sending',
     };
   }
 
-  private setStatus(id: number, status: WebsocketMessageStatus) {
-    const updated = this.messages.map((item) =>
+  #setStatus(id: number, status: WebsocketMessageStatus) {
+    const updated = this.#messages.map((item) =>
       item.params.id === id ? { ...item, status } : item
     );
 
-    this.messages = updated;
-    this.messages$.next(updated);
+    this.#messages = updated;
+    this.#messages$.next(updated);
   }
 
-  private addMessage(message: WebsocketMessage) {
-    const index = this.messages.findIndex(
+  #addMessage(message: WebsocketMessage) {
+    const index = this.#messages.findIndex(
       (item) => item.params.id === message.params.id
     );
 
     const updated =
       index > -1
-        ? this.messages.map((item) =>
+        ? this.#messages.map((item) =>
             item.params.id === message.params.id ? message : item
           )
-        : [...this.messages, message];
+        : [...this.#messages, message];
 
-    this.messages = updated;
-    this.messages$.next(updated);
+    this.#messages = updated;
+    this.#messages$.next(updated);
   }
 
-  private sendMessage(message: WebsocketMessage) {
-    const strigifiedMessage = this.stringifyParams(message.params);
+  #sendMessage(message: WebsocketMessage) {
+    const strigifiedMessage = this.#stringifyParams(message.params);
 
     this.websocketService.send(strigifiedMessage);
   }
 
-  private stringifyParams = ({
+  #stringifyParams = ({
     id,
     method,
     params,
@@ -97,55 +99,55 @@ export class WebsocketSubscribeService {
     });
   };
 
-  private addToQueue(params: WebsocketMessageParams) {
-    const message = this.createMessage(params);
+  #addToQueue(params: WebsocketMessageParams) {
+    const message = this.#createMessage(params);
 
-    this.addMessage(message);
-    this.queue$.next(message);
+    this.#addMessage(message);
+    this.#queue$.next(message);
   }
 
-  public subscribe(params: string[], id: number) {
-    this.addToQueue({ id, method: 'SUBSCRIBE', params });
+  subscribe(params: string[], id: number) {
+    this.#addToQueue({ id, method: 'SUBSCRIBE', params });
   }
 
-  public unsubscribe(params: string[], id: number) {
-    this.addToQueue({
+  unsubscribe(params: string[], id: number) {
+    this.#addToQueue({
       id: id + WEBSOCKET_UNSUBSCRIBE_BASE_ID,
       method: 'UNSUBSCRIBE',
       params,
     });
   }
 
-  public unsubscribeCurrent(id: number) {
-    const message = this.messages.find((item) => item.params.id === id);
+  unsubscribeCurrent(id: number) {
+    const message = this.#messages.find((item) => item.params.id === id);
 
     if (!message) return;
 
     this.unsubscribe(message.params.params, id);
   }
 
-  public messageStatusById$(id: number) {
-    return this.messages$.pipe(
+  messageStatusById$(id: number) {
+    return this.#messages$.pipe(
       map((messages) => messages.find((item) => item.params.id === id)?.status)
     );
   }
 
-  public subscribeStatus$(id: number) {
+  subscribeStatus$(id: number) {
     return this.messageStatusById$(id);
   }
 
-  public unsubscribeStatus$(id: number) {
+  unsubscribeStatus$(id: number) {
     return this.messageStatusById$(id + WEBSOCKET_UNSUBSCRIBE_BASE_ID);
   }
 
-  public resubscribed$(id: number) {
+  resubscribed$(id: number) {
     return combineLatest([
       this.unsubscribeStatus$(id).pipe(filter((status) => status === 'done')),
       this.subscribeStatus$(id).pipe(filter((status) => status === 'done')),
     ]);
   }
 
-  public handleWebsocketMessage(message: string) {
+  handleWebsocketMessage(message: string) {
     return ({
       onSubscribe,
       onUnsubscribe,
@@ -173,7 +175,7 @@ export class WebsocketSubscribeService {
           }
         }
 
-        this.setStatus(id, 'done');
+        this.#setStatus(id, 'done');
       }
     };
   }

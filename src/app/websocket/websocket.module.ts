@@ -7,7 +7,7 @@ import { WebsocketSwitchModule } from './components/websocket-switch/websocket-s
   imports: [WebsocketSwitchModule],
 })
 export class WebsocketModule {
-  public static forRoot(
+  static forRoot(
     config?: WebsocketConfig
   ): ModuleWithProviders<WebsocketModule> {
     return {

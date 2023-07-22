@@ -6,7 +6,7 @@ import { CandlesRestService } from '../services/candles-rest.service';
 
 @Injectable()
 export class CandlesEffects {
-  public loadCandles$ = createEffect(() => {
+  loadCandles$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(candlesActions.load),
       switchMap(({ interval, symbol }) => {
@@ -21,7 +21,7 @@ export class CandlesEffects {
     );
   });
 
-  public constructor(
+  constructor(
     private actions$: Actions,
     private candlesRestService: CandlesRestService
   ) {}

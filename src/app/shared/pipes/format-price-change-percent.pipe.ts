@@ -5,7 +5,7 @@ import { formatPriceChangePercent } from '../helpers';
   name: 'formatPriceChangePercent',
 })
 export class FormatPriceChangePercentPipe implements PipeTransform {
-  public transform(value: string | null) {
+  transform(value: string | null) {
     return value ? formatPriceChangePercent(value) : value;
   }
 }

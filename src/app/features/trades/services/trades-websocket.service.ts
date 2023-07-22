@@ -9,20 +9,20 @@ import { TradesFacade } from './trades-facade.service';
   providedIn: 'root',
 })
 export class TradesWebsocketService {
-  public constructor(
+  constructor(
     private tradesFacade: TradesFacade,
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  public handleWebsocketData({ p, q, m, T }: WebsocketTrades) {
+  handleWebsocketData({ p, q, m, T }: WebsocketTrades) {
     this.tradesFacade.addTrades({ price: p, qty: q, isBuyerMaker: m, time: T });
   }
 
-  public createParams = ({ symbol }: WebsocketTradesStreamParams) => [
+  createParams = ({ symbol }: WebsocketTradesStreamParams) => [
     `${symbol.toLowerCase()}@trade`,
   ];
 
-  public subscriber = new WebsocketSubscriber(
+  subscriber = new WebsocketSubscriber(
     3,
     this.createParams,
     this.websocketSubscribeService

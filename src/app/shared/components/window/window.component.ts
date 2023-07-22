@@ -6,8 +6,9 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./window.component.scss'],
 })
 export class WindowComponent {
-  @Input() public title: string = '';
-  @Input() public loading: boolean = false;
+  @Input() title: string = '';
 
-  public constructor() {}
+  @Input() loading: boolean = false;
+
+  constructor() {}
 }

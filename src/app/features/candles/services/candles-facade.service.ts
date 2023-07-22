@@ -8,22 +8,25 @@ import { Candle } from '../types/candle';
   providedIn: 'root',
 })
 export class CandlesFacade {
-  public interval$ = this.store$.select(candlesSelectors.interval);
-  public ohlc$ = this.store$.select(candlesSelectors.ohlc);
-  public dates$ = this.store$.select(candlesSelectors.dates);
-  public volumes$ = this.store$.select(candlesSelectors.volumes);
+  interval$ = this.store$.select(candlesSelectors.interval);
 
-  public constructor(private store$: Store<AppState>) {}
+  ohlc$ = this.store$.select(candlesSelectors.ohlc);
 
-  public loadData(params: Parameters<typeof candlesActions.load>[0]) {
+  dates$ = this.store$.select(candlesSelectors.dates);
+
+  volumes$ = this.store$.select(candlesSelectors.volumes);
+
+  constructor(private store$: Store<AppState>) {}
+
+  loadData(params: Parameters<typeof candlesActions.load>[0]) {
     this.store$.dispatch(candlesActions.load(params));
   }
 
-  public updateCandle(candle: Candle) {
+  updateCandle(candle: Candle) {
     this.store$.dispatch(candlesActions.updateCandle({ candle }));
   }
 
-  public addCandleAndRemoveFirst(candle: Candle) {
+  addCandleAndRemoveFirst(candle: Candle) {
     this.store$.dispatch(candlesActions.addCandleAndRemoveFirst({ candle }));
   }
 }

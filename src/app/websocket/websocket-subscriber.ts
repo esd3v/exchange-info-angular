@@ -1,37 +1,35 @@
 import { WebsocketSubscribeService } from './services/websocket-subscribe.service';
 
 export class WebsocketSubscriber<T> {
-  public subscribeStatus$ = this.websocketSubscribeService.subscribeStatus$(
+  subscribeStatus$ = this.websocketSubscribeService.subscribeStatus$(this.id);
+
+  unsubscribeStatus$ = this.websocketSubscribeService.unsubscribeStatus$(
     this.id
   );
 
-  public unsubscribeStatus$ = this.websocketSubscribeService.unsubscribeStatus$(
-    this.id
-  );
+  resubscribed$ = this.websocketSubscribeService.resubscribed$(this.id);
 
-  public resubscribed$ = this.websocketSubscribeService.resubscribed$(this.id);
-
-  public constructor(
+  constructor(
     private id: number,
     private createParams: (params: T) => string[],
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  public subscribe(params: T) {
+  subscribe(params: T) {
     this.websocketSubscribeService.subscribe(
       this.createParams(params),
       this.id
     );
   }
 
-  public unsubscribe(params: T) {
+  unsubscribe(params: T) {
     this.websocketSubscribeService.unsubscribe(
       this.createParams(params),
       this.id
     );
   }
 
-  public unsubscribeCurrent() {
+  unsubscribeCurrent() {
     this.websocketSubscribeService.unsubscribeCurrent(this.id);
   }
 }

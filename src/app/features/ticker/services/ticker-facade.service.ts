@@ -8,35 +8,31 @@ import { TickerEntity } from '../store/ticker.state';
   providedIn: 'root',
 })
 export class TickerFacade {
-  public lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
+  lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
 
-  public tickSize$ = this.store$.select(tickerSelectors.tickSize);
+  tickSize$ = this.store$.select(tickerSelectors.tickSize);
 
-  public formattedLastPrice$ = this.store$.select(
-    tickerSelectors.formattedLastPrice
-  );
+  formattedLastPrice$ = this.store$.select(tickerSelectors.formattedLastPrice);
 
-  public prevLastPrice$ = this.store$.select(tickerSelectors.prevLastPrice);
+  prevLastPrice$ = this.store$.select(tickerSelectors.prevLastPrice);
 
-  public tickers$ = this.store$.select(tickerSelectors.tickers);
+  tickers$ = this.store$.select(tickerSelectors.tickers);
 
-  public priceChange$ = this.store$.select(tickerSelectors.priceChange);
+  priceChange$ = this.store$.select(tickerSelectors.priceChange);
 
-  public priceChangePercent$ = this.store$.select(
-    tickerSelectors.priceChangePercent
-  );
+  priceChangePercent$ = this.store$.select(tickerSelectors.priceChangePercent);
 
-  public lastQuantity$ = this.store$.select(tickerSelectors.lastQuantity);
+  lastQuantity$ = this.store$.select(tickerSelectors.lastQuantity);
 
-  public numberOfTrades$ = this.store$.select(tickerSelectors.numberOfTrades);
+  numberOfTrades$ = this.store$.select(tickerSelectors.numberOfTrades);
 
-  public constructor(private store$: Store<AppState>) {}
+  constructor(private store$: Store<AppState>) {}
 
-  public loadData() {
+  loadData() {
     this.store$.dispatch(tickerActions.load());
   }
 
-  public updateTicker(ticker: TickerEntity) {
+  updateTicker(ticker: TickerEntity) {
     this.store$.dispatch(tickerActions.update({ data: ticker }));
   }
 }

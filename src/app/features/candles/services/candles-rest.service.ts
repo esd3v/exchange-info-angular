@@ -11,14 +11,11 @@ import { candlesSelectors } from '../store';
   providedIn: 'root',
 })
 export class CandlesRestService {
-  public status$ = this.store$.select(candlesSelectors.status);
+  status$ = this.store$.select(candlesSelectors.status);
 
-  public constructor(
-    private http: HttpClient,
-    private store$: Store<AppState>
-  ) {}
+  constructor(private http: HttpClient, private store$: Store<AppState>) {}
 
-  public get$(params: CandlesGetParams): Observable<Candle[]> {
+  get$(params: CandlesGetParams): Observable<Candle[]> {
     return this.http.get<Candle[]>('klines', { params });
   }
 }

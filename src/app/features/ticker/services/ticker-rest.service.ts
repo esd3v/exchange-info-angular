@@ -10,14 +10,11 @@ import { tickerSelectors } from '../store';
   providedIn: 'root',
 })
 export class TickerRestService {
-  public status$ = this.store$.select(tickerSelectors.status);
+  status$ = this.store$.select(tickerSelectors.status);
 
-  public constructor(
-    private http: HttpClient,
-    private store$: Store<AppState>
-  ) {}
+  constructor(private http: HttpClient, private store$: Store<AppState>) {}
 
-  public get$(): Observable<Ticker[]> {
+  get$(): Observable<Ticker[]> {
     return this.http.get<Ticker[]>('ticker/24hr');
   }
 }

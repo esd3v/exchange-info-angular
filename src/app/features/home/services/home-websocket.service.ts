@@ -10,13 +10,13 @@ import { WebsocketTradesStreamParams } from '../../trades/types/websocket-trades
   providedIn: 'root',
 })
 export class HomeWebsocketService {
-  public constructor(
+  constructor(
     private websocketSubscribeService: WebsocketSubscribeService,
     private orderBookWebsocketService: OrderBookWebsocketService,
     private tradesWebsocketService: TradesWebsocketService
   ) {}
 
-  public createParams({
+  createParams({
     orderBookParams,
     tradesParams,
   }: {
@@ -32,7 +32,7 @@ export class HomeWebsocketService {
     return combined;
   }
 
-  public widgetsUpdateSubscriber = new WebsocketSubscriber(
+  widgetsUpdateSubscriber = new WebsocketSubscriber(
     6,
     this.createParams.bind(this),
     this.websocketSubscribeService

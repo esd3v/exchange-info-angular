@@ -10,14 +10,11 @@ import { exchangeInfoSelectors } from '../store';
   providedIn: 'root',
 })
 export class ExchangeInfoRestService {
-  public status$ = this.store$.select(exchangeInfoSelectors.status);
+  status$ = this.store$.select(exchangeInfoSelectors.status);
 
-  public constructor(
-    private http: HttpClient,
-    private store$: Store<AppState>
-  ) {}
+  constructor(private http: HttpClient, private store$: Store<AppState>) {}
 
-  public get$(): Observable<ExchangeInfo> {
+  get$(): Observable<ExchangeInfo> {
     return this.http.get<ExchangeInfo>('exchangeInfo');
   }
 }

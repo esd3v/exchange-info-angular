@@ -11,14 +11,11 @@ import { orderBookSelectors } from '../store';
   providedIn: 'root',
 })
 export class OrderBookRestService {
-  public status$ = this.store$.select(orderBookSelectors.status);
+  status$ = this.store$.select(orderBookSelectors.status);
 
-  public constructor(
-    private store$: Store<AppState>,
-    private http: HttpClient
-  ) {}
+  constructor(private store$: Store<AppState>, private http: HttpClient) {}
 
-  public get$(params: OrderBookGetParams): Observable<OrderBook> {
+  get$(params: OrderBookGetParams): Observable<OrderBook> {
     return this.http.get<OrderBook>('depth', { params });
   }
 }

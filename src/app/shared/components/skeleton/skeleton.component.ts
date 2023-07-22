@@ -16,10 +16,10 @@ import { SkeletonProps } from './skeleton-props';
 })
 export class SkeletonComponent implements OnInit {
   @ViewChild('ngxSkeleton', { read: ViewContainerRef })
-  public ngxSkeleton: ComponentRef<NgxSkeletonLoaderComponent> =
+  ngxSkeleton: ComponentRef<NgxSkeletonLoaderComponent> =
     this.viewContainerRef.createComponent(NgxSkeletonLoaderComponent);
 
-  @Input() public width: SkeletonProps['width'] = '100%';
+  @Input() width: SkeletonProps['width'] = '100%';
 
   @HostBinding('style.font-size')
   private fontSize = 0;
@@ -27,9 +27,9 @@ export class SkeletonComponent implements OnInit {
   @HostBinding('style.display')
   private display = 'block';
 
-  public constructor(private viewContainerRef: ViewContainerRef) {}
+  constructor(private viewContainerRef: ViewContainerRef) {}
 
-  public ngOnInit() {
+  ngOnInit() {
     this.ngxSkeleton.instance.appearance = 'line';
     this.ngxSkeleton.instance.animation = false;
 

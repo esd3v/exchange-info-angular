@@ -2,10 +2,10 @@ import { Observable, Subject, takeUntil } from 'rxjs';
 import { LoadingStatus } from 'src/app/store/state';
 
 export abstract class WithRest {
-  public abstract get(params: any): any;
-  public abstract loadData(params: any): any;
+  abstract get(params: any): any;
+  abstract loadData(params: any): any;
 
-  public handleDataLoad<T extends Observable<LoadingStatus>>(status$: T) {
+  handleDataLoad<T extends Observable<LoadingStatus>>(status$: T) {
     return ({
       onSuccess,
       onError,

@@ -10,9 +10,9 @@ import { WEBSOCKET_ENABLED_AT_START } from '../../../shared/config';
   styleUrls: ['./websocket-switch.component.scss'],
 })
 export class WebsocketSwitchComponent {
-  public checked$ = new BehaviorSubject(WEBSOCKET_ENABLED_AT_START);
+  checked$ = new BehaviorSubject(WEBSOCKET_ENABLED_AT_START);
 
-  public disabled$ = this.websocketService.status$.pipe(
+  disabled$ = this.websocketService.status$.pipe(
     map((status) =>
       status === 'closing' || status === 'connecting' || status === null
         ? true
@@ -20,9 +20,9 @@ export class WebsocketSwitchComponent {
     )
   );
 
-  public constructor(private websocketService: WebsocketService) {}
+  constructor(private websocketService: WebsocketService) {}
 
-  public handleChange({ checked }: MatSlideToggleChange) {
+  handleChange({ checked }: MatSlideToggleChange) {
     if (checked) {
       this.checked$.next(true);
 

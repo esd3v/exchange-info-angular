@@ -9,11 +9,11 @@ import { exchangeInfoActions } from '../store';
 })
 export class ExchangeInfoFacade {
   // TODO Move?
-  public tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
+  tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
 
-  public constructor(private store$: Store<AppState>) {}
+  constructor(private store$: Store<AppState>) {}
 
-  public loadData() {
+  loadData() {
     this.store$.dispatch(exchangeInfoActions.load());
   }
 }

@@ -23,22 +23,24 @@ import { TradesTableService } from './trades-table.service';
   templateUrl: './trades-table.component.html',
 })
 export class TradesTableComponent implements OnInit {
-  public currency$ = this.globalFacade.currency$;
+  #currency$ = this.globalFacade.currency$;
 
-  public data$ = combineLatest([
+  #data$ = combineLatest([
     this.tradesFacade.trades$,
     this.tickerFacade.tickSize$.pipe(filter(Boolean)),
   ]).pipe(map(([trades, tickSize]) => this.createRows(trades, tickSize)));
 
-  public data: Row[] = [];
-  public columns: TradesColumn[] = [];
-  public placeholderRowsCount = WIDGET_TRADES_DEFAULT_LIMIT;
+  data: Row[] = [];
 
-  public get loading() {
+  columns: TradesColumn[] = [];
+
+  placeholderRowsCount = WIDGET_TRADES_DEFAULT_LIMIT;
+
+  get loading() {
     return this.tradesTableService.loadingController.loading;
   }
 
-  public constructor(
+  constructor(
     private tableStyleService: TableStyleService,
     private tradesFacade: TradesFacade,
     private tradesRestService: TradesRestService,
@@ -105,17 +107,17 @@ export class TradesTableComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     // Initial data load
     this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
       this.tradesFacade.loadData({ symbol });
     });
 
-    this.data$.subscribe((data) => {
+    this.#data$.subscribe((data) => {
       this.data = data;
     });
 
-    this.currency$.subscribe((currency) => {
+    this.#currency$.subscribe((currency) => {
       this.columns = this.createColumns(currency);
     });
 

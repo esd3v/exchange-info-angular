@@ -25,60 +25,63 @@ import { TableStyleService } from './table-style.service';
 })
 export class TableComponent implements OnChanges, OnInit, AfterViewInit {
   @ViewChild(MatPaginator, { static: false }) private paginator!: MatPaginator;
-  @Input() public data: Row[] = [];
-  @Input() public columns: Column[] = [];
-  @Input() public loading: Boolean = false;
-  @Input() public paginatorEnabled: boolean = false;
-  @Input() public paginatorPageSizeOptions: number[] = [15];
 
-  @Input() public placeholderRowsCount: number =
-    this.paginatorPageSizeOptions[0];
+  @Input() data: Row[] = [];
 
-  @Output() public paginatorPageChange: EventEmitter<Row[]> =
-    new EventEmitter();
+  @Input() columns: Column[] = [];
 
-  @Output() public rowClick: EventEmitter<Row> = new EventEmitter();
+  @Input() loading: Boolean = false;
 
-  @Output() public paginatorPageDataInit: EventEmitter<Row[]> =
-    new EventEmitter();
+  @Input() paginatorEnabled: boolean = false;
 
-  public dataSource: MatTableDataSource<Row> = new MatTableDataSource();
-  public styles = this.tableStyleService;
+  @Input() paginatorPageSizeOptions: number[] = [15];
 
-  public get placeholderRows() {
+  @Input() placeholderRowsCount: number = this.paginatorPageSizeOptions[0];
+
+  @Output() paginatorPageChange: EventEmitter<Row[]> = new EventEmitter();
+
+  @Output() rowClick: EventEmitter<Row> = new EventEmitter();
+
+  @Output() paginatorPageDataInit: EventEmitter<Row[]> = new EventEmitter();
+
+  dataSource: MatTableDataSource<Row> = new MatTableDataSource();
+
+  styles = this.tableStyleService;
+
+  get placeholderRows() {
     return Array<Row>(this.placeholderRowsCount).fill({
       cells: [],
     });
   }
 
-  public get displayedColumns() {
+  get displayedColumns() {
     return this.columns.map((item) => item.id);
   }
 
-  public get columnLabels(): string[] {
+  get columnLabels(): string[] {
     return this.columns.map((item) => item.label);
   }
 
-  private get pageRows$() {
+  get #pageRows$() {
     return this.dataSource.connect();
   }
 
-  public get paginatorLength() {
+  get paginatorLength() {
     return this.data.length;
   }
 
-  public constructor(private tableStyleService: TableStyleService) {}
+  constructor(private tableStyleService: TableStyleService) {}
 
-  public trackRow(_index: number, _item: Row) {
+  trackRow(_index: number, _item: Row) {
     return _index;
   }
 
-  public handleRowClick(row: Row) {
+  handleRowClick(row: Row) {
     this.rowClick?.emit(row);
   }
 
-  public handlePageChange(_event: PageEvent) {
-    this.pageRows$
+  handlePageChange(_event: PageEvent) {
+    this.#pageRows$
       .pipe(
         // Skip immediate value from BehaviorSubject (don't get old rows)
         skip(1),
@@ -89,9 +92,9 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
       });
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     // Emit page rows on first data render
-    this.pageRows$
+    this.#pageRows$
       .pipe(
         filter((rows) => Boolean(rows.length)),
         first()
@@ -101,13 +104,13 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
       });
   }
 
-  public ngAfterViewInit(): void {
+  ngAfterViewInit(): void {
     // Create paginator before setting dataSource, for optimization
     // https://stackoverflow.com/a/51296374
     this.dataSource.paginator = this.paginator;
   }
 
-  public ngOnChanges({ data }: NgChanges<TableComponent>): void {
+  ngOnChanges({ data }: NgChanges<TableComponent>): void {
     if (data?.currentValue) {
       // If this table supposed to use paginator
       if (this.paginatorEnabled) {

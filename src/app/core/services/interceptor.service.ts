@@ -10,7 +10,7 @@ import { API_HTTP_BASEURL } from '../../shared/config';
 
 @Injectable()
 export class InterceptorService implements HttpInterceptor {
-  public intercept(
+  intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {

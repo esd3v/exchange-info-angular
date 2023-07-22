@@ -6,7 +6,7 @@ import { OrderBookRestService } from '../services/order-book-rest.service';
 
 @Injectable()
 export class OrderBookEffects {
-  public loadOrderBook$ = createEffect(() => {
+  loadOrderBook$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(orderBookActions.load),
       switchMap(({ symbol, limit }) => {
@@ -17,7 +17,7 @@ export class OrderBookEffects {
     );
   });
 
-  public constructor(
+  constructor(
     private actions$: Actions,
     private orderBookRestService: OrderBookRestService
   ) {}

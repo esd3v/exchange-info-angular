@@ -31,7 +31,7 @@ import { API_WEBSOCKET_BASEURL } from '../shared/config';
   exports: [AppRoutingModule],
 })
 export class CoreModule {
-  public constructor(@SkipSelf() @Optional() parent: CoreModule) {
+  constructor(@SkipSelf() @Optional() parent: CoreModule) {
     if (parent) {
       throw new Error(`${parent.constructor.name} has already been loaded.`);
     }

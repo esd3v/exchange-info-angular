@@ -5,7 +5,7 @@ import { formatPrice } from '../helpers';
   name: 'formatPrice',
 })
 export class FormatPricePipe implements PipeTransform {
-  public transform(value: string | null, tickSize: string | null) {
+  transform(value: string | null, tickSize: string | null) {
     return value === null || tickSize === null
       ? null
       : value

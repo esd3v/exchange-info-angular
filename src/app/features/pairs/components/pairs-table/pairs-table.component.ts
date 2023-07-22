@@ -42,12 +42,15 @@ import { PairColumn } from '../../types/pair-column';
   templateUrl: './pairs-table.component.html',
 })
 export class PairsTableComponent implements OnDestroy, OnInit {
-  private debounceTime = 1000;
-  private pageClicks$ = new Subject<void>();
-  private prevPageRows$ = new BehaviorSubject<Row[]>([]);
-  private pageRows$ = new BehaviorSubject<Row[]>([]);
+  #debounceTime = 1000;
 
-  private data$ = combineLatest([
+  #pageClicks$ = new Subject<void>();
+
+  #prevPageRows$ = new BehaviorSubject<Row[]>([]);
+
+  #pageRows$ = new BehaviorSubject<Row[]>([]);
+
+  #data$ = combineLatest([
     this.exchangeInfoFacade.tradingSymbols$,
     this.tickerFacade.tickers$,
     this.globalFacade.symbol$,
@@ -57,18 +60,19 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     )
   );
 
-  public data: Row[] = [];
-  public pageSizeOptions = [15];
+  data: Row[] = [];
 
-  public columns: PairColumn[] = [
+  pageSizeOptions = [15];
+
+  columns: PairColumn[] = [
     { id: 'pair', numeric: false, label: 'Pair' },
     { id: 'lastPrice', numeric: true, label: 'Price' },
     { id: 'priceChangePercent', numeric: true, label: '24h Change' },
   ];
 
-  public loadingController = new LoadingController(true);
+  loadingController = new LoadingController(true);
 
-  public constructor(
+  constructor(
     private router: Router,
     private location: Location,
     private tickerFacade: TickerFacade,
@@ -94,7 +98,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     return symbols.filter((item) => item !== symbol);
   }
 
-  public createSymbolsFromRows(rows: Row[]) {
+  createSymbolsFromRows(rows: Row[]) {
     return rows.map((row) => {
       const pairCell = row.cells[0];
 
@@ -107,7 +111,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     });
   }
 
-  public createRows(
+  createRows(
     symbols: ExchangeSymbolEntity[],
     tickers: Dictionary<TickerEntity>,
     globalSymbol: string
@@ -205,7 +209,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
       });
   }
 
-  public changePair({ base, quote }: Currency) {
+  changePair({ base, quote }: Currency) {
     if (!base || !quote) return;
 
     const pair = `${base}_${quote}`;
@@ -239,33 +243,33 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     return { base, quote };
   }
 
-  public subscribeToPageSymbols(symbols: string[]) {
+  subscribeToPageSymbols(symbols: string[]) {
     this.tickerWebsocketService.multipleSubscriber.subscribe({ symbols });
   }
 
-  public unsubscribeFromPageSymbols(symbols: string[]) {
+  unsubscribeFromPageSymbols(symbols: string[]) {
     this.tickerWebsocketService.multipleSubscriber.unsubscribe({ symbols });
   }
 
-  public handleRowClick(row: Row) {
+  handleRowClick(row: Row) {
     const currency = this.getRowCurrency(row);
 
     this.changePair(currency);
   }
 
-  public handlePageDataInit(rows: Row[]) {
-    this.pageRows$.next(rows);
-    this.prevPageRows$.next(rows);
+  handlePageDataInit(rows: Row[]) {
+    this.#pageRows$.next(rows);
+    this.#prevPageRows$.next(rows);
   }
 
-  public handlePageChange(rows: Row[]) {
-    this.pageRows$.next(rows);
-    this.pageClicks$.next();
+  handlePageChange(rows: Row[]) {
+    this.#pageRows$.next(rows);
+    this.#pageClicks$.next();
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     // Update data
-    this.data$.subscribe((data) => {
+    this.#data$.subscribe((data) => {
       this.data = data;
     });
 
@@ -276,7 +280,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
         switchMap(() =>
           combineLatest([
             this.globalFacade.symbol$.pipe(first()),
-            this.pageRows$.pipe(
+            this.#pageRows$.pipe(
               filter((rows) => Boolean(rows.length)),
               first()
             ),
@@ -293,14 +297,14 @@ export class PairsTableComponent implements OnDestroy, OnInit {
       });
 
     // On page change debounced
-    this.pageClicks$
+    this.#pageClicks$
       .pipe(
-        debounceTime(this.debounceTime),
+        debounceTime(this.#debounceTime),
         switchMap(() =>
           combineLatest([
             this.globalFacade.symbol$.pipe(first()),
-            this.pageRows$.pipe(first()),
-            this.prevPageRows$.pipe(first()),
+            this.#pageRows$.pipe(first()),
+            this.#prevPageRows$.pipe(first()),
           ])
         )
       )
@@ -318,7 +322,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
         this.unsubscribeFromPageSymbols(prevSymbols);
         this.subscribeToPageSymbols(symbols);
 
-        this.prevPageRows$.next(pageRows);
+        this.#prevPageRows$.next(pageRows);
       });
 
     // REST loading
@@ -341,13 +345,13 @@ export class PairsTableComponent implements OnDestroy, OnInit {
       this.exchangeInfoRestService.status$.pipe(
         filter((status) => status === 'success')
       ),
-      this.data$.pipe(filter((data) => Boolean(data.length))),
+      this.#data$.pipe(filter((data) => Boolean(data.length))),
     ]).subscribe(() => {
       this.loadingController.setLoading(false);
     });
   }
 
-  public ngOnDestroy(): void {
-    this.pageClicks$.complete();
+  ngOnDestroy(): void {
+    this.#pageClicks$.complete();
   }
 }

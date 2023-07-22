@@ -6,7 +6,7 @@ import { tickerActions } from '.';
 
 @Injectable()
 export class TickerEffects {
-  public loadTicker$ = createEffect(() => {
+  loadTicker$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(tickerActions.load),
       switchMap(() => {
@@ -17,7 +17,7 @@ export class TickerEffects {
     );
   });
 
-  public constructor(
+  constructor(
     private actions$: Actions,
     private tickerRestService: TickerRestService
   ) {}

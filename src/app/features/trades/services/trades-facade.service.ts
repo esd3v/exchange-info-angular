@@ -7,18 +7,18 @@ import { TradesEntity } from '../store/trades.state';
 
 @Injectable({ providedIn: 'root' })
 export class TradesFacade {
-  public trades$ = this.store$.select(tradesSelectors.data);
+  trades$ = this.store$.select(tradesSelectors.data);
 
-  public constructor(private store$: Store<AppState>) {}
+  constructor(private store$: Store<AppState>) {}
 
-  public loadData({
+  loadData({
     symbol,
     limit = WIDGET_TRADES_DEFAULT_LIMIT,
   }: Parameters<typeof tradesActions.load>[0]) {
     this.store$.dispatch(tradesActions.load({ symbol, limit }));
   }
 
-  public addTrades(trades: TradesEntity) {
+  addTrades(trades: TradesEntity) {
     this.store$.dispatch(tradesActions.addAndRemoveLast(trades));
   }
 }

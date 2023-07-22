@@ -11,12 +11,12 @@ import { CandlesFacade } from './candles-facade.service';
   providedIn: 'root',
 })
 export class CandlesWebsocketService {
-  public constructor(
+  constructor(
     private candlesFacade: CandlesFacade,
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  public handleWebsocketData({
+  handleWebsocketData({
     k: { t, o, h, l, c, v, T, B, n, q, V, Q },
   }: WebsocketCandle) {
     this.candlesFacade.ohlc$.pipe(take(1)).subscribe((data) => {
@@ -32,14 +32,11 @@ export class CandlesWebsocketService {
     });
   }
 
-  public createParams = ({
-    symbol,
-    interval,
-  }: WebsocketCandlesStreamParams) => [
+  createParams = ({ symbol, interval }: WebsocketCandlesStreamParams) => [
     `${symbol.toLowerCase()}@kline_${interval}`,
   ];
 
-  public subscriber = new WebsocketSubscriber(
+  subscriber = new WebsocketSubscriber(
     1,
     this.createParams,
     this.websocketSubscribeService

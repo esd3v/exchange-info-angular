@@ -12,28 +12,37 @@ import { TickerRestService } from '../../services/ticker-rest.service';
   templateUrl: './ticker-group.component.html',
 })
 export class TickerGroupComponent implements OnInit {
-  public pair!: string;
-  public pairLoading: boolean = false;
+  pair!: string;
 
-  public lastPrice!: string;
-  public lastPriceLoading: boolean = false;
-  public lastPricePositive!: boolean;
+  pairLoading: boolean = false;
 
-  public priceChange!: string;
-  public priceChangeLoading: boolean = false;
-  public priceChangePositive!: boolean;
+  lastPrice!: string;
 
-  public priceChangePercent!: string;
-  public priceChangePercentLoading: boolean = false;
-  public priceChangePercentPositive!: boolean;
+  lastPriceLoading: boolean = false;
 
-  public numberOfTrades!: number;
-  public numberOfTradesLoading: boolean = false;
+  lastPricePositive!: boolean;
 
-  public lastQuantity!: number;
-  public lastQuantityLoading: boolean = false;
+  priceChange!: string;
 
-  public constructor(
+  priceChangeLoading: boolean = false;
+
+  priceChangePositive!: boolean;
+
+  priceChangePercent!: string;
+
+  priceChangePercentLoading: boolean = false;
+
+  priceChangePercentPositive!: boolean;
+
+  numberOfTrades!: number;
+
+  numberOfTradesLoading: boolean = false;
+
+  lastQuantity!: number;
+
+  lastQuantityLoading: boolean = false;
+
+  constructor(
     private globalFacade: GlobalFacade,
     private tickerFacade: TickerFacade,
     private tickerRestService: TickerRestService,
@@ -44,7 +53,8 @@ export class TickerGroupComponent implements OnInit {
   private isPositive(value: string | number): boolean {
     return Number(value) > 0;
   }
-  public ngOnInit(): void {
+
+  ngOnInit(): void {
     // On websocket start
     this.websocketService.status$
       .pipe(

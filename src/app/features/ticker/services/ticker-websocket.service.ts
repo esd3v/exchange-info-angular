@@ -9,12 +9,12 @@ import { TickerFacade } from './ticker-facade.service';
   providedIn: 'root',
 })
 export class TickerWebsocketService {
-  public constructor(
+  constructor(
     private tickerFacade: TickerFacade,
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  public handleWebsocketData({ s, c, Q, P, p, n }: WebsocketTicker) {
+  handleWebsocketData({ s, c, Q, P, p, n }: WebsocketTicker) {
     this.tickerFacade.updateTicker({
       symbol: s,
       lastPrice: c,
@@ -25,16 +25,16 @@ export class TickerWebsocketService {
     });
   }
 
-  public createParams = ({ symbols }: WebsocketTickerStreamParams) =>
+  createParams = ({ symbols }: WebsocketTickerStreamParams) =>
     symbols.map((item) => `${item.toLowerCase()}@ticker`);
 
-  public singleSubscriber = new WebsocketSubscriber(
+  singleSubscriber = new WebsocketSubscriber(
     2,
     this.createParams,
     this.websocketSubscribeService
   );
 
-  public multipleSubscriber = new WebsocketSubscriber(
+  multipleSubscriber = new WebsocketSubscriber(
     5,
     this.createParams,
     this.websocketSubscribeService

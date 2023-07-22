@@ -7,17 +7,17 @@ import { AppState } from 'src/app/store';
   providedIn: 'root',
 })
 export class GlobalFacade {
-  public currency$ = this.store$.select(globalSelectors.currency);
-  public symbol$ = this.store$.select(globalSelectors.globalSymbol);
-  public pair$ = this.store$.select(globalSelectors.globalPair);
+  currency$ = this.store$.select(globalSelectors.currency);
 
-  public pairUnderscore$ = this.store$.select(
-    globalSelectors.globalPairUnderscore
-  );
+  symbol$ = this.store$.select(globalSelectors.globalSymbol);
 
-  public constructor(private store$: Store<AppState>) {}
+  pair$ = this.store$.select(globalSelectors.globalPair);
 
-  public setCurrency({
+  pairUnderscore$ = this.store$.select(globalSelectors.globalPairUnderscore);
+
+  constructor(private store$: Store<AppState>) {}
+
+  setCurrency({
     base,
     quote,
   }: Parameters<typeof globalActions.setCurrency>[0]) {

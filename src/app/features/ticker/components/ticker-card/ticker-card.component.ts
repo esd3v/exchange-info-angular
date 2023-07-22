@@ -6,10 +6,13 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./ticker-card.component.scss'],
 })
 export class TickerCardComponent {
-  @Input() public title!: string;
-  @Input() public value!: string | number;
-  @Input() public loading: boolean = false;
-  @Input() public positive!: boolean;
+  @Input() title!: string;
 
-  public constructor() {}
+  @Input() value!: string | number;
+
+  @Input() loading: boolean = false;
+
+  @Input() positive!: boolean;
+
+  constructor() {}
 }

@@ -6,7 +6,7 @@ import { TradesRestService } from '../services/trades-rest.service';
 
 @Injectable()
 export class TradesEffects {
-  public loadTrades$ = createEffect(() => {
+  loadTrades$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(tradesActions.load),
       switchMap(({ symbol, limit }) => {
@@ -17,7 +17,7 @@ export class TradesEffects {
     );
   });
 
-  public constructor(
+  constructor(
     private actions$: Actions,
     private tradesRestService: TradesRestService
   ) {}

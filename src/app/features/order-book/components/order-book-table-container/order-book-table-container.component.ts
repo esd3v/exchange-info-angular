@@ -22,22 +22,25 @@ import { OrderBookTableContainerService } from './order-book-table-container.ser
   templateUrl: './order-book-table-container.component.html',
 })
 export class OrderBookTableContainerComponent implements OnInit {
-  public currency$ = this.globalFacade.currency$;
+  #currency$ = this.globalFacade.currency$;
 
-  public asksData$ = this.getData$('asks');
-  public bidsData$ = this.getData$('bids');
+  #asksData$ = this.#getData$('asks');
 
-  public asksData: Row[] = [];
-  public bidsData: Row[] = [];
+  #bidsData$ = this.#getData$('bids');
 
-  public columns: OrderBookColumn[] = [];
-  public placeholderRowsCount = WIDGET_DEPTH_DEFAULT_LIMIT;
+  asksData: Row[] = [];
 
-  public get loading() {
+  bidsData: Row[] = [];
+
+  columns: OrderBookColumn[] = [];
+
+  placeholderRowsCount = WIDGET_DEPTH_DEFAULT_LIMIT;
+
+  get loading() {
     return this.orderBookTableContainerService.loadingController.loading;
   }
 
-  public constructor(
+  constructor(
     private orderBookRestService: OrderBookRestService,
     private tickerFacade: TickerFacade,
     private orderBookFacade: OrderBookFacade,
@@ -46,7 +49,7 @@ export class OrderBookTableContainerComponent implements OnInit {
     private orderBookTableContainerService: OrderBookTableContainerService
   ) {}
 
-  private createColumns({ base, quote }: Currency): OrderBookColumn[] {
+  #createColumns({ base, quote }: Currency): OrderBookColumn[] {
     return [
       {
         id: 'price',
@@ -66,16 +69,18 @@ export class OrderBookTableContainerComponent implements OnInit {
     ];
   }
 
-  private getData$(type: 'asks' | 'bids') {
+  #getData$(type: 'asks' | 'bids') {
     return combineLatest([
       type === 'asks' ? this.orderBookFacade.asks$ : this.orderBookFacade.bids$,
       this.tickerFacade.tickSize$.pipe(filter(Boolean)),
     ]).pipe(
-      map(([orderBook, tickSize]) => this.createRows(orderBook, tickSize, type))
+      map(([orderBook, tickSize]) =>
+        this.#createRows(orderBook, tickSize, type)
+      )
     );
   }
 
-  public createRows(
+  #createRows(
     orderBook: OrderBook['asks'] | OrderBook['bids'],
     tickSize: string,
     type: 'asks' | 'bids'
@@ -107,21 +112,21 @@ export class OrderBookTableContainerComponent implements OnInit {
     });
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     // Initial data load
     this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
       this.orderBookFacade.loadData({ symbol });
     });
 
-    this.currency$.subscribe((currency) => {
-      this.columns = this.createColumns(currency);
+    this.#currency$.subscribe((currency) => {
+      this.columns = this.#createColumns(currency);
     });
 
-    this.asksData$.subscribe((data) => {
+    this.#asksData$.subscribe((data) => {
       this.asksData = data;
     });
 
-    this.bidsData$.subscribe((data) => {
+    this.#bidsData$.subscribe((data) => {
       this.bidsData = data;
     });
 
