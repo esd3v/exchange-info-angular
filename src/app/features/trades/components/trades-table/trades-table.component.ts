@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { combineLatest, filter, first, map, switchMap } from 'rxjs';
+import { combineLatest, filter, first, map } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
@@ -10,11 +10,10 @@ import {
   getFormattedDate,
   multiplyDecimal,
 } from 'src/app/shared/helpers';
-import { LoadingController } from 'src/app/shared/loading-controller';
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TradesFacade } from '../../services/trades-facade.service';
+import { TradesTableService } from '../../services/trades-table.service';
 import { TradesWebsocketService } from '../../services/trades-websocket.service';
 import { TradesEntity } from '../../store/trades.state';
 import { TradesColumn } from '../../types/trades-column';
@@ -24,7 +23,7 @@ import { TradesColumn } from '../../types/trades-column';
   templateUrl: './trades-table.component.html',
   encapsulation: ViewEncapsulation.None,
 })
-export class TradesTableComponent extends LoadingController implements OnInit {
+export class TradesTableComponent implements OnInit {
   public currency$ = this.globalFacade.currency$;
 
   public data$ = combineLatest([
@@ -36,17 +35,18 @@ export class TradesTableComponent extends LoadingController implements OnInit {
   public columns: TradesColumn[] = [];
   public placeholderRowsCount = WIDGET_TRADES_DEFAULT_LIMIT;
 
+  public get loading() {
+    return this.tradesTableService.loading;
+  }
+
   public constructor(
     private tableStyleService: TableStyleService,
     private tradesFacade: TradesFacade,
     private tickerFacade: TickerFacade,
-    private tradesWebsocketService: TradesWebsocketService,
     private globalFacade: GlobalFacade,
-    private websocketService: WebsocketService
-  ) {
-    // Set loading
-    super(true);
-  }
+    private tradesWebsocketService: TradesWebsocketService,
+    private tradesTableService: TradesTableService
+  ) {}
 
   private createColumns({ base, quote }: Currency): TradesColumn[] {
     return [
@@ -124,17 +124,14 @@ export class TradesTableComponent extends LoadingController implements OnInit {
     this.tradesFacade.restStatus$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
-        this.setLoading(true);
+        this.tradesTableService.setLoading(true);
       });
 
-    // REST and data complete
-    combineLatest([
-      this.tradesFacade.restStatus$.pipe(
-        filter((status) => status === 'success')
-      ),
-      this.data$.pipe(filter((data) => Boolean(data.length))),
-    ]).subscribe(() => {
-      this.setLoading(false);
-    });
+    // REST complete
+    this.tradesFacade.restStatus$
+      .pipe(filter((status) => status === 'success'))
+      .subscribe(() => {
+        this.tradesTableService.setLoading(false);
+      });
   }
 }

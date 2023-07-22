@@ -1,33 +1,28 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
-import { combineLatest, filter, first, map, switchMap } from 'rxjs';
+import { combineLatest, filter, first, map } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
+import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import {
   formatDecimal,
   formatPrice,
   multiplyDecimal,
 } from 'src/app/shared/helpers';
-import { LoadingController } from 'src/app/shared/loading-controller';
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { OrderBookFacade } from '../../services/order-book-facade.service';
 import { OrderBookRestService } from '../../services/order-book-rest.service';
-import { OrderBookWebsocketService } from '../../services/order-book-websocket.service';
+import { OrderBookTableContainerService } from '../../services/order-book-table-container.service';
 import { OrderBook } from '../../types/order-book';
 import { OrderBookColumn } from '../../types/order-book-column';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
-import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 
 @Component({
   selector: 'app-order-book-table-container',
   templateUrl: './order-book-table-container.component.html',
   encapsulation: ViewEncapsulation.None,
 })
-export class OrderBookTableContainerComponent
-  extends LoadingController
-  implements OnInit
-{
+export class OrderBookTableContainerComponent implements OnInit {
   public currency$ = this.globalFacade.currency$;
 
   public asksData$ = this.getData$('asks');
@@ -39,18 +34,18 @@ export class OrderBookTableContainerComponent
   public columns: OrderBookColumn[] = [];
   public placeholderRowsCount = WIDGET_DEPTH_DEFAULT_LIMIT;
 
+  public get loading() {
+    return this.orderBookTableContainerService.loading;
+  }
+
   public constructor(
-    private orderBookWebsocketService: OrderBookWebsocketService,
     private orderBookRestService: OrderBookRestService,
     private tickerFacade: TickerFacade,
     private orderBookFacade: OrderBookFacade,
     private globalFacade: GlobalFacade,
-    private websocketService: WebsocketService,
-    private tableStyleService: TableStyleService
-  ) {
-    // Set loading
-    super(true);
-  }
+    private tableStyleService: TableStyleService,
+    private orderBookTableContainerService: OrderBookTableContainerService
+  ) {}
 
   private createColumns({ base, quote }: Currency): OrderBookColumn[] {
     return [
@@ -135,18 +130,14 @@ export class OrderBookTableContainerComponent
     this.orderBookRestService.restStatus$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
-        this.setLoading(true);
+        this.orderBookTableContainerService.setLoading(true);
       });
 
-    // REST and data complete
-    combineLatest([
-      this.orderBookRestService.restStatus$.pipe(
-        filter((status) => status === 'success')
-      ),
-      this.asksData$.pipe(filter((data) => Boolean(data.length))),
-      this.bidsData$.pipe(filter((data) => Boolean(data.length))),
-    ]).subscribe(() => {
-      this.setLoading(false);
-    });
+    // REST complete
+    this.orderBookRestService.restStatus$
+      .pipe(filter((status) => status === 'success'))
+      .subscribe(() => {
+        this.orderBookTableContainerService.setLoading(false);
+      });
   }
 }

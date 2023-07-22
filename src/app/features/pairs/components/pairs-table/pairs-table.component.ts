@@ -1,6 +1,6 @@
+import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import { Location } from '@angular/common';
 import { Dictionary } from '@ngrx/entity';
 import {
   BehaviorSubject,
@@ -15,24 +15,24 @@ import {
 import { CandlesFacade } from 'src/app/features/candles/services/candles-facade.service';
 import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
+import { HomeWebsocketService } from 'src/app/features/home/services/home-websocket.service';
 import { OrderBookFacade } from 'src/app/features/order-book/services/order-book-facade.service';
-import { OrderBookWebsocketService } from 'src/app/features/order-book/services/order-book-websocket.service';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
+import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesFacade } from 'src/app/features/trades/services/trades-facade.service';
-import { TradesWebsocketService } from 'src/app/features/trades/services/trades-websocket.service';
+import { TradesTableService } from 'src/app/features/trades/services/trades-table.service';
+import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
-import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
-import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
-import { HomeWebsocketService } from 'src/app/features/home/services/home-websocket.service';
-import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
+import { ChartService } from 'src/app/features/candles/services/chart.service';
+import { OrderBookTableContainerService } from 'src/app/features/order-book/services/order-book-table-container.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -78,11 +78,11 @@ export class PairsTableComponent
     private globalFacade: GlobalFacade,
     private tradesFacade: TradesFacade,
     private candlesFacade: CandlesFacade,
-    private orderBookWebsocketService: OrderBookWebsocketService,
-    private tradesWebsocketService: TradesWebsocketService,
     private orderBookFacade: OrderBookFacade,
-    private candlesWebsocketService: CandlesWebsocketService,
-    private homeWebsocketService: HomeWebsocketService
+    private homeWebsocketService: HomeWebsocketService,
+    private tradesTableService: TradesTableService,
+    private chartService: ChartService,
+    private orderBookTableContainerService: OrderBookTableContainerService
   ) {
     // Set loading
     super(true);
@@ -165,6 +165,11 @@ export class PairsTableComponent
   }
 
   private updateWidgetsData(symbol: string) {
+    // Set loading manually because of ws delay
+    this.tradesTableService.setLoading(true);
+    this.chartService.setLoading(true);
+    this.orderBookTableContainerService.setLoading(true);
+
     this.homeWebsocketService.widgetsUpdateSubscriber.unsubscribeCurrent();
 
     this.candlesFacade.interval$.pipe(first()).subscribe((interval) => {

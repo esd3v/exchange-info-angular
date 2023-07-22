@@ -9,13 +9,12 @@ import {
   map,
   switchMap,
 } from 'rxjs';
-import { CandlesFacade } from '../../services/candles-facade.service';
-import { CandleInterval } from '../../types/candle-interval';
-import { LoadingController } from 'src/app/shared/loading-controller';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
-import { CandlesWebsocketService } from '../../services/candles-websocket.service';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { CandlesFacade } from '../../services/candles-facade.service';
 import { CandlesRestService } from '../../services/candles-rest.service';
+import { CandlesWebsocketService } from '../../services/candles-websocket.service';
+import { ChartService } from '../../services/chart.service';
+import { CandleInterval } from '../../types/candle-interval';
 
 type Options = {
   xAxis: [
@@ -41,7 +40,7 @@ type Options = {
   templateUrl: './chart.component.html',
   styleUrls: ['./chart.component.scss'],
 })
-export class ChartComponent extends LoadingController implements OnInit {
+export class ChartComponent implements OnInit {
   private chartInstance$ = new BehaviorSubject<ECharts | null>(null);
   private upColor = '#00da3c';
   private downColor = '#ec0000';
@@ -67,16 +66,16 @@ export class ChartComponent extends LoadingController implements OnInit {
 
   public interval$ = this.candlesFacade.interval$;
 
+  public get loading() {
+    return this.chartService.loading;
+  }
+
   private options$ = combineLatest([
-    this.candlesFacade.dates$,
-    this.candlesFacade.volumes$,
-    this.candlesFacade.ohlc$,
+    this.candlesFacade.dates$.pipe(filter((item) => Boolean(item.length))),
+    this.candlesFacade.volumes$.pipe(filter((item) => Boolean(item.length))),
+    this.candlesFacade.ohlc$.pipe(filter((item) => Boolean(item.length))),
   ]).pipe(
-    map(([dates, volumes, ohlc]) =>
-      dates.length && volumes.length && ohlc.length
-        ? this.createOptions(dates, volumes, ohlc)
-        : null
-    )
+    map(([dates, volumes, ohlc]) => this.createOptions(dates, volumes, ohlc))
   );
 
   public chartOptions: EChartsOption = {
@@ -202,12 +201,9 @@ export class ChartComponent extends LoadingController implements OnInit {
     private candlesFacade: CandlesFacade,
     private globalFacade: GlobalFacade,
     private candlesWebsocketService: CandlesWebsocketService,
-    private websocketService: WebsocketService,
+    private chartService: ChartService,
     private candlesRestService: CandlesRestService
-  ) {
-    // Set loading
-    super(true);
-  }
+  ) {}
 
   public onChartInit($event: ECharts) {
     this.chartInstance$.next($event);
@@ -268,20 +264,15 @@ export class ChartComponent extends LoadingController implements OnInit {
     this.candlesRestService.status$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
-        this.setLoading(true);
+        this.chartService.setLoading(true);
       });
 
-    // REST and data complete
-    combineLatest([
-      this.candlesRestService.status$.pipe(
-        filter((status) => status === 'success')
-      ),
-      this.options$.pipe(
-        filter((options): options is Options => options !== null)
-      ),
-    ]).subscribe(() => {
-      this.setLoading(false);
-    });
+    // REST complete
+    this.candlesRestService.status$
+      .pipe(filter((status) => status === 'success'))
+      .subscribe(() => {
+        this.chartService.setLoading(false);
+      });
 
     // Update data
     this.chartInstance$
@@ -289,7 +280,6 @@ export class ChartComponent extends LoadingController implements OnInit {
         filter(Boolean),
         switchMap(() => this.options$)
       )
-      .pipe(filter((options): options is Options => options !== null))
       .subscribe((options) => {
         this.mergeOptions = options;
       });
