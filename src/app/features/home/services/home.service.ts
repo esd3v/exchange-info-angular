@@ -14,9 +14,8 @@ import { ExchangeInfoFacade } from '../../exchange-info/services/exchange-info-f
 import { GlobalFacade } from '../../global/services/global-facade.service';
 import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
 import { TickerFacade } from '../../ticker/services/ticker-facade.service';
-import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
 import { TickerWebsocketService } from '../../ticker/services/ticker-websocket.service';
-import { CandlesFacade } from '../../candles/services/candles-facade.service';
+import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
 import { HomeWebsocketService } from './home-websocket.service';
 
 @Injectable({ providedIn: 'root' })
@@ -33,7 +32,6 @@ export class HomerService {
     private orderBookWebsocketService: OrderBookWebsocketService,
     private tradesWebsocketService: TradesWebsocketService,
     private candlesWebsocketService: CandlesWebsocketService,
-    private candlesFacade: CandlesFacade,
     private homeWebsocketService: HomeWebsocketService
   ) {}
 
@@ -89,19 +87,10 @@ export class HomerService {
     this.websocketService.status$
       .pipe(
         filter((status) => status === 'open'),
-        switchMap(() =>
-          combineLatest([
-            this.globalFacade.symbol$.pipe(first()),
-            this.candlesFacade.interval$.pipe(first()),
-          ])
-        )
+        switchMap(() => this.globalFacade.symbol$.pipe(first()))
       )
-      .subscribe(([symbol, interval]) => {
+      .subscribe((symbol) => {
         this.homeWebsocketService.widgetsUpdateSubscriber.subscribe({
-          candlesParams: {
-            interval,
-            symbol,
-          },
           orderBookParams: {
             limit: WIDGET_DEPTH_DEFAULT_LIMIT,
             symbol,

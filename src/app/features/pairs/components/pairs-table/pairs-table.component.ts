@@ -33,6 +33,7 @@ import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
 import { ChartService } from 'src/app/features/candles/services/chart.service';
 import { OrderBookTableContainerService } from 'src/app/features/order-book/services/order-book-table-container.service';
+import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -82,7 +83,8 @@ export class PairsTableComponent
     private homeWebsocketService: HomeWebsocketService,
     private tradesTableService: TradesTableService,
     private chartService: ChartService,
-    private orderBookTableContainerService: OrderBookTableContainerService
+    private orderBookTableContainerService: OrderBookTableContainerService,
+    private candlesWebsocketService: CandlesWebsocketService
   ) {
     // Set loading
     super(true);
@@ -171,32 +173,36 @@ export class PairsTableComponent
     this.orderBookTableContainerService.setLoading(true);
 
     this.homeWebsocketService.widgetsUpdateSubscriber.unsubscribeCurrent();
+    this.candlesWebsocketService.subscriber.unsubscribeCurrent();
+
+    this.homeWebsocketService.widgetsUpdateSubscriber.subscribe({
+      orderBookParams: {
+        symbol,
+        limit: WIDGET_DEPTH_DEFAULT_LIMIT,
+      },
+      tradesParams: {
+        symbol,
+      },
+    });
 
     this.candlesFacade.interval$.pipe(first()).subscribe((interval) => {
-      this.homeWebsocketService.widgetsUpdateSubscriber.subscribe({
-        candlesParams: {
-          interval,
-          symbol,
-        },
-        orderBookParams: {
-          symbol,
-          limit: WIDGET_DEPTH_DEFAULT_LIMIT,
-        },
-        tradesParams: {
-          symbol,
-        },
-      });
+      this.candlesWebsocketService.subscriber.subscribe({ interval, symbol });
     });
 
     this.homeWebsocketService.widgetsUpdateSubscriber.resubscribed$
+      .pipe(first())
+      .subscribe(() => {
+        this.orderBookFacade.loadData({ symbol });
+        this.tradesFacade.loadData({ symbol });
+      });
+
+    this.candlesWebsocketService.subscriber.resubscribed$
       .pipe(
         first(),
         switchMap(() => this.candlesFacade.interval$.pipe(first()))
       )
       .subscribe((interval) => {
         this.candlesFacade.loadData({ symbol, interval });
-        this.orderBookFacade.loadData({ symbol });
-        this.tradesFacade.loadData({ symbol });
       });
   }
 

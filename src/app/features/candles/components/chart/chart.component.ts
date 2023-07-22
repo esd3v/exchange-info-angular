@@ -15,6 +15,7 @@ import { CandlesRestService } from '../../services/candles-rest.service';
 import { CandlesWebsocketService } from '../../services/candles-websocket.service';
 import { ChartService } from '../../services/chart.service';
 import { CandleInterval } from '../../types/candle-interval';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 
 type Options = {
   xAxis: [
@@ -202,7 +203,8 @@ export class ChartComponent implements OnInit {
     private globalFacade: GlobalFacade,
     private candlesWebsocketService: CandlesWebsocketService,
     private chartService: ChartService,
-    private candlesRestService: CandlesRestService
+    private candlesRestService: CandlesRestService,
+    private websocketService: WebsocketService
   ) {}
 
   public onChartInit($event: ECharts) {
@@ -259,6 +261,21 @@ export class ChartComponent implements OnInit {
     ]).subscribe(([symbol, interval]) => {
       this.candlesFacade.loadData({ symbol, interval });
     });
+
+    // On websocket start
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() =>
+          combineLatest([
+            this.globalFacade.symbol$.pipe(first()),
+            this.candlesFacade.interval$.pipe(first()),
+          ])
+        )
+      )
+      .subscribe(([symbol, interval]) => {
+        this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
+      });
 
     // REST loading
     this.candlesRestService.status$
