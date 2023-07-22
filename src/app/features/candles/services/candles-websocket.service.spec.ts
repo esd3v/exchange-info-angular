@@ -1,62 +1,34 @@
 import { TestBed } from '@angular/core/testing';
+import { AppModule } from 'src/app/app.module';
+import { WebsocketCandlesStreamParams } from '../../candles/types/websocket-candles-stream-params';
 import { CandlesWebsocketService } from './candles-websocket.service';
-import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
-import { WebsocketCandlesStreamParams } from '../types/websocket-candles-stream-params';
 
 describe('CandlesWebsocketService', () => {
-  const symbol = 'BTCUSDT';
-  const interval = '1h';
-  const expected = 'btcusdt@kline_1h';
+  const params: WebsocketCandlesStreamParams = {
+    interval: '1d',
+    symbol: 'BTCUSDT',
+  };
+
+  const expected = ['btcusdt@kline_1d'];
 
   let service: CandlesWebsocketService;
-  let websocketSubscribeServiceSpy: jasmine.SpyObj<WebsocketSubscribeService>;
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj('websocketSubscribeService', [
-      'subscribe',
-      'unsubscribe',
-    ]);
-
     TestBed.configureTestingModule({
-      providers: [
-        CandlesWebsocketService,
-        {
-          provide: WebsocketSubscribeService,
-          useValue: spy,
-        },
-      ],
+      imports: [AppModule],
+      providers: [CandlesWebsocketService],
     });
 
     service = TestBed.inject(CandlesWebsocketService);
-
-    websocketSubscribeServiceSpy = TestBed.inject(
-      WebsocketSubscribeService
-    ) as jasmine.SpyObj<WebsocketSubscribeService>;
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should subscribe', () => {
-    const params: WebsocketCandlesStreamParams = { symbol, interval };
+  it('should create params', () => {
+    const result = service.createParams(params);
 
-    service.subscriber.subscribe(params);
-
-    expect(websocketSubscribeServiceSpy.subscribe).toHaveBeenCalledWith(
-      [expected],
-      0
-    );
-  });
-
-  it('should unsubscribe', () => {
-    const params: WebsocketCandlesStreamParams = { symbol, interval };
-
-    service.subscriber.unsubscribe(params);
-
-    expect(websocketSubscribeServiceSpy.unsubscribe).toHaveBeenCalledWith(
-      [expected],
-      0
-    );
+    expect(result).toEqual(expected);
   });
 });
