@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { combineLatest, filter, first, map } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
@@ -13,14 +13,13 @@ import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { OrderBookFacade } from '../../services/order-book-facade.service';
 import { OrderBookRestService } from '../../services/order-book-rest.service';
-import { OrderBookTableContainerService } from './order-book-table-container.service';
 import { OrderBook } from '../../types/order-book';
 import { OrderBookColumn } from '../../types/order-book-column';
+import { OrderBookTableContainerService } from './order-book-table-container.service';
 
 @Component({
   selector: 'app-order-book-table-container',
   templateUrl: './order-book-table-container.component.html',
-  encapsulation: ViewEncapsulation.None,
 })
 export class OrderBookTableContainerComponent implements OnInit {
   public currency$ = this.globalFacade.currency$;

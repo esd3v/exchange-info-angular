@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Dictionary } from '@ngrx/entity';
 import {
@@ -12,15 +12,21 @@ import {
   map,
   switchMap,
 } from 'rxjs';
+import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
 import { CandlesFacade } from 'src/app/features/candles/services/candles-facade.service';
+import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
 import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
+import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { HomeWebsocketService } from 'src/app/features/home/services/home-websocket.service';
+import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
 import { OrderBookFacade } from 'src/app/features/order-book/services/order-book-facade.service';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
+import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
+import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import { TradesFacade } from 'src/app/features/trades/services/trades-facade.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
@@ -30,17 +36,10 @@ import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
-import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
-import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
-import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
-import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
-import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
-import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 
 @Component({
   selector: 'app-pairs-table',
   templateUrl: './pairs-table.component.html',
-  encapsulation: ViewEncapsulation.None,
 })
 export class PairsTableComponent implements OnDestroy, OnInit {
   private debounceTime = 1000;

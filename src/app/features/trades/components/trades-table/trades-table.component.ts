@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { combineLatest, filter, first, map } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
@@ -13,15 +13,14 @@ import {
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { TradesFacade } from '../../services/trades-facade.service';
+import { TradesRestService } from '../../services/trades-rest.service';
 import { TradesEntity } from '../../store/trades.state';
 import { TradesColumn } from '../../types/trades-column';
 import { TradesTableService } from './trades-table.service';
-import { TradesRestService } from '../../services/trades-rest.service';
 
 @Component({
   selector: 'app-trades-table',
   templateUrl: './trades-table.component.html',
-  encapsulation: ViewEncapsulation.None,
 })
 export class TradesTableComponent implements OnInit {
   public currency$ = this.globalFacade.currency$;
