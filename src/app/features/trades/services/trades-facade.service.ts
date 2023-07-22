@@ -19,10 +19,6 @@ export class TradesFacade {
   }
 
   public addTrades(trades: TradesEntity) {
-    this.store$.dispatch(
-      tradesActions.addAndRemoveLast({
-        trades,
-      })
-    );
+    this.store$.dispatch(tradesActions.addAndRemoveLast(trades));
   }
 }

@@ -20,11 +20,7 @@ export class GlobalFacade {
   public setCurrency({
     base,
     quote,
-  }: Parameters<typeof globalActions.setCurrency>[0]['payload']) {
-    this.store$.dispatch(
-      globalActions.setCurrency({
-        payload: { base, quote },
-      })
-    );
+  }: Parameters<typeof globalActions.setCurrency>[0]) {
+    this.store$.dispatch(globalActions.setCurrency({ base, quote }));
   }
 }

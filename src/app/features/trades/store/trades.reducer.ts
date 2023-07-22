@@ -13,10 +13,10 @@ export const tradesReducer = createReducer(
     data: trades,
     status: 'success',
   })),
-  on(tradesActions.addAndRemoveLast, (state, { trades }) => {
+  on(tradesActions.addAndRemoveLast, (state, payload) => {
     let updated = state.data.slice(0, state.data.length - 1);
 
-    updated.unshift(trades);
+    updated.unshift(payload);
 
     return {
       data: updated,

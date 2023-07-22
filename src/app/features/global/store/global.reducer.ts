@@ -4,7 +4,7 @@ import { initialState } from './global.state';
 
 export const globalReducer = createReducer(
   initialState,
-  on(globalActions.setCurrency, (state, { payload }) => ({
+  on(globalActions.setCurrency, (state, payload) => ({
     ...state,
     currency: payload,
   }))
