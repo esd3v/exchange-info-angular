@@ -12,6 +12,7 @@
       <mat-label>Time</mat-label>
       <mat-select
         panelOpen="false"
+        [disabled]="loading"
         [value]="interval$ | async"
         (selectionChange)="handleIntervalChange($event)"
         ><mat-option *ngFor="let interval of intervals" [value]="interval">

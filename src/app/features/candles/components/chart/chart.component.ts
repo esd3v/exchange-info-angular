@@ -237,6 +237,8 @@ export class ChartComponent implements OnInit {
   }
 
   public handleIntervalChange(event: MatSelectChange) {
+    this.chartService.setLoading(true);
+
     const interval = event.value as CandleInterval;
 
     this.candlesWebsocketService.subscriber.unsubscribeCurrent();
