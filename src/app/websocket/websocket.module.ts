@@ -1,14 +1,14 @@
 import { ModuleWithProviders, NgModule } from '@angular/core';
-import { WebsocketSubscribeService } from './services/websocket-subscribe.service';
-import { WebsocketService } from './services/websocket.service';
-import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from './websocket-config';
+import { TOKEN_WEBSOCKET_CONFIG } from './injection-tokens';
+import { WebsocketConfig } from './types/websocket-config';
+import { WebsocketSwitchModule } from './components/websocket-switch/websocket-switch.module';
 
 @NgModule({
-  providers: [WebsocketService, WebsocketSubscribeService],
+  imports: [WebsocketSwitchModule],
 })
 export class WebsocketModule {
   public static forRoot(
-    config: WebsocketConfig
+    config?: WebsocketConfig
   ): ModuleWithProviders<WebsocketModule> {
     return {
       ngModule: WebsocketModule,

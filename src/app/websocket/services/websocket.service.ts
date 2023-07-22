@@ -9,7 +9,9 @@ import {
   takeUntil,
   timer,
 } from 'rxjs';
-import { TOKEN_WEBSOCKET_CONFIG, WebsocketConfig } from '../websocket-config';
+import { TOKEN_WEBSOCKET_CONFIG } from '../injection-tokens';
+import { WebsocketModule } from '../websocket.module';
+import { WebsocketConfig } from '../types/websocket-config';
 
 type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing' | null;
 
@@ -21,7 +23,9 @@ export type Reason =
   | 'switch'
   | null;
 
-@Injectable()
+@Injectable({
+  providedIn: WebsocketModule,
+})
 export class WebsocketService implements OnDestroy {
   #socket!: WebSocket | null;
   #messages$ = new Subject<MessageEvent<string>>();

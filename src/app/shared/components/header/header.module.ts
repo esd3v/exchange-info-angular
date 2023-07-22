@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { WebsocketSwitchModule } from '../websocket-switch/websocket-switch.module';
+import { WebsocketSwitchModule } from '../../../websocket/components/websocket-switch/websocket-switch.module';
 import { HeaderComponent } from './header.component';
 
 @NgModule({

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { BehaviorSubject, map } from 'rxjs';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { WEBSOCKET_ENABLED_AT_START } from '../../config';
+import { WEBSOCKET_ENABLED_AT_START } from '../../../shared/config';
 
 @Component({
   selector: 'app-websocket-switch',

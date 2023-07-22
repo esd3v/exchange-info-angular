@@ -18,9 +18,10 @@ import { WebsocketMessageIncoming } from '../types/websocket-message-incoming';
 import { WebsocketMessageStatus } from '../types/websocket-message-status';
 import { WebsocketMessageParams } from '../types/websocket-message-stream-params';
 import { WebsocketService } from './websocket.service';
+import { WebsocketModule } from '../websocket.module';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: WebsocketModule,
 })
 export class WebsocketSubscribeService {
   public messages: WebsocketMessage[] = [];

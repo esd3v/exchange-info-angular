@@ -21,7 +21,7 @@ describe('PairsComponent', () => {
       imports: [
         HttpClientTestingModule,
         AppStoreModule,
-        WebsocketModule.forRoot({ url: '' }),
+        WebsocketModule.forRoot(),
         RouterTestingModule,
         TableModule,
       ],

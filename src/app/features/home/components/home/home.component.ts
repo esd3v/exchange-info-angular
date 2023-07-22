@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { MISC_SNACKBAR_DURATION } from 'src/app/shared/config';
 import { convertPairToCurrency } from 'src/app/shared/helpers';
-import { AppState } from 'src/app/store';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { HomerService } from '../../services/home.service';
 
@@ -17,7 +15,6 @@ import { HomerService } from '../../services/home.service';
 })
 export class HomeComponent implements OnInit {
   public constructor(
-    private store$: Store<AppState>,
     private router: Router,
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
