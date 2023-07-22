@@ -34,6 +34,8 @@ import { CandlesWebsocketService } from 'src/app/features/candles/services/candl
 import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
+import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
+import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -71,7 +73,9 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     private router: Router,
     private location: Location,
     private tickerFacade: TickerFacade,
+    private tickerRestService: TickerRestService,
     private exchangeInfoFacade: ExchangeInfoFacade,
+    private exchangeInfoRestService: ExchangeInfoRestService,
     private websocketService: WebsocketService,
     private tableStyleService: TableStyleService,
     private tickerWebsocketService: TickerWebsocketService,
@@ -320,10 +324,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
 
     // REST loading
     combineLatest([
-      this.tickerFacade.restStatus$.pipe(
+      this.tickerRestService.status$.pipe(
         filter((status) => status === 'loading')
       ),
-      this.exchangeInfoFacade.restStatus$.pipe(
+      this.exchangeInfoRestService.status$.pipe(
         filter((status) => status === 'loading')
       ),
     ]).subscribe(() => {
@@ -332,10 +336,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
 
     // REST and data complete
     combineLatest([
-      this.tickerFacade.restStatus$.pipe(
+      this.tickerRestService.status$.pipe(
         filter((status) => status === 'success')
       ),
-      this.exchangeInfoFacade.restStatus$.pipe(
+      this.exchangeInfoRestService.status$.pipe(
         filter((status) => status === 'success')
       ),
       this.data$.pipe(filter((data) => Boolean(data.length))),

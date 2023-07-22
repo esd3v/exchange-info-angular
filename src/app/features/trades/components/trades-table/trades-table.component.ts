@@ -16,6 +16,7 @@ import { TradesFacade } from '../../services/trades-facade.service';
 import { TradesEntity } from '../../store/trades.state';
 import { TradesColumn } from '../../types/trades-column';
 import { TradesTableService } from './trades-table.service';
+import { TradesRestService } from '../../services/trades-rest.service';
 
 @Component({
   selector: 'app-trades-table',
@@ -41,6 +42,7 @@ export class TradesTableComponent implements OnInit {
   public constructor(
     private tableStyleService: TableStyleService,
     private tradesFacade: TradesFacade,
+    private tradesRestService: TradesRestService,
     private tickerFacade: TickerFacade,
     private globalFacade: GlobalFacade,
     private tradesTableService: TradesTableService
@@ -119,14 +121,14 @@ export class TradesTableComponent implements OnInit {
     });
 
     // REST loading
-    this.tradesFacade.restStatus$
+    this.tradesRestService.status$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
         this.tradesTableService.loadingController.setLoading(true);
       });
 
     // REST complete
-    this.tradesFacade.restStatus$
+    this.tradesRestService.status$
       .pipe(filter((status) => status === 'success'))
       .subscribe(() => {
         this.tradesTableService.loadingController.setLoading(false);

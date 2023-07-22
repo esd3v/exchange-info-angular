@@ -5,6 +5,7 @@ import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
 import { TickerFacade } from '../../services/ticker-facade.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TickerWebsocketService } from '../../services/ticker-websocket.service';
+import { TickerRestService } from '../../services/ticker-rest.service';
 
 @Component({
   selector: 'app-ticker-group',
@@ -35,6 +36,7 @@ export class TickerGroupComponent implements OnInit {
   public constructor(
     private globalFacade: GlobalFacade,
     private tickerFacade: TickerFacade,
+    private tickerRestService: TickerRestService,
     private websocketService: WebsocketService,
     private tickerWebsocketService: TickerWebsocketService
   ) {}
@@ -57,7 +59,7 @@ export class TickerGroupComponent implements OnInit {
 
     // Loading with tickSize
     combineLatest([
-      this.tickerFacade.restStatus$.pipe(
+      this.tickerRestService.status$.pipe(
         filter((status) => status === 'loading')
       ),
       this.tickerFacade.tickSize$.pipe(
@@ -70,7 +72,7 @@ export class TickerGroupComponent implements OnInit {
 
     // Loading with tickSize complete
     combineLatest([
-      this.tickerFacade.restStatus$.pipe(
+      this.tickerRestService.status$.pipe(
         filter((status) => status === 'success')
       ),
       this.tickerFacade.tickSize$.pipe(filter(Boolean)),
@@ -80,7 +82,7 @@ export class TickerGroupComponent implements OnInit {
     });
 
     // Loading without tickSize
-    this.tickerFacade.restStatus$
+    this.tickerRestService.status$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
         this.priceChangePercentLoading = true;
@@ -89,7 +91,7 @@ export class TickerGroupComponent implements OnInit {
       });
 
     // Loading without tickSize complete
-    this.tickerFacade.restStatus$
+    this.tickerRestService.status$
       .pipe(filter((status) => status === 'success'))
       .subscribe(() => {
         this.priceChangePercentLoading = false;

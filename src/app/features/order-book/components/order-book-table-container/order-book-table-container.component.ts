@@ -127,14 +127,14 @@ export class OrderBookTableContainerComponent implements OnInit {
     });
 
     // REST loading
-    this.orderBookRestService.restStatus$
+    this.orderBookRestService.status$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
         this.orderBookTableContainerService.loadingController.setLoading(true);
       });
 
     // REST complete
-    this.orderBookRestService.restStatus$
+    this.orderBookRestService.status$
       .pipe(filter((status) => status === 'success'))
       .subscribe(() => {
         this.orderBookTableContainerService.loadingController.setLoading(false);

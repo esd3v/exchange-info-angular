@@ -11,7 +11,7 @@ import { orderBookSelectors } from '../store';
   providedIn: 'root',
 })
 export class OrderBookRestService {
-  public restStatus$ = this.store$.select(orderBookSelectors.status);
+  public status$ = this.store$.select(orderBookSelectors.status);
 
   public constructor(
     private store$: Store<AppState>,

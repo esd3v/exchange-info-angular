@@ -7,7 +7,6 @@ import { TradesEntity } from '../store/trades.state';
 
 @Injectable({ providedIn: 'root' })
 export class TradesFacade {
-  public restStatus$ = this.store$.select(tradesSelectors.status);
   public trades$ = this.store$.select(tradesSelectors.data);
 
   public constructor(private store$: Store<AppState>) {}

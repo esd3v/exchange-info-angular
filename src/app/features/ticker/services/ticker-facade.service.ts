@@ -8,8 +8,6 @@ import { TickerEntity } from '../store/ticker.state';
   providedIn: 'root',
 })
 export class TickerFacade {
-  public restStatus$ = this.store$.select(tickerSelectors.status);
-
   public lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
 
   public tickSize$ = this.store$.select(tickerSelectors.tickSize);
