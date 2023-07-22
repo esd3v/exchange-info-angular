@@ -6,6 +6,7 @@ import {
 import { CandlesRestService } from './candles-rest.service';
 import { CandlesGetParams } from '../types/candles-get-params';
 import { Candle } from '../types/candle';
+import { AppStoreModule } from 'src/app/store/store.module';
 
 describe('CandlesRestService', () => {
   let service: CandlesRestService;
@@ -13,7 +14,7 @@ describe('CandlesRestService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
+      imports: [HttpClientTestingModule, AppStoreModule],
       providers: [CandlesRestService],
     });
 

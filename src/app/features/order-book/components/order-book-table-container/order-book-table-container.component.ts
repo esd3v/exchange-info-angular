@@ -13,7 +13,7 @@ import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { OrderBookFacade } from '../../services/order-book-facade.service';
 import { OrderBookRestService } from '../../services/order-book-rest.service';
-import { OrderBookTableContainerService } from '../../services/order-book-table-container.service';
+import { OrderBookTableContainerService } from './order-book-table-container.service';
 import { OrderBook } from '../../types/order-book';
 import { OrderBookColumn } from '../../types/order-book-column';
 

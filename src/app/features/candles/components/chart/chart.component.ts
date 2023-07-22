@@ -13,7 +13,7 @@ import { GlobalFacade } from 'src/app/features/global/services/global-facade.ser
 import { CandlesFacade } from '../../services/candles-facade.service';
 import { CandlesRestService } from '../../services/candles-rest.service';
 import { CandlesWebsocketService } from '../../services/candles-websocket.service';
-import { ChartService } from '../../services/chart.service';
+import { ChartService } from './chart.service';
 import { CandleInterval } from '../../types/candle-interval';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 

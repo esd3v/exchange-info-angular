@@ -13,10 +13,9 @@ import {
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { TradesFacade } from '../../services/trades-facade.service';
-import { TradesTableService } from '../../services/trades-table.service';
-import { TradesWebsocketService } from '../../services/trades-websocket.service';
 import { TradesEntity } from '../../store/trades.state';
 import { TradesColumn } from '../../types/trades-column';
+import { TradesTableService } from './trades-table.service';
 
 @Component({
   selector: 'app-trades-table',
@@ -44,7 +43,6 @@ export class TradesTableComponent implements OnInit {
     private tradesFacade: TradesFacade,
     private tickerFacade: TickerFacade,
     private globalFacade: GlobalFacade,
-    private tradesWebsocketService: TradesWebsocketService,
     private tradesTableService: TradesTableService
   ) {}
 

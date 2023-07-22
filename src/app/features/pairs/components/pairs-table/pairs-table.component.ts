@@ -22,7 +22,6 @@ import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.ser
 import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesFacade } from 'src/app/features/trades/services/trades-facade.service';
-import { TradesTableService } from 'src/app/features/trades/services/trades-table.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
@@ -31,9 +30,10 @@ import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
-import { ChartService } from 'src/app/features/candles/services/chart.service';
-import { OrderBookTableContainerService } from 'src/app/features/order-book/services/order-book-table-container.service';
 import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
+import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
+import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
+import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 
 @Component({
   selector: 'app-pairs-table',
