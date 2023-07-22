@@ -35,7 +35,7 @@ export class TradesTableComponent implements OnInit {
   public placeholderRowsCount = WIDGET_TRADES_DEFAULT_LIMIT;
 
   public get loading() {
-    return this.tradesTableService.loading;
+    return this.tradesTableService.loadingController.loading;
   }
 
   public constructor(
@@ -122,14 +122,14 @@ export class TradesTableComponent implements OnInit {
     this.tradesFacade.restStatus$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
-        this.tradesTableService.setLoading(true);
+        this.tradesTableService.loadingController.setLoading(true);
       });
 
     // REST complete
     this.tradesFacade.restStatus$
       .pipe(filter((status) => status === 'success'))
       .subscribe(() => {
-        this.tradesTableService.setLoading(false);
+        this.tradesTableService.loadingController.setLoading(false);
       });
   }
 }

@@ -68,7 +68,7 @@ export class ChartComponent implements OnInit {
   public interval$ = this.candlesFacade.interval$;
 
   public get loading() {
-    return this.chartService.loading;
+    return this.chartService.loadingController.loading;
   }
 
   private options$ = combineLatest([
@@ -237,7 +237,7 @@ export class ChartComponent implements OnInit {
   }
 
   public handleIntervalChange(event: MatSelectChange) {
-    this.chartService.setLoading(true);
+    this.chartService.loadingController.setLoading(true);
 
     const interval = event.value as CandleInterval;
 
@@ -283,14 +283,14 @@ export class ChartComponent implements OnInit {
     this.candlesRestService.status$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
-        this.chartService.setLoading(true);
+        this.chartService.loadingController.setLoading(true);
       });
 
     // REST complete
     this.candlesRestService.status$
       .pipe(filter((status) => status === 'success'))
       .subscribe(() => {
-        this.chartService.setLoading(false);
+        this.chartService.loadingController.setLoading(false);
       });
 
     // Update data

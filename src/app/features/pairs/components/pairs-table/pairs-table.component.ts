@@ -31,19 +31,16 @@ import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
 import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
-import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
 import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
+import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
 
 @Component({
   selector: 'app-pairs-table',
   templateUrl: './pairs-table.component.html',
   encapsulation: ViewEncapsulation.None,
 })
-export class PairsTableComponent
-  extends LoadingController
-  implements OnDestroy, OnInit
-{
+export class PairsTableComponent implements OnDestroy, OnInit {
   private debounceTime = 1000;
   private pageClicks$ = new Subject<void>();
   private prevPageRows$ = new BehaviorSubject<Row[]>([]);
@@ -68,6 +65,8 @@ export class PairsTableComponent
     { id: 'priceChangePercent', numeric: true, label: '24h Change' },
   ];
 
+  public loadingController = new LoadingController(true);
+
   public constructor(
     private router: Router,
     private location: Location,
@@ -85,10 +84,7 @@ export class PairsTableComponent
     private chartService: ChartService,
     private orderBookTableContainerService: OrderBookTableContainerService,
     private candlesWebsocketService: CandlesWebsocketService
-  ) {
-    // Set loading
-    super(true);
-  }
+  ) {}
 
   // Exclude globalSymbol because we already subscribed to it
   private filterSymbol(symbols: string[], symbol: string) {
@@ -168,9 +164,9 @@ export class PairsTableComponent
 
   private updateWidgetsData(symbol: string) {
     // Set loading manually because of ws delay
-    this.tradesTableService.setLoading(true);
-    this.chartService.setLoading(true);
-    this.orderBookTableContainerService.setLoading(true);
+    this.tradesTableService.loadingController.setLoading(true);
+    this.chartService.loadingController.setLoading(true);
+    this.orderBookTableContainerService.loadingController.setLoading(true);
 
     this.homeWebsocketService.widgetsUpdateSubscriber.unsubscribeCurrent();
     this.candlesWebsocketService.subscriber.unsubscribeCurrent();
@@ -331,7 +327,7 @@ export class PairsTableComponent
         filter((status) => status === 'loading')
       ),
     ]).subscribe(() => {
-      this.setLoading(true);
+      this.loadingController.setLoading(true);
     });
 
     // REST and data complete
@@ -344,7 +340,7 @@ export class PairsTableComponent
       ),
       this.data$.pipe(filter((data) => Boolean(data.length))),
     ]).subscribe(() => {
-      this.setLoading(false);
+      this.loadingController.setLoading(false);
     });
   }
 

@@ -35,7 +35,7 @@ export class OrderBookTableContainerComponent implements OnInit {
   public placeholderRowsCount = WIDGET_DEPTH_DEFAULT_LIMIT;
 
   public get loading() {
-    return this.orderBookTableContainerService.loading;
+    return this.orderBookTableContainerService.loadingController.loading;
   }
 
   public constructor(
@@ -130,14 +130,14 @@ export class OrderBookTableContainerComponent implements OnInit {
     this.orderBookRestService.restStatus$
       .pipe(filter((status) => status === 'loading'))
       .subscribe(() => {
-        this.orderBookTableContainerService.setLoading(true);
+        this.orderBookTableContainerService.loadingController.setLoading(true);
       });
 
     // REST complete
     this.orderBookRestService.restStatus$
       .pipe(filter((status) => status === 'success'))
       .subscribe(() => {
-        this.orderBookTableContainerService.setLoading(false);
+        this.orderBookTableContainerService.loadingController.setLoading(false);
       });
   }
 }
