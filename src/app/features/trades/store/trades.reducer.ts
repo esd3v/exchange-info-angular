@@ -19,8 +19,8 @@ export const tradesReducer = createReducer(
     updated.unshift(payload);
 
     return {
+      ...state,
       data: updated,
-      status: 'success',
     };
   })
 );

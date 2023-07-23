@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, filter, first, map } from 'rxjs';
+import { combineLatest, filter, first, map, switchMap } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
@@ -71,7 +71,13 @@ export class OrderBookTableContainerComponent implements OnInit {
 
   #getData$(type: 'asks' | 'bids') {
     return combineLatest([
-      type === 'asks' ? this.orderBookFacade.asks$ : this.orderBookFacade.bids$,
+      type === 'asks'
+        ? this.orderBookFacade.asks$.pipe(
+            filter((asks) => Boolean(asks.length))
+          )
+        : this.orderBookFacade.bids$.pipe(
+            filter((bids) => Boolean(bids.length))
+          ),
       this.tickerFacade.tickSize$.pipe(filter(Boolean)),
     ]).pipe(
       map(([orderBook, tickSize]) =>
@@ -137,9 +143,14 @@ export class OrderBookTableContainerComponent implements OnInit {
         this.orderBookTableContainerService.loadingController.setLoading(true);
       });
 
-    // REST complete
+    // REST and data complete
     this.orderBookRestService.status$
-      .pipe(filter((status) => status === 'success'))
+      .pipe(
+        filter((status) => status === 'success'),
+        switchMap(() =>
+          combineLatest([this.#asksData$, this.#bidsData$]).pipe(first())
+        )
+      )
       .subscribe(() => {
         this.orderBookTableContainerService.loadingController.setLoading(false);
       });

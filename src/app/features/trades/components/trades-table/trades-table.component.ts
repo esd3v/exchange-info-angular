@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, filter, first, map } from 'rxjs';
+import { combineLatest, filter, first, map, switchMap } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
@@ -26,7 +26,7 @@ export class TradesTableComponent implements OnInit {
   #currency$ = this.globalFacade.currency$;
 
   #data$ = combineLatest([
-    this.tradesFacade.trades$,
+    this.tradesFacade.trades$.pipe(filter((trades) => Boolean(trades.length))),
     this.tickerFacade.tickSize$.pipe(filter(Boolean)),
   ]).pipe(map(([trades, tickSize]) => this.createRows(trades, tickSize)));
 
@@ -128,9 +128,12 @@ export class TradesTableComponent implements OnInit {
         this.tradesTableService.loadingController.setLoading(true);
       });
 
-    // REST complete
+    // REST and data complete
     this.tradesRestService.status$
-      .pipe(filter((status) => status === 'success'))
+      .pipe(
+        filter((status) => status === 'success'),
+        switchMap(() => this.#data$.pipe(first()))
+      )
       .subscribe(() => {
         this.tradesTableService.loadingController.setLoading(false);
       });

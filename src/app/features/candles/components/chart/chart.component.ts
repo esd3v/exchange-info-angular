@@ -289,9 +289,12 @@ export class ChartComponent implements OnInit {
         this.chartService.loadingController.setLoading(true);
       });
 
-    // REST complete
+    // REST and data complete
     this.candlesRestService.status$
-      .pipe(filter((status) => status === 'success'))
+      .pipe(
+        filter((status) => status === 'success'),
+        switchMap(() => this.#options$.pipe(first()))
+      )
       .subscribe(() => {
         this.chartService.loadingController.setLoading(false);
       });
