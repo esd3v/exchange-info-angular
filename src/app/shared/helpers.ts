@@ -80,7 +80,7 @@ export const formatPriceChangePercent = (value: string) =>
 export const getFormattedDate = ({
   msec,
   utc,
-  format = 'DD-MM-YYYY HH:mm',
+  format = 'DD-MM-YYYY HH:mm:ss',
 }: {
   msec: number;
   format?: string;

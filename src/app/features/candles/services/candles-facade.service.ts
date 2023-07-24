@@ -10,11 +10,7 @@ import { Candle } from '../types/candle';
 export class CandlesFacade {
   interval$ = this.store$.select(candlesSelectors.interval);
 
-  ohlc$ = this.store$.select(candlesSelectors.ohlc);
-
-  dates$ = this.store$.select(candlesSelectors.dates);
-
-  volumes$ = this.store$.select(candlesSelectors.volumes);
+  candles$ = this.store$.select(candlesSelectors.candles);
 
   constructor(private store$: Store<AppState>) {}
 

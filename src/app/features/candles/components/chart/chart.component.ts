@@ -16,25 +16,8 @@ import { CandlesWebsocketService } from '../../services/candles-websocket.servic
 import { ChartService } from './chart.service';
 import { CandleInterval } from '../../types/candle-interval';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-
-type Options = {
-  xAxis: [
-    {
-      data: string[];
-    },
-    {
-      data: string[];
-    }
-  ];
-  series: [
-    {
-      data: (string | number)[][];
-    },
-    {
-      data: string[];
-    }
-  ];
-};
+import { CandleEntity } from '../../store/candles.state';
+import { getFormattedDate } from 'src/app/shared/helpers';
 
 @Component({
   selector: 'app-chart',
@@ -48,7 +31,9 @@ export class ChartComponent implements OnInit {
 
   #downColor = '#ec0000';
 
-  #barMinWidth = 6;
+  #upBorderColor = '#00CF36';
+
+  #downBorderColor = '#D50000';
 
   intervals: CandleInterval[] = [
     '12h',
@@ -57,6 +42,7 @@ export class ChartComponent implements OnInit {
     '1d',
     '1h',
     '1m',
+    '1s',
     '1w',
     '2h',
     '30m',
@@ -74,96 +60,101 @@ export class ChartComponent implements OnInit {
     return this.chartService.loadingController.loading;
   }
 
-  #options$ = combineLatest([
-    this.candlesFacade.dates$.pipe(filter((item) => Boolean(item.length))),
-    this.candlesFacade.volumes$.pipe(filter((item) => Boolean(item.length))),
-    this.candlesFacade.ohlc$.pipe(filter((item) => Boolean(item.length))),
-  ]).pipe(
-    map(([dates, volumes, ohlc]) => this.#createOptions(dates, volumes, ohlc))
+  #data$ = this.candlesFacade.candles$.pipe(
+    filter((candles) => Boolean(candles.length)),
+    map((candles) => this.#createData(candles))
   );
 
   chartOptions: EChartsOption = {
-    backgroundColor: '#fff',
-    animation: false,
     tooltip: {
       trigger: 'axis',
       axisPointer: {
-        type: 'cross',
-      },
-      backgroundColor: 'rgba(245, 245, 245, 0.8)',
-      borderWidth: 1,
-      borderColor: '#ccc',
-      padding: 10,
-      textStyle: {
-        color: '#000',
-      },
-    },
-    axisPointer: {
-      label: {
-        backgroundColor: '#777',
+        type: 'line',
       },
     },
     grid: [
       {
-        width: 'auto',
-        height: '70%',
-        top: 8,
-        left: 45,
-        right: this.#barMinWidth,
+        top: 10,
+        left: 55,
+        right: 0,
+        bottom: 180,
       },
       {
-        width: 'auto',
-        height: '15%',
-        left: 40,
-        right: this.#barMinWidth,
-        bottom: 19,
+        left: 55,
+        right: 0,
+        height: 80,
+        bottom: 60,
       },
     ],
-    dataZoom: {
-      type: 'inside',
-      xAxisIndex: [0, 1],
-      start: 75,
-      end: 100,
-      maxSpan: 25,
-      minSpan: 5,
-    },
-    xAxis: [
+    dataZoom: [
       {
-        show: true,
-        type: 'category',
-        data: [],
-        gridIndex: 0,
-        boundaryGap: false,
+        type: 'inside',
+        xAxisIndex: [0, 1],
+        start: 85,
+        end: 100,
       },
       {
         show: true,
+        xAxisIndex: [0, 1],
+        type: 'slider',
+        bottom: 10,
+      },
+    ],
+    xAxis: [
+      {
+        type: 'category',
+        data: [],
+        boundaryGap: false,
+        axisLine: {
+          onZero: false,
+        },
+        splitLine: {
+          show: false,
+        },
+        min: 'dataMin',
+        max: 'dataMax',
+      },
+      {
         type: 'category',
         gridIndex: 1,
         data: [],
         boundaryGap: false,
-        axisLabel: {
-          show: true,
+        axisLine: {
+          onZero: false,
         },
+        axisTick: {
+          show: false,
+        },
+        splitLine: {
+          show: false,
+        },
+        axisLabel: {
+          show: false,
+        },
+        min: 'dataMin',
+        max: 'dataMax',
       },
     ],
     yAxis: [
       {
-        show: true,
         scale: true,
-        gridIndex: 0,
-        splitNumber: 7,
-        splitLine: {
+        splitArea: {
           show: true,
-          lineStyle: {
-            type: 'dashed',
-          },
         },
       },
       {
-        show: true,
         scale: true,
         gridIndex: 1,
         splitNumber: 2,
+        axisLabel: {
+          show: false,
+        },
+        axisLine: {
+          show: false,
+        },
+        axisTick: {
+          show: false,
+        },
         splitLine: {
           show: false,
         },
@@ -171,30 +162,23 @@ export class ChartComponent implements OnInit {
     ],
     series: [
       {
-        name: 'OHLC',
         type: 'candlestick',
         data: [],
-        barMinWidth: this.#barMinWidth,
-        xAxisIndex: 0,
-        yAxisIndex: 0,
         itemStyle: {
           color: this.#upColor,
           color0: this.#downColor,
-          borderColor: undefined,
-          borderColor0: undefined,
+          borderColor: this.#upBorderColor,
+          borderColor0: this.#downBorderColor,
+          borderColorDoji: this.#upBorderColor,
         },
       },
       {
         name: 'Volume',
         type: 'bar',
         data: [],
-        barMinWidth: this.#barMinWidth,
         xAxisIndex: 1,
         yAxisIndex: 1,
-        itemStyle: {
-          color: '#5e71ae',
-          opacity: 0.3,
-        },
+        large: true,
       },
     ],
   };
@@ -214,29 +198,17 @@ export class ChartComponent implements OnInit {
     this.#chartInstance$.next($event);
   }
 
-  #createOptions(
-    dates: string[],
-    volumes: string[],
-    ohlc: (string | number)[][]
-  ): Options {
-    return {
-      xAxis: [
-        {
-          data: dates,
-        },
-        {
-          data: volumes,
-        },
-      ],
-      series: [
-        {
-          data: ohlc,
-        },
-        {
-          data: volumes,
-        },
-      ],
-    };
+  #createData(candles: CandleEntity[]) {
+    return candles.map(({ open, high, low, close, openTime, volume }) => ({
+      date: getFormattedDate({
+        msec: openTime,
+      }),
+      open,
+      close,
+      low,
+      high,
+      volume,
+    }));
   }
 
   handleIntervalChange(event: MatSelectChange) {
@@ -293,7 +265,7 @@ export class ChartComponent implements OnInit {
     this.candlesRestService.status$
       .pipe(
         filter((status) => status === 'success'),
-        switchMap(() => this.#options$.pipe(first()))
+        switchMap(() => this.#data$.pipe(first()))
       )
       .subscribe(() => {
         this.chartService.loadingController.setLoading(false);
@@ -303,10 +275,41 @@ export class ChartComponent implements OnInit {
     this.#chartInstance$
       .pipe(
         filter(Boolean),
-        switchMap(() => this.#options$)
+        switchMap(() => this.#data$)
       )
-      .subscribe((options) => {
-        this.mergeOptions = options;
+      .subscribe((data) => {
+        const dates = data.map((item) => item.date);
+
+        const ohlc = data.map((item) => ({
+          value: [item.open, item.close, item.low, item.high],
+        }));
+
+        const volumes = data.map((item) => ({
+          value: item.volume,
+          itemStyle: {
+            color: item.open > item.close ? this.#downColor : this.#upColor,
+            opacity: 0.3,
+          },
+        }));
+
+        this.mergeOptions = {
+          xAxis: [
+            {
+              data: dates,
+            },
+            {
+              data: volumes,
+            },
+          ],
+          series: [
+            {
+              data: ohlc,
+            },
+            {
+              data: volumes,
+            },
+          ],
+        };
       });
   }
 }

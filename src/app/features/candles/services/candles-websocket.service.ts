@@ -19,10 +19,10 @@ export class CandlesWebsocketService {
   handleWebsocketData({
     k: { t, o, h, l, c, v, T, B, n, q, V, Q },
   }: WebsocketCandle) {
-    this.candlesFacade.ohlc$.pipe(take(1)).subscribe((data) => {
+    this.candlesFacade.candles$.pipe(take(1)).subscribe((data) => {
       const candle: Candle = [t, o, h, l, c, v, T, q, n, V, Q, B];
       // If ohlc with same time already exists in candles array
-      const ohlcExists = data.some((item) => candle[0] === item[4]);
+      const ohlcExists = data.some((item) => candle[0] === item.openTime);
 
       if (ohlcExists) {
         this.candlesFacade.updateCandle(candle);
