@@ -3,7 +3,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
-import { MISC_SNACKBAR_DURATION } from 'src/app/shared/config';
+import {
+  MISC_SNACKBAR_DURATION,
+  WEBSOCKET_ENABLED_AT_START,
+} from 'src/app/shared/config';
 import { convertPairToCurrency } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { HomerService } from '../../services/home.service';
@@ -82,7 +85,10 @@ export class HomeComponent implements OnInit {
     this.homeService.updateTitle();
     this.homeService.onWebsocketStart();
     this.homeService.onWebsocketMessage();
-    this.homeService.startWebSocket();
+
+    if (WEBSOCKET_ENABLED_AT_START) {
+      this.homeService.startWebSocket();
+    }
 
     combineLatest([
       this.websocketService.status$,
