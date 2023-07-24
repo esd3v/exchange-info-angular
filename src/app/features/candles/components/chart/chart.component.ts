@@ -66,6 +66,7 @@ export class ChartComponent implements OnInit {
   );
 
   chartOptions: EChartsOption = {
+    animation: false,
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -76,12 +77,12 @@ export class ChartComponent implements OnInit {
       {
         top: 10,
         left: 55,
-        right: 0,
+        right: 8,
         bottom: 180,
       },
       {
         left: 55,
-        right: 0,
+        right: 8,
         height: 80,
         bottom: 60,
       },
@@ -90,7 +91,7 @@ export class ChartComponent implements OnInit {
       {
         type: 'inside',
         xAxisIndex: [0, 1],
-        start: 85,
+        start: 75,
         end: 100,
       },
       {

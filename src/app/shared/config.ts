@@ -4,7 +4,7 @@ export const APP_SITE_NAME = 'Binance Exchange Info Demo';
 export const APP_DEFAULT_BASE_CURRENCY = 'BTC';
 export const APP_DEFAULT_QUOTE_CURRENCY = 'USDT';
 
-export const WIDGET_CHART_DEFAULT_CANDLEINTERVAL: CandleInterval = '1s';
+export const WIDGET_CHART_DEFAULT_CANDLEINTERVAL: CandleInterval = '1m';
 export const WIDGET_TRADES_DEFAULT_LIMIT = 20;
 export const WIDGET_DEPTH_DEFAULT_LIMIT = 20;
 
