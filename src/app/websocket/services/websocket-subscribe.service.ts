@@ -140,13 +140,6 @@ export class WebsocketSubscribeService {
     return this.messageStatusById$(id + WEBSOCKET_UNSUBSCRIBE_BASE_ID);
   }
 
-  resubscribed$(id: number) {
-    return combineLatest([
-      this.unsubscribeStatus$(id).pipe(filter((status) => status === 'done')),
-      this.subscribeStatus$(id).pipe(filter((status) => status === 'done')),
-    ]);
-  }
-
   handleWebsocketMessage(message: string) {
     return ({
       onSubscribe,

@@ -9,13 +9,12 @@ import {
 import { formatPrice } from 'src/app/shared/helpers';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { CandlesWebsocketService } from '../../candles/services/candles-websocket.service';
+import { CandlesFacade } from '../../candles/services/candles-facade.service';
 import { ExchangeInfoFacade } from '../../exchange-info/services/exchange-info-facade.service';
 import { GlobalFacade } from '../../global/services/global-facade.service';
-import { OrderBookWebsocketService } from '../../order-book/services/order-book-websocket.service';
+import { OrderBookFacade } from '../../order-book/services/order-book-facade.service';
 import { TickerFacade } from '../../ticker/services/ticker-facade.service';
-import { TickerWebsocketService } from '../../ticker/services/ticker-websocket.service';
-import { TradesWebsocketService } from '../../trades/services/trades-websocket.service';
+import { TradesFacade } from '../../trades/services/trades-facade.service';
 import { HomeWebsocketService } from './home-websocket.service';
 
 @Injectable({ providedIn: 'root' })
@@ -27,11 +26,10 @@ export class HomerService {
     private titleService: Title,
     private websocketService: WebsocketService,
     private tickerFacade: TickerFacade,
-    private tickerWebsocketService: TickerWebsocketService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private orderBookWebsocketService: OrderBookWebsocketService,
-    private tradesWebsocketService: TradesWebsocketService,
-    private candlesWebsocketService: CandlesWebsocketService,
+    private orderBookFacade: OrderBookFacade,
+    private tradesFacade: TradesFacade,
+    private candlesFacade: CandlesFacade,
     private homeWebsocketService: HomeWebsocketService
   ) {}
 
@@ -108,15 +106,15 @@ export class HomerService {
         onData: (data) => {
           if ('e' in data) {
             if (data.e === 'kline') {
-              this.candlesWebsocketService.handleWebsocketData(data);
+              this.candlesFacade.handleWebsocketData(data);
             } else if (data.e === '24hrTicker') {
-              this.tickerWebsocketService.handleWebsocketData(data);
+              this.tickerFacade.handleWebsocketData(data);
             } else if (data.e === 'trade') {
-              this.tradesWebsocketService.handleWebsocketData(data);
+              this.tradesFacade.handleWebsocketData(data);
             }
           } else {
             if ('lastUpdateId' in data) {
-              this.orderBookWebsocketService.handleWebsocketData(data);
+              this.orderBookFacade.handleWebsocketData(data);
             }
           }
         },

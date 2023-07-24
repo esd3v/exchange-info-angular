@@ -7,8 +7,6 @@ export class WebsocketSubscriber<T> {
     this.id
   );
 
-  resubscribed$ = this.websocketSubscribeService.resubscribed$(this.id);
-
   constructor(
     private id: number,
     private createParams: (params: T) => string[],
