@@ -1,33 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, filter, first, map, switchMap } from 'rxjs';
-import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
-import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
-import {
-  formatDecimal,
-  formatPrice,
-  multiplyDecimal,
-} from 'src/app/shared/helpers';
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
-import { OrderBookFacade } from '../../services/order-book-facade.service';
-import { OrderBookRestService } from '../../services/order-book-rest.service';
-import { OrderBook } from '../../types/order-book';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { OrderBookColumn } from '../../types/order-book-column';
 import { OrderBookTableContainerService } from './order-book-table-container.service';
+import { first } from 'rxjs';
 
 @Component({
   selector: 'app-order-book-table-container',
   templateUrl: './order-book-table-container.component.html',
 })
 export class OrderBookTableContainerComponent implements OnInit {
-  #currency$ = this.globalFacade.currency$;
-
-  #asksData$ = this.#getData$('asks');
-
-  #bidsData$ = this.#getData$('bids');
-
   asksData: Row[] = [];
 
   bidsData: Row[] = [];
@@ -41,12 +25,8 @@ export class OrderBookTableContainerComponent implements OnInit {
   }
 
   constructor(
-    private orderBookRestService: OrderBookRestService,
-    private tickerFacade: TickerFacade,
-    private orderBookFacade: OrderBookFacade,
-    private globalFacade: GlobalFacade,
-    private tableStyleService: TableStyleService,
-    private orderBookTableContainerService: OrderBookTableContainerService
+    private orderBookTableContainerService: OrderBookTableContainerService,
+    private websocketService: WebsocketService
   ) {}
 
   #createColumns({ base, quote }: Currency): OrderBookColumn[] {
@@ -69,90 +49,28 @@ export class OrderBookTableContainerComponent implements OnInit {
     ];
   }
 
-  #getData$(type: 'asks' | 'bids') {
-    return combineLatest([
-      type === 'asks'
-        ? this.orderBookFacade.asks$.pipe(
-            filter((asks) => Boolean(asks.length))
-          )
-        : this.orderBookFacade.bids$.pipe(
-            filter((bids) => Boolean(bids.length))
-          ),
-      this.tickerFacade.tickSize$.pipe(filter(Boolean)),
-    ]).pipe(
-      map(([orderBook, tickSize]) =>
-        this.#createRows(orderBook, tickSize, type)
-      )
-    );
-  }
-
-  #createRows(
-    orderBook: OrderBook['asks'] | OrderBook['bids'],
-    tickSize: string,
-    type: 'asks' | 'bids'
-  ): Row[] {
-    return orderBook.map((item) => {
-      const [price, quantity] = item;
-      const formattedPrice = formatPrice(price, tickSize);
-      const formattedQuantity = formatDecimal(quantity); // TODO use stepSize from LOT_SIZE filter?
-      const total = multiplyDecimal(formattedPrice, formattedQuantity);
-
-      return {
-        cells: [
-          {
-            value: formattedPrice,
-            classNames:
-              type === 'bids'
-                ? this.tableStyleService.cellPositiveClass
-                : this.tableStyleService.cellNegativeClass,
-          },
-          {
-            value: formattedQuantity,
-          },
-          {
-            value: total,
-          },
-        ],
-        classNames: '',
-      };
-    });
-  }
-
   ngOnInit(): void {
-    // Initial data load
-    this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
-      this.orderBookFacade.loadData({ symbol });
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === null) {
+        // Load REST data only if we start the app with websockets disabled
+        this.orderBookTableContainerService.loadData();
+      }
     });
 
-    this.#currency$.subscribe((currency) => {
+    this.orderBookTableContainerService.onWebsocketOpen();
+    this.orderBookTableContainerService.onRestLoading();
+    this.orderBookTableContainerService.onRestAndDataComplete();
+
+    this.orderBookTableContainerService.currency$.subscribe((currency) => {
       this.columns = this.#createColumns(currency);
     });
 
-    this.#asksData$.subscribe((data) => {
+    this.orderBookTableContainerService.asksData$.subscribe((data) => {
       this.asksData = data;
     });
 
-    this.#bidsData$.subscribe((data) => {
+    this.orderBookTableContainerService.bidsData$.subscribe((data) => {
       this.bidsData = data;
     });
-
-    // REST loading
-    this.orderBookRestService.status$
-      .pipe(filter((status) => status === 'loading'))
-      .subscribe(() => {
-        this.orderBookTableContainerService.loadingController.setLoading(true);
-      });
-
-    // REST and data complete
-    this.orderBookRestService.status$
-      .pipe(
-        filter((status) => status === 'success'),
-        switchMap(() =>
-          combineLatest([this.#asksData$, this.#bidsData$]).pipe(first())
-        )
-      )
-      .subscribe(() => {
-        this.orderBookTableContainerService.loadingController.setLoading(false);
-      });
   }
 }

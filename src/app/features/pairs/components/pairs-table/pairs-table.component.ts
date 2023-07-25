@@ -13,30 +13,25 @@ import {
   switchMap,
 } from 'rxjs';
 import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
-import { CandlesFacade } from 'src/app/features/candles/services/candles-facade.service';
-import { CandlesWebsocketService } from 'src/app/features/candles/services/candles-websocket.service';
-import { ExchangeInfoFacade } from 'src/app/features/exchange-info/services/exchange-info-facade.service';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
-import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
-import { HomeWebsocketService } from 'src/app/features/home/services/home-websocket.service';
 import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
-import { OrderBookFacade } from 'src/app/features/order-book/services/order-book-facade.service';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
-import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
-import { TradesFacade } from 'src/app/features/trades/services/trades-facade.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
-import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
-import { HomeFacade } from 'src/app/features/home/services/home-facade.service';
+import { GlobalService } from 'src/app/features/global/services/global.service';
+import { HomeService } from 'src/app/features/home/components/home/home.service';
+import { TickerService } from 'src/app/features/ticker/services/ticker.service';
+import { CandlesService } from 'src/app/features/candles/services/candles.service';
+import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -52,9 +47,9 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   #pageRows$ = new BehaviorSubject<Row[]>([]);
 
   #data$ = combineLatest([
-    this.exchangeInfoFacade.tradingSymbols$,
-    this.tickerFacade.tickers$,
-    this.globalFacade.symbol$,
+    this.exchangeInfoService.tradingSymbols$,
+    this.tickerService.tickers$,
+    this.globalService.symbol$,
   ]).pipe(
     map(([tradingSymbols, tickers, globalSymbol]) =>
       this.createRows(tradingSymbols, tickers, globalSymbol)
@@ -76,21 +71,17 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   constructor(
     private router: Router,
     private location: Location,
-    private tickerFacade: TickerFacade,
+    private tickerService: TickerService,
     private tickerRestService: TickerRestService,
-    private exchangeInfoFacade: ExchangeInfoFacade,
+    private exchangeInfoService: ExchangeInfoService,
     private exchangeInfoRestService: ExchangeInfoRestService,
     private websocketService: WebsocketService,
     private tableStyleService: TableStyleService,
     private tickerWebsocketService: TickerWebsocketService,
-    private globalFacade: GlobalFacade,
-    private candlesFacade: CandlesFacade,
-    private homeFacade: HomeFacade,
-    private homeWebsocketService: HomeWebsocketService,
+    private globalService: GlobalService,
     private tradesTableService: TradesTableService,
     private chartService: ChartService,
-    private orderBookTableContainerService: OrderBookTableContainerService,
-    private candlesWebsocketService: CandlesWebsocketService
+    private orderBookTableContainerService: OrderBookTableContainerService
   ) {}
 
   // Exclude globalSymbol because we already subscribed to it
@@ -169,49 +160,15 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     return rows;
   }
 
-  private updateWidgetsData(symbol: string) {
+  private updateWidgetsData() {
     // Set loading manually because of ws delay
-    ////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////
     this.tradesTableService.loadingController.setLoading(true);
     this.chartService.loadingController.setLoading(true);
     this.orderBookTableContainerService.loadingController.setLoading(true);
 
-    // Unsubscribe
-    ////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////
-    this.homeWebsocketService.widgetsUpdateSubscriber.unsubscribeCurrent();
-    this.candlesWebsocketService.subscriber.unsubscribeCurrent();
-
-    // Subscribe and load data
-    ////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////
-    this.homeWebsocketService.widgetsUpdateSubscriber.unsubscribeStatus$
-      .pipe(
-        filter((status) => status === 'done'),
-        first()
-      )
-      .subscribe(() => {
-        this.homeFacade.subscribeThenLoadData({
-          orderBookParams: {
-            symbol,
-            limit: WIDGET_DEPTH_DEFAULT_LIMIT,
-          },
-          tradesParams: {
-            symbol,
-          },
-        });
-      });
-
-    this.candlesWebsocketService.subscriber.unsubscribeStatus$
-      .pipe(
-        filter((status) => status === 'done'),
-        first(),
-        switchMap(() => this.candlesFacade.interval$.pipe(first()))
-      )
-      .subscribe((interval) => {
-        this.candlesFacade.subscribeThenLoadData({ symbol, interval });
-      });
+    this.chartService.resubscribeLoadData();
+    this.orderBookTableContainerService.resubscribeLoadData();
+    this.tradesTableService.resubscribeLoadData();
   }
 
   changePair({ base, quote }: Currency) {
@@ -220,7 +177,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     const pair = `${base}_${quote}`;
     const symbol = `${base}${quote}`;
 
-    this.globalFacade.symbol$
+    this.globalService.symbol$
       .pipe(
         first(),
         // Dont't change if clicked twtice
@@ -229,8 +186,11 @@ export class PairsTableComponent implements OnDestroy, OnInit {
       .subscribe(() => {
         const url = this.router.createUrlTree([pair]).toString();
 
-        this.updateWidgetsData(symbol);
-        this.globalFacade.setCurrency({ base, quote });
+        // First change symbol
+        this.globalService.setCurrency({ base, quote });
+
+        // Then update order book and trades tables data based on new symbol
+        this.updateWidgetsData();
 
         // Don't navigate with refresh, just replace url
         this.location.go(url);
@@ -284,7 +244,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
         filter((status) => status === 'open'),
         switchMap(() =>
           combineLatest([
-            this.globalFacade.symbol$.pipe(first()),
+            this.globalService.symbol$.pipe(first()),
             this.#pageRows$.pipe(
               filter((rows) => Boolean(rows.length)),
               first()
@@ -307,7 +267,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
         debounceTime(this.#debounceTime),
         switchMap(() =>
           combineLatest([
-            this.globalFacade.symbol$.pipe(first()),
+            this.globalService.symbol$.pipe(first()),
             this.#pageRows$.pipe(first()),
             this.#prevPageRows$.pipe(first()),
           ])

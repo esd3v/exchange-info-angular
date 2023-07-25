@@ -8,7 +8,7 @@ import { WebsocketTicker } from '../types/websocket-ticker';
 @Injectable({
   providedIn: 'root',
 })
-export class TickerFacade {
+export class TickerService {
   lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
 
   tickSize$ = this.store$.select(tickerSelectors.tickSize);

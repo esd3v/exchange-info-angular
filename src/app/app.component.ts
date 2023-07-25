@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HomerService } from './features/home/services/home.service';
+import { HomeService } from './features/home/components/home/home.service';
 
 @Component({
   selector: 'app-root',
@@ -11,11 +11,11 @@ export class AppComponent implements OnInit {
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
     private route: ActivatedRoute,
-    private homeService: HomerService,
+    private homeService: HomeService,
     private router: Router
   ) {}
 
-  private onRouteEvent() {
+  #onRouteEvent() {
     this.router.events.subscribe((data: unknown) => {
       const { type } = data as Event;
 
@@ -30,6 +30,6 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.onRouteEvent();
+    this.#onRouteEvent();
   }
 }

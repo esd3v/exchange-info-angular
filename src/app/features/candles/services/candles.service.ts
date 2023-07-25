@@ -1,25 +1,30 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { take } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { candlesActions, candlesSelectors } from '../store';
 import { Candle } from '../types/candle';
-import { CandlesGetParams } from '../types/candles-get-params';
-import { CandlesWebsocketService } from './candles-websocket.service';
-import { filter, first, take } from 'rxjs';
 import { WebsocketCandle } from '../types/websocket-candle';
+import { WebsocketCandlesStreamParams } from '../types/websocket-candles-stream-params';
+import { CandleInterval } from '../types/candle-interval';
 
 @Injectable({
   providedIn: 'root',
 })
-export class CandlesFacade {
+export class CandlesService {
+  constructor(private store$: Store<AppState>) {}
+
   interval$ = this.store$.select(candlesSelectors.interval);
 
   candles$ = this.store$.select(candlesSelectors.candles);
 
-  constructor(
-    private store$: Store<AppState>,
-    private candlesWebsocketService: CandlesWebsocketService
-  ) {}
+  createStreamParams = ({ symbol, interval }: WebsocketCandlesStreamParams) => [
+    `${symbol.toLowerCase()}@kline_${interval}`,
+  ];
+
+  setInterval(interval: CandleInterval) {
+    this.store$.dispatch(candlesActions.setInterval({ interval }));
+  }
 
   loadData(params: Parameters<typeof candlesActions.load>[0]) {
     this.store$.dispatch(candlesActions.load(params));
@@ -47,21 +52,5 @@ export class CandlesFacade {
         this.addCandleAndRemoveFirst(candle);
       }
     });
-  }
-
-  subscribeThenLoadData({
-    symbol,
-    interval,
-  }: Parameters<typeof candlesActions.load>[0]) {
-    this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
-
-    this.candlesWebsocketService.subscriber.subscribeStatus$
-      .pipe(
-        filter((status) => status === 'done'),
-        first()
-      )
-      .subscribe(() => {
-        this.loadData({ symbol, interval });
-      });
   }
 }

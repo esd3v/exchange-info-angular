@@ -1,23 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { ECharts, EChartsOption } from 'echarts';
-import {
-  BehaviorSubject,
-  combineLatest,
-  filter,
-  first,
-  map,
-  switchMap,
-} from 'rxjs';
-import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
-import { CandlesFacade } from '../../services/candles-facade.service';
-import { CandlesRestService } from '../../services/candles-rest.service';
-import { CandlesWebsocketService } from '../../services/candles-websocket.service';
-import { ChartService } from './chart.service';
+import { BehaviorSubject, filter, first, switchMap } from 'rxjs';
+import { GlobalService } from 'src/app/features/global/services/global.service';
 import { CandleInterval } from '../../types/candle-interval';
+import { ChartService } from './chart.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { CandleEntity } from '../../store/candles.state';
-import { getFormattedDate } from 'src/app/shared/helpers';
+import { CandlesService } from '../../services/candles.service';
 
 @Component({
   selector: 'app-chart',
@@ -54,16 +43,11 @@ export class ChartComponent implements OnInit {
     '8h',
   ];
 
-  interval$ = this.candlesFacade.interval$;
+  interval$ = this.chartService.interval$;
 
   get loading() {
     return this.chartService.loadingController.loading;
   }
-
-  #data$ = this.candlesFacade.candles$.pipe(
-    filter((candles) => Boolean(candles.length)),
-    map((candles) => this.#createData(candles))
-  );
 
   chartOptions: EChartsOption = {
     animation: false,
@@ -187,11 +171,9 @@ export class ChartComponent implements OnInit {
   mergeOptions: EChartsOption = {};
 
   constructor(
-    private candlesFacade: CandlesFacade,
-    private globalFacade: GlobalFacade,
-    private candlesWebsocketService: CandlesWebsocketService,
+    private globalService: GlobalService,
     private chartService: ChartService,
-    private candlesRestService: CandlesRestService,
+    private candlesService: CandlesService,
     private websocketService: WebsocketService
   ) {}
 
@@ -199,84 +181,33 @@ export class ChartComponent implements OnInit {
     this.#chartInstance$.next($event);
   }
 
-  #createData(candles: CandleEntity[]) {
-    return candles.map(({ open, high, low, close, openTime, volume }) => ({
-      date: getFormattedDate({
-        msec: openTime,
-      }),
-      open,
-      close,
-      low,
-      high,
-      volume,
-    }));
-  }
-
   handleIntervalChange(event: MatSelectChange) {
     this.chartService.loadingController.setLoading(true);
 
     const interval = event.value as CandleInterval;
 
-    this.candlesWebsocketService.subscriber.unsubscribeCurrent();
+    this.candlesService.setInterval(interval);
 
-    this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
-      this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
-    });
-
-    combineLatest([
-      this.globalFacade.symbol$.pipe(first()),
-      this.candlesWebsocketService.subscriber.resubscribed$.pipe(first()),
-    ]).subscribe(([symbol]) => {
-      this.candlesFacade.loadData({ symbol, interval });
-    });
+    this.chartService.resubscribeLoadData();
   }
 
   ngOnInit(): void {
-    // Initial data load
-    combineLatest([
-      this.globalFacade.symbol$.pipe(first()),
-      this.candlesFacade.interval$.pipe(first()),
-    ]).subscribe(([symbol, interval]) => {
-      this.candlesFacade.loadData({ symbol, interval });
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === null) {
+        // Load REST data only if we start the app with websockets disabled
+        this.chartService.loadData();
+      }
     });
 
-    // On websocket start
-    this.websocketService.status$
-      .pipe(
-        filter((status) => status === 'open'),
-        switchMap(() =>
-          combineLatest([
-            this.globalFacade.symbol$.pipe(first()),
-            this.candlesFacade.interval$.pipe(first()),
-          ])
-        )
-      )
-      .subscribe(([symbol, interval]) => {
-        this.candlesWebsocketService.subscriber.subscribe({ symbol, interval });
-      });
-
-    // REST loading
-    this.candlesRestService.status$
-      .pipe(filter((status) => status === 'loading'))
-      .subscribe(() => {
-        this.chartService.loadingController.setLoading(true);
-      });
-
-    // REST and data complete
-    this.candlesRestService.status$
-      .pipe(
-        filter((status) => status === 'success'),
-        switchMap(() => this.#data$.pipe(first()))
-      )
-      .subscribe(() => {
-        this.chartService.loadingController.setLoading(false);
-      });
+    this.chartService.onWebsocketOpen();
+    this.chartService.onRestLoading();
+    this.chartService.onRestAndDataComplete();
 
     // Update data
     this.#chartInstance$
       .pipe(
         filter(Boolean),
-        switchMap(() => this.#data$)
+        switchMap(() => this.chartService.data$)
       )
       .subscribe((data) => {
         const dates = data.map((item) => item.date);

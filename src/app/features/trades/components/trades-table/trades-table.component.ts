@@ -1,34 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, filter, first, map, switchMap } from 'rxjs';
-import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
-import { TickerFacade } from 'src/app/features/ticker/services/ticker-facade.service';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
-import {
-  formatDecimal,
-  formatPrice,
-  getFormattedDate,
-  multiplyDecimal,
-} from 'src/app/shared/helpers';
 import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
-import { TradesFacade } from '../../services/trades-facade.service';
-import { TradesRestService } from '../../services/trades-rest.service';
-import { TradesEntity } from '../../store/trades.state';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TradesColumn } from '../../types/trades-column';
 import { TradesTableService } from './trades-table.service';
+import { first } from 'rxjs';
 
 @Component({
   selector: 'app-trades-table',
   templateUrl: './trades-table.component.html',
 })
 export class TradesTableComponent implements OnInit {
-  #currency$ = this.globalFacade.currency$;
-
-  #data$ = combineLatest([
-    this.tradesFacade.trades$.pipe(filter((trades) => Boolean(trades.length))),
-    this.tickerFacade.tickSize$.pipe(filter(Boolean)),
-  ]).pipe(map(([trades, tickSize]) => this.createRows(trades, tickSize)));
+  constructor(
+    private tradesTableService: TradesTableService,
+    private websocketService: WebsocketService
+  ) {}
 
   data: Row[] = [];
 
@@ -40,16 +27,7 @@ export class TradesTableComponent implements OnInit {
     return this.tradesTableService.loadingController.loading;
   }
 
-  constructor(
-    private tableStyleService: TableStyleService,
-    private tradesFacade: TradesFacade,
-    private tradesRestService: TradesRestService,
-    private tickerFacade: TickerFacade,
-    private globalFacade: GlobalFacade,
-    private tradesTableService: TradesTableService
-  ) {}
-
-  private createColumns({ base, quote }: Currency): TradesColumn[] {
+  #createColumns({ base, quote }: Currency): TradesColumn[] {
     return [
       {
         id: 'price',
@@ -74,68 +52,24 @@ export class TradesTableComponent implements OnInit {
     ];
   }
 
-  private createRows(trades: TradesEntity[], tickSize: string): Row[] {
-    return trades.map((item) => {
-      const { isBuyerMaker, price, qty, time } = item;
-      const formattedPrice = formatPrice(price, tickSize);
-      const formattedQty = formatDecimal(qty); // TODO use stepSize from for quantity formatting
-      const total = multiplyDecimal(formattedPrice, formattedQty);
-
-      return {
-        cells: [
-          {
-            value: formattedPrice,
-            classNames: isBuyerMaker
-              ? this.tableStyleService.cellNegativeClass
-              : this.tableStyleService.cellPositiveClass,
-          },
-          {
-            value: formattedQty,
-          },
-          {
-            value: total,
-          },
-          {
-            value: getFormattedDate({
-              msec: time,
-              format: 'HH:mm:ss:SSS',
-            }),
-          },
-        ],
-        classNames: '',
-      };
-    });
-  }
-
   ngOnInit(): void {
-    // Initial data load
-    this.globalFacade.symbol$.pipe(first()).subscribe((symbol) => {
-      this.tradesFacade.loadData({ symbol });
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === null) {
+        // Load REST data only if we start the app with websockets disabled
+        this.tradesTableService.loadData();
+      }
     });
 
-    this.#data$.subscribe((data) => {
+    this.tradesTableService.onWebsocketOpen();
+    this.tradesTableService.onRestLoading();
+    this.tradesTableService.onRestAndDataComplete();
+
+    this.tradesTableService.data$.subscribe((data) => {
       this.data = data;
     });
 
-    this.#currency$.subscribe((currency) => {
-      this.columns = this.createColumns(currency);
+    this.tradesTableService.currency$.subscribe((currency) => {
+      this.columns = this.#createColumns(currency);
     });
-
-    // REST loading
-    this.tradesRestService.status$
-      .pipe(filter((status) => status === 'loading'))
-      .subscribe(() => {
-        this.tradesTableService.loadingController.setLoading(true);
-      });
-
-    // REST and data complete
-    this.tradesRestService.status$
-      .pipe(
-        filter((status) => status === 'success'),
-        switchMap(() => this.#data$.pipe(first()))
-      )
-      .subscribe(() => {
-        this.tradesTableService.loadingController.setLoading(false);
-      });
   }
 }

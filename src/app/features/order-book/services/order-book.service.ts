@@ -6,18 +6,19 @@ import { orderBookActions, orderBookSelectors } from '../store';
 import { OrderBook } from '../types/order-book';
 import { OrderBookGetParams } from '../types/order-book-get-params';
 import { WebsocketOrderBook } from '../types/websocket-order-book';
-import { OrderBookWebsocketService } from './order-book-websocket.service';
+import { WebsocketOrderBookStreamParams } from '../types/websocket-order-book-stream-params';
 
 @Injectable({ providedIn: 'root' })
-export class OrderBookFacade {
+export class OrderBookService {
+  constructor(private store$: Store<AppState>) {}
+
   asks$ = this.store$.select(orderBookSelectors.asks);
 
   bids$ = this.store$.select(orderBookSelectors.bids);
 
-  constructor(
-    private store$: Store<AppState>,
-    private orderBookWebsocketService: OrderBookWebsocketService
-  ) {}
+  createStreamParams = ({ symbol, limit }: WebsocketOrderBookStreamParams) => [
+    `${symbol.toLowerCase()}@depth${limit}@1000ms`,
+  ];
 
   handleWebsocketData({ asks, bids, lastUpdateId }: WebsocketOrderBook) {
     this.setOrderBook({

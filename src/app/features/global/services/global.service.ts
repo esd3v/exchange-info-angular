@@ -6,7 +6,7 @@ import { AppState } from 'src/app/store';
 @Injectable({
   providedIn: 'root',
 })
-export class GlobalFacade {
+export class GlobalService {
   currency$ = this.store$.select(globalSelectors.currency);
 
   symbol$ = this.store$.select(globalSelectors.globalSymbol);

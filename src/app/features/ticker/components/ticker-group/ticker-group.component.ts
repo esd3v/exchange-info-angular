@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { combineLatest, filter, first, map, switchMap } from 'rxjs';
-import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
 import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
-import { TickerFacade } from '../../services/ticker-facade.service';
+import { TickerService } from '../../services/ticker.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TickerWebsocketService } from '../../services/ticker-websocket.service';
 import { TickerRestService } from '../../services/ticker-rest.service';
+import { GlobalService } from 'src/app/features/global/services/global.service';
 
 @Component({
   selector: 'app-ticker-group',
@@ -43,8 +43,8 @@ export class TickerGroupComponent implements OnInit {
   lastQuantityLoading: boolean = false;
 
   constructor(
-    private globalFacade: GlobalFacade,
-    private tickerFacade: TickerFacade,
+    private globalService: GlobalService,
+    private tickerService: TickerService,
     private tickerRestService: TickerRestService,
     private websocketService: WebsocketService,
     private tickerWebsocketService: TickerWebsocketService
@@ -59,7 +59,7 @@ export class TickerGroupComponent implements OnInit {
     this.websocketService.status$
       .pipe(
         filter((status) => status === 'open'),
-        switchMap(() => this.globalFacade.symbol$.pipe(first()))
+        switchMap(() => this.globalService.symbol$.pipe(first()))
       )
       .subscribe((symbol) => {
         this.tickerWebsocketService.singleSubscriber.subscribe({
@@ -72,7 +72,7 @@ export class TickerGroupComponent implements OnInit {
       this.tickerRestService.status$.pipe(
         filter((status) => status === 'loading')
       ),
-      this.tickerFacade.tickSize$.pipe(
+      this.tickerService.tickSize$.pipe(
         filter((tickSize) => !Boolean(tickSize))
       ),
     ]).subscribe(() => {
@@ -85,7 +85,7 @@ export class TickerGroupComponent implements OnInit {
       this.tickerRestService.status$.pipe(
         filter((status) => status === 'success')
       ),
-      this.tickerFacade.tickSize$.pipe(filter(Boolean)),
+      this.tickerService.tickSize$.pipe(filter(Boolean)),
     ]).subscribe(() => {
       this.lastPriceLoading = false;
       this.priceChangeLoading = false;
@@ -110,16 +110,16 @@ export class TickerGroupComponent implements OnInit {
       });
 
     // Pair
-    this.globalFacade.pair$.subscribe((pair) => {
+    this.globalService.pair$.subscribe((pair) => {
       this.pair = pair;
     });
 
     // Last price
     combineLatest([
-      this.tickerFacade.lastPrice$.pipe(filter(Boolean)),
+      this.tickerService.lastPrice$.pipe(filter(Boolean)),
       // don't initially check for boolean because prevLastPrice comes after ws update later
-      this.tickerFacade.prevLastPrice$,
-      this.tickerFacade.tickSize$.pipe(filter(Boolean)),
+      this.tickerService.prevLastPrice$,
+      this.tickerService.tickSize$.pipe(filter(Boolean)),
     ]).subscribe(([lastPrice, prevLastPrice, tickSize]) => {
       this.lastPrice = formatPrice(lastPrice, tickSize);
 
@@ -132,15 +132,15 @@ export class TickerGroupComponent implements OnInit {
 
     // Price change
     combineLatest([
-      this.tickerFacade.priceChange$.pipe(filter(Boolean)),
-      this.tickerFacade.tickSize$.pipe(filter(Boolean)),
+      this.tickerService.priceChange$.pipe(filter(Boolean)),
+      this.tickerService.tickSize$.pipe(filter(Boolean)),
     ]).subscribe(([priceChange, tickSize]) => {
       this.priceChange = formatPrice(priceChange, tickSize);
       this.priceChangePositive = this.isPositive(priceChange);
     });
 
     // Price change percent
-    this.tickerFacade.priceChangePercent$
+    this.tickerService.priceChangePercent$
       .pipe(filter(Boolean))
       .subscribe((priceChangePercent) => {
         this.priceChangePercent = formatPriceChangePercent(priceChangePercent);
@@ -148,14 +148,14 @@ export class TickerGroupComponent implements OnInit {
       });
 
     // Number of trades
-    this.tickerFacade.numberOfTrades$
+    this.tickerService.numberOfTrades$
       .pipe(filter(Boolean), map(Number))
       .subscribe((numberOfTrades) => {
         this.numberOfTrades = numberOfTrades;
       });
 
     // Last quantity
-    this.tickerFacade.lastQuantity$
+    this.tickerService.lastQuantity$
       .pipe(filter(Boolean), map(Number))
       .subscribe((lastQuantity) => {
         this.lastQuantity = lastQuantity;

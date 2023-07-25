@@ -7,7 +7,7 @@ import { exchangeInfoActions } from '../store';
 @Injectable({
   providedIn: 'root',
 })
-export class ExchangeInfoFacade {
+export class ExchangeInfoService {
   // TODO Move?
   tradingSymbols$ = this.store$.select(symbolsSelectors.tradingSymbols);
 

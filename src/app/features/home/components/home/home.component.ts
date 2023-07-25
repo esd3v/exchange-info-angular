@@ -1,15 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
-import { GlobalFacade } from 'src/app/features/global/services/global-facade.service';
+import { GlobalService } from 'src/app/features/global/services/global.service';
+import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import {
-  MISC_SNACKBAR_DURATION,
+  APP_SITE_NAME,
   WEBSOCKET_ENABLED_AT_START,
 } from 'src/app/shared/config';
-import { convertPairToCurrency } from 'src/app/shared/helpers';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { HomerService } from '../../services/home.service';
+import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
+import { HomeService } from './home.service';
+import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 
 @Component({
   selector: 'app-home',
@@ -22,10 +23,11 @@ export class HomeComponent implements OnInit {
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
     private route: ActivatedRoute,
-    private homeService: HomerService,
-    private snackBar: MatSnackBar,
-    private websocketService: WebsocketService,
-    private globalFacade: GlobalFacade
+    private homeService: HomeService,
+    private titleService: Title,
+    private globalService: GlobalService,
+    private exchangeInfoService: ExchangeInfoService,
+    private tickerService: TickerService
   ) {
     this.#onRouteEvent();
   }
@@ -56,8 +58,42 @@ export class HomeComponent implements OnInit {
 
     const { base, quote } = parsedRoutePair;
 
-    this.homeService.initHomeData();
-    this.globalFacade.setCurrency({ base, quote });
+    this.globalService.setCurrency({ base, quote });
+    this.exchangeInfoService.loadData();
+    this.tickerService.loadData();
+  }
+
+  #createTitle({
+    lastPrice,
+    pair,
+    tickSize,
+  }: {
+    lastPrice: string | undefined;
+    tickSize: string | undefined;
+    pair: string;
+  }) {
+    const delimiter = ' | ';
+
+    const pricePart =
+      lastPrice && tickSize
+        ? `${formatPrice(lastPrice, tickSize)}${delimiter}`
+        : '';
+
+    const globalPairPart = pair ? `${pair}${delimiter}` : '';
+
+    return `${pricePart}${globalPairPart}${APP_SITE_NAME}`;
+  }
+
+  #updateTitle() {
+    combineLatest([
+      this.globalService.pair$,
+      this.tickerService.lastPrice$,
+      this.tickerService.tickSize$,
+    ]).subscribe(([pair, lastPrice, tickSize]) => {
+      const title = this.#createTitle({ pair, lastPrice, tickSize });
+
+      this.titleService.setTitle(title);
+    });
   }
 
   #onRouteEvent() {
@@ -73,40 +109,14 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  #openSnackBar(msg: string) {
-    this.snackBar.open(msg, 'Close', {
-      duration: MISC_SNACKBAR_DURATION,
-      horizontalPosition: 'right',
-      verticalPosition: 'bottom',
-    });
-  }
-
   ngOnInit(): void {
-    this.homeService.updateTitle();
-    this.homeService.onWebsocketStart();
-    this.homeService.onWebsocketMessage();
-
     if (WEBSOCKET_ENABLED_AT_START) {
       this.homeService.startWebSocket();
     }
 
-    combineLatest([
-      this.websocketService.status$,
-      this.websocketService.reason$,
-    ]).subscribe(([status, reason]) => {
-      if (status === 'connecting') {
-        this.#openSnackBar('Connecting to WebSocket server...');
-      } else if (status === 'closed') {
-        if (reason === 'terminated') {
-          this.#openSnackBar('WebSocket connection terminated');
-        } else {
-          this.#openSnackBar('WebSocket connection closed');
-        }
-      } else if (status === 'closing') {
-        this.#openSnackBar('Closing WebSocket connection...');
-      } else if (status === 'open') {
-        this.#openSnackBar('WebSocket connection has been opened');
-      }
-    });
+    this.#updateTitle();
+
+    this.homeService.onWebsocketMessage();
+    this.homeService.onWebsocketStatus();
   }
 }

@@ -1,3 +1,4 @@
+import { filter, first } from 'rxjs';
 import { WebsocketSubscribeService } from './services/websocket-subscribe.service';
 
 export class WebsocketSubscriber<T> {
@@ -5,6 +6,16 @@ export class WebsocketSubscriber<T> {
 
   unsubscribeStatus$ = this.websocketSubscribeService.unsubscribeStatus$(
     this.id
+  );
+
+  subscribed$ = this.subscribeStatus$.pipe(
+    filter((status) => status === 'done'),
+    first()
+  );
+
+  unsubscribed$ = this.unsubscribeStatus$.pipe(
+    filter((status) => status === 'done'),
+    first()
   );
 
   constructor(

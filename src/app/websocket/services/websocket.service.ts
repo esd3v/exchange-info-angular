@@ -98,6 +98,8 @@ export class WebsocketService implements OnDestroy {
   send(msg: string | Record<string, any>): void {
     if (this.#status === 'open') {
       this.#socket?.send(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } else {
+      throw Error(`Can't send message. Webscoket isn't open`);
     }
   }
 
