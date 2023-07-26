@@ -16,7 +16,6 @@ import { ChartService } from 'src/app/features/candles/components/chart/chart.se
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
-import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
@@ -28,7 +27,7 @@ import { LoadingController } from 'src/app/shared/loading-controller';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
-import { Currency } from 'src/app/features/global/types/currency';
+import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -80,7 +79,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     private globalService: GlobalService,
     private tradesTableService: TradesTableService,
     private chartService: ChartService,
-    private orderBookTableContainerService: OrderBookTableContainerService
+    private orderBookTablesService: OrderBookTablesService
   ) {}
 
   // Exclude globalSymbol because we already subscribed to it
@@ -163,10 +162,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     // Set loading manually because of ws delay
     this.tradesTableService.loadingController.setLoading(true);
     this.chartService.loadingController.setLoading(true);
-    this.orderBookTableContainerService.loadingController.setLoading(true);
+    this.orderBookTablesService.loadingController.setLoading(true);
 
     this.chartService.resubscribeLoadData();
-    this.orderBookTableContainerService.resubscribeLoadData();
+    this.orderBookTablesService.resubscribeLoadData();
     this.tradesTableService.resubscribeLoadData();
   }
 

@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { TableModule } from 'src/app/shared/components/table/table.module';
 import { WindowModule } from 'src/app/shared/components/window/window.module';
-import { OrderBookTableContainerComponent } from './order-book-table-container.component';
+import { OrderBookTablesComponent } from './order-book-tables.component';
 
 @NgModule({
-  declarations: [OrderBookTableContainerComponent],
+  declarations: [OrderBookTablesComponent],
   imports: [WindowModule, TableModule],
-  exports: [OrderBookTableContainerComponent],
+  exports: [OrderBookTablesComponent],
 })
-export class OrderBookTableContainerModule {}
+export class OrderBookTablesModule {}

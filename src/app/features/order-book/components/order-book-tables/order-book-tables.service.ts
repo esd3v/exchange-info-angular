@@ -19,7 +19,7 @@ import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 
 @Injectable({ providedIn: 'root' })
-export class OrderBookTableContainerService {
+export class OrderBookTablesService {
   constructor(
     private orderBookRestService: OrderBookRestService,
     private tickerService: TickerService,
