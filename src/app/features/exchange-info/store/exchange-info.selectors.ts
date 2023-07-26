@@ -1,7 +1,6 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState } from 'src/app/store';
 
-const featureSelector =
-  createFeatureSelector<AppState['exchangeInfo']>('exchangeInfo');
+const state = createFeatureSelector<AppState['exchangeInfo']>('exchangeInfo');
 
-export const status = createSelector(featureSelector, (state) => state.status);
+export const status = createSelector(state, (state) => state.status);
