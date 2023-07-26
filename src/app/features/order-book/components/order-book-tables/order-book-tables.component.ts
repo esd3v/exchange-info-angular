@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { OrderBookColumn } from '../../types/order-book-column';
 import { first } from 'rxjs';
 import { Currency } from 'src/app/features/global/types/currency';
 import { OrderBookTablesService } from './order-book-tables.service';
+import { Row } from '../../../../shared/table/types/row';
 
 @Component({
   selector: 'app-order-book-tables',

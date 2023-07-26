@@ -21,13 +21,13 @@ import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
-import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
 import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
+import { TableStyleService } from 'src/app/shared/table/components/table/table-style.service';
+import { Row } from '../../../../shared/table/types/row';
 
 @Component({
   selector: 'app-pairs-table',

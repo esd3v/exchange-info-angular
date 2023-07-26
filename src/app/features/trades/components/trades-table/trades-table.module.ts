@@ -4,7 +4,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { TradesTableComponent } from './trades-table.component';
 import { WindowModule } from 'src/app/shared/components/window/window.module';
 import { SkeletonModule } from 'src/app/shared/components/skeleton/skeleton.module';
-import { TableModule } from 'src/app/shared/components/table/table.module';
+import { TableModule } from 'src/app/shared/table/components/table/table.module';
 
 @NgModule({
   declarations: [TradesTableComponent],

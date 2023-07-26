@@ -4,12 +4,12 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { Dictionary } from '@ngrx/entity';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
-import { TableModule } from 'src/app/shared/components/table/table.module';
-import { Row } from 'src/app/shared/types/row';
 import { AppStoreModule } from 'src/app/store/store.module';
 import { WebsocketModule } from 'src/app/websocket/websocket.module';
 import { PairsTableComponent } from './pairs-table.component';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
+import { TableStyleService } from '../../../../shared/table/components/table/table-style.service';
+import { TableModule } from '../../../../shared/table/components/table/table.module';
+import { Row } from '../../../../shared/table/types/row';
 
 describe('PairsComponent', () => {
   let component: PairsTableComponent;

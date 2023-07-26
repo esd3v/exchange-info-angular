@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { combineLatest, filter, first, map, switchMap } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { LoadingController } from 'src/app/shared/loading-controller';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { TradesRestService } from '../../services/trades-rest.service';
@@ -14,9 +13,10 @@ import {
   multiplyDecimal,
   getFormattedDate,
 } from 'src/app/shared/helpers';
-import { Row } from 'src/app/shared/types/row';
 import { TradesEntity } from '../../store/trades.state';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { TableStyleService } from 'src/app/shared/table/components/table/table-style.service';
+import { Row } from '../../../../shared/table/types/row';
 
 @Injectable({ providedIn: 'root' })
 export class TradesTableService {

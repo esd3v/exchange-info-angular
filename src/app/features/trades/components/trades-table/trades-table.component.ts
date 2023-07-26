@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TradesColumn } from '../../types/trades-column';
 import { TradesTableService } from './trades-table.service';
 import { first } from 'rxjs';
 import { Currency } from 'src/app/features/global/types/currency';
+import { Row } from '../../../../shared/table/types/row';
 
 @Component({
   selector: 'app-trades-table',

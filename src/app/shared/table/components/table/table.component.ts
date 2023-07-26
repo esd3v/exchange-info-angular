@@ -13,9 +13,9 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { filter, first, skip } from 'rxjs';
 import { NgChanges } from 'src/app/shared/types/misc';
-import { Row } from 'src/app/shared/types/row';
 import { Column } from '../../types/column';
 import { TableStyleService } from './table-style.service';
+import { Row } from '../../types/row';
 
 @Component({
   selector: 'app-table',

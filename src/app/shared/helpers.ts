@@ -2,9 +2,9 @@ import { Big } from 'big.js';
 import { MISC_TOFIXED_DIGITS } from './config';
 import * as dayjs from 'dayjs';
 import * as utc from 'dayjs/plugin/utc';
-import { Column } from './types/column';
-import { Row } from './types/row';
-import { SortOrder } from './types/sort-order';
+import { Column } from './table/types/column';
+import { Row } from './table/types/row';
+import { SortOrder } from './table/types/sort-order';
 import { Currency } from '../features/global/types/currency';
 
 dayjs.extend(utc);

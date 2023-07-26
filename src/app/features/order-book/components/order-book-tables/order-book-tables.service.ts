@@ -2,14 +2,12 @@ import { Injectable } from '@angular/core';
 import { combineLatest, filter, first, map, switchMap } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
-import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import {
   formatDecimal,
   formatPrice,
   multiplyDecimal,
 } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
-import { Row } from 'src/app/shared/types/row';
 import { OrderBookRestService } from '../../services/order-book-rest.service';
 import { OrderBookService } from '../../services/order-book.service';
 import { OrderBook } from '../../types/order-book';
@@ -17,6 +15,8 @@ import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { TableStyleService } from 'src/app/shared/table/components/table/table-style.service';
+import { Row } from '../../../../shared/table/types/row';
 
 @Injectable({ providedIn: 'root' })
 export class OrderBookTablesService {
