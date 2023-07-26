@@ -1,7 +1,5 @@
-import { EntityAdapter, createEntityAdapter, EntityState } from '@ngrx/entity';
-import { WIDGET_CHART_DEFAULT_CANDLEINTERVAL } from 'src/app/shared/config';
+import { EntityAdapter, EntityState, createEntityAdapter } from '@ngrx/entity';
 import { LoadingStatus } from 'src/app/store/state';
-import { CandleInterval } from '../types/candle-interval';
 
 export interface CandleEntity {
   openTime: number;
@@ -19,10 +17,8 @@ export const candlesAdapter: EntityAdapter<CandleEntity> =
 
 export interface CandlesState extends EntityState<CandleEntity> {
   status: LoadingStatus;
-  interval: CandleInterval;
 }
 
 export const initialState: CandlesState = candlesAdapter.getInitialState({
   status: 'init',
-  interval: WIDGET_CHART_DEFAULT_CANDLEINTERVAL,
 });

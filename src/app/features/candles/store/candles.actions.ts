@@ -1,12 +1,11 @@
 import { createAction, props } from '@ngrx/store';
-import { CandleInterval } from '../types/candle-interval';
 import { Candle } from '../types/candle';
+import { CandleInterval } from '../types/candle-interval';
 import { CandlesGetParams } from '../types/candles-get-params';
 
 const PREFIX = '[CANDLES]';
 const LOAD = `${PREFIX} LOAD`;
 const SUCCESS = `${PREFIX} SUCCESS`;
-const SET_INTERVAL = `${PREFIX} SET INTERVAL`;
 const ADD_CANDLE_AND_REMOVE_FIRST = `${PREFIX} ADD CANDLE AND REMOVE FIRST`;
 const UPDATE_CANDLE = `${PREFIX} UPDATE CANDLE`;
 
@@ -15,11 +14,6 @@ export const load = createAction(LOAD, props<CandlesGetParams>());
 export const loadSuccess = createAction(
   SUCCESS,
   props<{ candles: Candle[]; interval?: CandleInterval }>()
-);
-
-export const setInterval = createAction(
-  SET_INTERVAL,
-  props<{ interval: CandleInterval }>()
 );
 
 export const addCandleAndRemoveFirst = createAction(

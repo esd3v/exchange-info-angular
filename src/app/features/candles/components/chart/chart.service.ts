@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, filter, first, map, switchMap } from 'rxjs';
+import { filter, first, map, switchMap } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
+import { WIDGET_CHART_DEFAULT_CANDLEINTERVAL } from 'src/app/shared/config';
 import { getFormattedDate } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
@@ -9,6 +10,7 @@ import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
 import { CandlesRestService } from '../../services/candles-rest.service';
 import { CandlesService } from '../../services/candles.service';
 import { CandleEntity } from '../../store/candles.state';
+import { CandleInterval } from '../../types/candle-interval';
 
 @Injectable({ providedIn: 'root' })
 export class ChartService {
@@ -28,7 +30,7 @@ export class ChartService {
     this.websocketSubscribeService
   );
 
-  interval$ = this.candlesService.interval$;
+  interval: CandleInterval = WIDGET_CHART_DEFAULT_CANDLEINTERVAL;
 
   data$ = this.candlesService.candles$.pipe(
     filter((candles) => Boolean(candles.length)),
@@ -48,21 +50,19 @@ export class ChartService {
     }));
   }
 
+  setInterval(interval: CandleInterval) {
+    this.interval = interval;
+  }
+
   loadData() {
-    combineLatest([
-      this.globalService.symbol$.pipe(first()),
-      this.candlesService.interval$.pipe(first()),
-    ]).subscribe(([symbol, interval]) => {
-      this.candlesService.loadData({ symbol, interval });
+    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
+      this.candlesService.loadData({ symbol, interval: this.interval });
     });
   }
 
   subscribeToStream() {
-    combineLatest([
-      this.globalService.symbol$.pipe(first()),
-      this.candlesService.interval$.pipe(first()),
-    ]).subscribe(([symbol, interval]) => {
-      this.subscriber.subscribe({ symbol, interval });
+    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
+      this.subscriber.subscribe({ symbol, interval: this.interval });
     });
   }
 

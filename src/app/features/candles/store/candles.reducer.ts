@@ -21,20 +21,13 @@ export const candlesReducer = createReducer(
       status: 'loading',
     });
   }),
-  on(candlesActions.loadSuccess, (state, { candles, interval }) => {
+  on(candlesActions.loadSuccess, (state, { candles }) => {
     const mapped = candles.map(createCandleEntity) as CandleEntity[];
 
     return candlesAdapter.setAll(mapped, {
       ...state,
       status: 'success',
-      interval: interval || state.interval,
     });
-  }),
-  on(candlesActions.setInterval, (state, { interval }) => {
-    return {
-      ...state,
-      interval,
-    };
   }),
   on(candlesActions.addCandleAndRemoveFirst, (state, { candle }) => {
     const id = state.ids[0] as string;

@@ -2,11 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { ECharts, EChartsOption } from 'echarts';
 import { BehaviorSubject, filter, first, switchMap } from 'rxjs';
-import { GlobalService } from 'src/app/features/global/services/global.service';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandleInterval } from '../../types/candle-interval';
 import { ChartService } from './chart.service';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { CandlesService } from '../../services/candles.service';
 
 @Component({
   selector: 'app-chart',
@@ -43,7 +41,7 @@ export class ChartComponent implements OnInit {
     '8h',
   ];
 
-  interval$ = this.chartService.interval$;
+  interval: CandleInterval = this.chartService.interval;
 
   get loading() {
     return this.chartService.loadingController.loading;
@@ -171,9 +169,7 @@ export class ChartComponent implements OnInit {
   mergeOptions: EChartsOption = {};
 
   constructor(
-    private globalService: GlobalService,
     private chartService: ChartService,
-    private candlesService: CandlesService,
     private websocketService: WebsocketService
   ) {}
 
@@ -186,8 +182,7 @@ export class ChartComponent implements OnInit {
 
     const interval = event.value as CandleInterval;
 
-    this.candlesService.setInterval(interval);
-
+    this.chartService.setInterval(interval);
     this.chartService.resubscribeLoadData();
   }
 

@@ -13,7 +13,7 @@
       <mat-select
         panelOpen="false"
         [disabled]="loading"
-        [value]="interval$ | async"
+        [value]="interval"
         (selectionChange)="handleIntervalChange($event)"
         ><mat-option *ngFor="let interval of intervals" [value]="interval">
           {{ interval }}

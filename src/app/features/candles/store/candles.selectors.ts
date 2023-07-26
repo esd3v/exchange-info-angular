@@ -8,9 +8,4 @@ const allCandles = createSelector(featureSelector, selectAll);
 
 export const candles = createSelector(allCandles, (state) => state);
 
-export const interval = createSelector(
-  featureSelector,
-  (state) => state.interval
-);
-
 export const status = createSelector(featureSelector, (state) => state.status);

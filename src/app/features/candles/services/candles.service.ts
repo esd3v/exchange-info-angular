@@ -6,7 +6,6 @@ import { candlesActions, candlesSelectors } from '../store';
 import { Candle } from '../types/candle';
 import { WebsocketCandle } from '../types/websocket-candle';
 import { WebsocketCandlesStreamParams } from '../types/websocket-candles-stream-params';
-import { CandleInterval } from '../types/candle-interval';
 
 @Injectable({
   providedIn: 'root',
@@ -14,17 +13,11 @@ import { CandleInterval } from '../types/candle-interval';
 export class CandlesService {
   constructor(private store$: Store<AppState>) {}
 
-  interval$ = this.store$.select(candlesSelectors.interval);
-
   candles$ = this.store$.select(candlesSelectors.candles);
 
   createStreamParams = ({ symbol, interval }: WebsocketCandlesStreamParams) => [
     `${symbol.toLowerCase()}@kline_${interval}`,
   ];
-
-  setInterval(interval: CandleInterval) {
-    this.store$.dispatch(candlesActions.setInterval({ interval }));
-  }
 
   loadData(params: Parameters<typeof candlesActions.load>[0]) {
     this.store$.dispatch(candlesActions.load(params));
