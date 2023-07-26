@@ -170,25 +170,11 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     this.tradesTableService.resubscribeLoadData();
   }
 
-  changePair({ base, quote }: Currency) {
-    if (!base || !quote) return;
+  setLocation(pair: string) {
+    const url = this.router.createUrlTree([pair]).toString();
 
-    const pair = `${base}_${quote}`;
-    const symbol = `${base}${quote}`;
-
-    // Dont't change if clicked twtice
-    if (symbol !== this.#globalSymbol) {
-      const url = this.router.createUrlTree([pair]).toString();
-
-      // First change symbol
-      this.globalService.setCurrency({ base, quote });
-
-      // Then update order book and trades tables data based on new symbol
-      this.updateWidgetsData();
-
-      // Don't navigate with refresh, just replace url
-      this.location.go(url);
-    }
+    // Don't navigate with refresh, just replace url
+    this.location.go(url);
   }
 
   private getRowCurrency(row: Row) {
@@ -211,9 +197,22 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   handleRowClick(row: Row) {
-    const currency = this.getRowCurrency(row);
+    const { base, quote } = this.getRowCurrency(row);
 
-    this.changePair(currency);
+    if (!base || !quote) return;
+
+    const pair = `${base}_${quote}`;
+    const symbol = `${base}${quote}`;
+
+    // Prevent double click
+    if (symbol !== this.#globalSymbol) {
+      // First set currecy (global symbol)
+      this.globalService.setCurrency({ base, quote });
+      // Then update order book and trades tables data based on new symbol
+      this.updateWidgetsData();
+      // And change url
+      this.setLocation(pair);
+    }
   }
 
   handlePageDataInit(rows: Row[]) {
