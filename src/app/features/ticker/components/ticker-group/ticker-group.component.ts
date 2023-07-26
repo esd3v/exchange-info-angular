@@ -63,7 +63,7 @@ export class TickerGroupComponent implements OnInit {
     this.websocketService.status$
       .pipe(filter((status) => status === 'open'))
       .subscribe(() => {
-        this.tickerService.singleSubscriber.subscribe({
+        this.tickerService.singleSubscriber.subscribeToStream({
           symbols: [this.#globalSymbol],
         });
       });

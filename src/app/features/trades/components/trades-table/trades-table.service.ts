@@ -89,11 +89,11 @@ export class TradesTableService {
   }
 
   subscribeToStream() {
-    this.subscriber.subscribe({ symbol: this.#globalSymbol });
+    this.subscriber.subscribeToStream({ symbol: this.#globalSymbol });
   }
 
   resubscribeLoadData() {
-    this.subscriber.unsubscribeCurrent();
+    this.subscriber.unsubscribeFromCurrentStream();
 
     this.subscriber.unsubscribed$.subscribe(() => {
       this.subscribeLoadData();

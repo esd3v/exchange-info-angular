@@ -66,14 +66,14 @@ export class ChartService {
   }
 
   subscribeToStream() {
-    this.subscriber.subscribe({
+    this.subscriber.subscribeToStream({
       symbol: this.#globalSymbol,
       interval: this.interval,
     });
   }
 
   resubscribeLoadData() {
-    this.subscriber.unsubscribeCurrent();
+    this.subscriber.unsubscribeFromCurrentStream();
 
     this.subscriber.unsubscribed$.subscribe(() => {
       this.subscribeLoadData();

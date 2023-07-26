@@ -188,11 +188,11 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   subscribeToPageSymbols(symbols: string[]) {
-    this.tickerService.multipleSubscriber.subscribe({ symbols });
+    this.tickerService.multipleSubscriber.subscribeToStream({ symbols });
   }
 
   unsubscribeFromPageSymbols(symbols: string[]) {
-    this.tickerService.multipleSubscriber.unsubscribe({ symbols });
+    this.tickerService.multipleSubscriber.unsubscribeFromStream({ symbols });
   }
 
   handleRowClick(row: Row) {

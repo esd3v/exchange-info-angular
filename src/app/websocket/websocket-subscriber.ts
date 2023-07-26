@@ -20,25 +20,25 @@ export class WebsocketSubscriber<T> {
 
   constructor(
     private id: number,
-    private createParams: (params: T) => string[],
+    private createStreamParams: (params: T) => string[],
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  subscribe(params: T) {
+  subscribeToStream(params: T) {
     this.websocketSubscribeService.subscribe(
-      this.createParams(params),
+      this.createStreamParams(params),
       this.id
     );
   }
 
-  unsubscribe(params: T) {
+  unsubscribeFromStream(params: T) {
     this.websocketSubscribeService.unsubscribe(
-      this.createParams(params),
+      this.createStreamParams(params),
       this.id
     );
   }
 
-  unsubscribeCurrent() {
+  unsubscribeFromCurrentStream() {
     this.websocketSubscribeService.unsubscribeCurrent(this.id);
   }
 }

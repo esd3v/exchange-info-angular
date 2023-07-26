@@ -104,14 +104,14 @@ export class OrderBookTablesService {
   }
 
   subscribeToStream() {
-    this.subscriber.subscribe({
+    this.subscriber.subscribeToStream({
       symbol: this.#globalSymbol,
       limit: WIDGET_DEPTH_DEFAULT_LIMIT,
     });
   }
 
   resubscribeLoadData() {
-    this.subscriber.unsubscribeCurrent();
+    this.subscriber.unsubscribeFromCurrentStream();
 
     this.subscriber.unsubscribed$.subscribe(() => {
       this.subscribeLoadData();
