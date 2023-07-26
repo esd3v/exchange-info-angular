@@ -5,7 +5,7 @@ import * as utc from 'dayjs/plugin/utc';
 import { Column } from './types/column';
 import { Row } from './types/row';
 import { SortOrder } from './types/sort-order';
-import { Currency } from './types/currency';
+import { Currency } from '../features/global/types/currency';
 
 dayjs.extend(utc);
 

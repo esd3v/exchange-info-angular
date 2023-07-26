@@ -1,18 +1,24 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, filter, first, map, switchMap } from 'rxjs';
-import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
-import { TickerService } from '../../services/ticker.service';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { TickerWebsocketService } from '../../services/ticker-websocket.service';
-import { TickerRestService } from '../../services/ticker-rest.service';
+import { combineLatest, filter, map } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
+import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { TickerRestService } from '../../services/ticker-rest.service';
+import { TickerWebsocketService } from '../../services/ticker-websocket.service';
+import { TickerService } from '../../services/ticker.service';
 
 @Component({
   selector: 'app-ticker-group',
   templateUrl: './ticker-group.component.html',
 })
 export class TickerGroupComponent implements OnInit {
-  pair!: string;
+  get #globalSymbol() {
+    return this.globalService.symbol;
+  }
+
+  get globalPair() {
+    return this.globalService.pair;
+  }
 
   pairLoading: boolean = false;
 
@@ -57,13 +63,10 @@ export class TickerGroupComponent implements OnInit {
   ngOnInit(): void {
     // On websocket start
     this.websocketService.status$
-      .pipe(
-        filter((status) => status === 'open'),
-        switchMap(() => this.globalService.symbol$.pipe(first()))
-      )
-      .subscribe((symbol) => {
+      .pipe(filter((status) => status === 'open'))
+      .subscribe(() => {
         this.tickerWebsocketService.singleSubscriber.subscribe({
-          symbols: [symbol],
+          symbols: [this.#globalSymbol],
         });
       });
 
@@ -108,11 +111,6 @@ export class TickerGroupComponent implements OnInit {
         this.lastQuantityLoading = false;
         this.numberOfTradesLoading = false;
       });
-
-    // Pair
-    this.globalService.pair$.subscribe((pair) => {
-      this.pair = pair;
-    });
 
     // Last price
     combineLatest([

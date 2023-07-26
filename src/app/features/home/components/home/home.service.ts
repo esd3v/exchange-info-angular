@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { combineLatest, first } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { CandlesService } from 'src/app/features/candles/services/candles.service';
 import { OrderBookService } from 'src/app/features/order-book/services/order-book.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
@@ -26,9 +26,7 @@ export class HomeService {
   ) {}
 
   navigateToDefaultPair() {
-    this.globalService.pairUnderscore$.pipe(first()).subscribe((pair) => {
-      this.router.navigate([pair]);
-    });
+    this.router.navigate([this.globalService.pairUnderscore]);
   }
 
   #openSnackBar(msg: string) {

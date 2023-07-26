@@ -38,7 +38,13 @@ export class TradesTableService {
     this.websocketSubscribeService
   );
 
-  currency$ = this.globalService.currency$;
+  get currency() {
+    return this.globalService.currency;
+  }
+
+  get #globalSymbol() {
+    return this.globalService.symbol;
+  }
 
   data$ = combineLatest([
     this.tradesService.trades$.pipe(filter((trades) => Boolean(trades.length))),
@@ -79,15 +85,11 @@ export class TradesTableService {
   }
 
   loadData() {
-    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
-      this.tradesService.loadData({ symbol });
-    });
+    this.tradesService.loadData({ symbol: this.#globalSymbol });
   }
 
   subscribeToStream() {
-    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
-      this.subscriber.subscribe({ symbol });
-    });
+    this.subscriber.subscribe({ symbol: this.#globalSymbol });
   }
 
   resubscribeLoadData() {

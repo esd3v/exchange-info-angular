@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from 'src/app/store';
+import { GlobalService } from '../../global/services/global.service';
 import { tickerActions, tickerSelectors } from '../store';
 import { TickerEntity } from '../store/ticker.state';
 import { WebsocketTicker } from '../types/websocket-ticker';
@@ -9,25 +10,46 @@ import { WebsocketTicker } from '../types/websocket-ticker';
   providedIn: 'root',
 })
 export class TickerService {
-  lastPrice$ = this.store$.select(tickerSelectors.lastPrice);
+  constructor(
+    private store$: Store<AppState>,
+    private globalService: GlobalService
+  ) {}
 
-  tickSize$ = this.store$.select(tickerSelectors.tickSize);
+  get #globalSymbol() {
+    return this.globalService.symbol;
+  }
 
-  formattedLastPrice$ = this.store$.select(tickerSelectors.formattedLastPrice);
+  lastPrice$ = this.store$.select(
+    tickerSelectors.lastPrice(this.#globalSymbol)
+  );
 
-  prevLastPrice$ = this.store$.select(tickerSelectors.prevLastPrice);
+  tickSize$ = this.store$.select(tickerSelectors.tickSize(this.#globalSymbol));
+
+  formattedLastPrice$ = this.store$.select(
+    tickerSelectors.formattedLastPrice(this.#globalSymbol)
+  );
+
+  prevLastPrice$ = this.store$.select(
+    tickerSelectors.prevLastPrice(this.#globalSymbol)
+  );
 
   tickers$ = this.store$.select(tickerSelectors.tickers);
 
-  priceChange$ = this.store$.select(tickerSelectors.priceChange);
+  priceChange$ = this.store$.select(
+    tickerSelectors.priceChange(this.#globalSymbol)
+  );
 
-  priceChangePercent$ = this.store$.select(tickerSelectors.priceChangePercent);
+  priceChangePercent$ = this.store$.select(
+    tickerSelectors.priceChangePercent(this.#globalSymbol)
+  );
 
-  lastQuantity$ = this.store$.select(tickerSelectors.lastQuantity);
+  lastQuantity$ = this.store$.select(
+    tickerSelectors.lastQuantity(this.#globalSymbol)
+  );
 
-  numberOfTrades$ = this.store$.select(tickerSelectors.numberOfTrades);
-
-  constructor(private store$: Store<AppState>) {}
+  numberOfTrades$ = this.store$.select(
+    tickerSelectors.numberOfTrades(this.#globalSymbol)
+  );
 
   handleWebsocketData({ s, c, Q, P, p, n }: WebsocketTicker) {
     this.updateTicker({

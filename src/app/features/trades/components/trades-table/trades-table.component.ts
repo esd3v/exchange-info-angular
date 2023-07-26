@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TradesColumn } from '../../types/trades-column';
 import { TradesTableService } from './trades-table.service';
 import { first } from 'rxjs';
+import { Currency } from 'src/app/features/global/types/currency';
 
 @Component({
   selector: 'app-trades-table',
@@ -68,8 +68,6 @@ export class TradesTableComponent implements OnInit {
       this.data = data;
     });
 
-    this.tradesTableService.currency$.subscribe((currency) => {
-      this.columns = this.#createColumns(currency);
-    });
+    this.columns = this.#createColumns(this.tradesTableService.currency);
   }
 }

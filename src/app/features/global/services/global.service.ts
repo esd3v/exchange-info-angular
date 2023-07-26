@@ -1,26 +1,41 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { globalActions, globalSelectors } from 'src/app/features/global/store';
-import { AppState } from 'src/app/store';
+import {
+  APP_DEFAULT_BASE_CURRENCY,
+  APP_DEFAULT_QUOTE_CURRENCY,
+} from 'src/app/shared/config';
+import { Currency } from '../types/currency';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GlobalService {
-  currency$ = this.store$.select(globalSelectors.currency);
+  constructor() {}
 
-  symbol$ = this.store$.select(globalSelectors.globalSymbol);
+  currency: Currency = {
+    base: APP_DEFAULT_BASE_CURRENCY,
+    quote: APP_DEFAULT_QUOTE_CURRENCY,
+  };
 
-  pair$ = this.store$.select(globalSelectors.globalPair);
+  notification = {
+    type: 'info',
+    message: '',
+  };
 
-  pairUnderscore$ = this.store$.select(globalSelectors.globalPairUnderscore);
+  get pair() {
+    const { base, quote } = this.currency;
 
-  constructor(private store$: Store<AppState>) {}
+    return `${base}/${quote}`;
+  }
 
-  setCurrency({
-    base,
-    quote,
-  }: Parameters<typeof globalActions.setCurrency>[0]) {
-    this.store$.dispatch(globalActions.setCurrency({ base, quote }));
+  get symbol() {
+    return this.pair.replace('/', '');
+  }
+
+  get pairUnderscore() {
+    return this.pair.replace('/', '_');
+  }
+
+  setCurrency(currency: Currency) {
+    this.currency = currency;
   }
 }

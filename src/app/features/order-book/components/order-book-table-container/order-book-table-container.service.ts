@@ -30,9 +30,15 @@ export class OrderBookTableContainerService {
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  loadingController = new LoadingController(true);
+  get #globalSymbol() {
+    return this.globalService.symbol;
+  }
 
-  currency$ = this.globalService.currency$;
+  get currency() {
+    return this.globalService.currency;
+  }
+
+  loadingController = new LoadingController(true);
 
   asksData$ = this.#getData$('asks');
 
@@ -94,14 +100,13 @@ export class OrderBookTableContainerService {
   }
 
   loadData() {
-    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
-      this.orderBookService.loadData({ symbol });
-    });
+    this.orderBookService.loadData({ symbol: this.#globalSymbol });
   }
 
   subscribeToStream() {
-    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
-      this.subscriber.subscribe({ symbol, limit: WIDGET_DEPTH_DEFAULT_LIMIT });
+    this.subscriber.subscribe({
+      symbol: this.#globalSymbol,
+      limit: WIDGET_DEPTH_DEFAULT_LIMIT,
     });
   }
 

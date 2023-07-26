@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { OrderBookColumn } from '../../types/order-book-column';
 import { OrderBookTableContainerService } from './order-book-table-container.service';
 import { first } from 'rxjs';
+import { Currency } from 'src/app/features/global/types/currency';
 
 @Component({
   selector: 'app-order-book-table-container',
@@ -61,9 +61,9 @@ export class OrderBookTableContainerComponent implements OnInit {
     this.orderBookTableContainerService.onRestLoading();
     this.orderBookTableContainerService.onRestAndDataComplete();
 
-    this.orderBookTableContainerService.currency$.subscribe((currency) => {
-      this.columns = this.#createColumns(currency);
-    });
+    this.columns = this.#createColumns(
+      this.orderBookTableContainerService.currency
+    );
 
     this.orderBookTableContainerService.asksData$.subscribe((data) => {
       this.asksData = data;

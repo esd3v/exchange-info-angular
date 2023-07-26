@@ -14,30 +14,32 @@ import {
 } from 'rxjs';
 import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
+import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
+import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
+import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import { TableStyleService } from 'src/app/shared/components/table/table-style.service';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
-import { Currency } from 'src/app/shared/types/currency';
 import { Row } from 'src/app/shared/types/row';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { PairColumn } from '../../types/pair-column';
-import { GlobalService } from 'src/app/features/global/services/global.service';
-import { HomeService } from 'src/app/features/home/components/home/home.service';
-import { TickerService } from 'src/app/features/ticker/services/ticker.service';
-import { CandlesService } from 'src/app/features/candles/services/candles.service';
-import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
+import { Currency } from 'src/app/features/global/types/currency';
 
 @Component({
   selector: 'app-pairs-table',
   templateUrl: './pairs-table.component.html',
 })
 export class PairsTableComponent implements OnDestroy, OnInit {
+  get #globalSymbol() {
+    return this.globalService.symbol;
+  }
+
   #debounceTime = 1000;
 
   #pageClicks$ = new Subject<void>();
@@ -49,10 +51,9 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   #data$ = combineLatest([
     this.exchangeInfoService.tradingSymbols$,
     this.tickerService.tickers$,
-    this.globalService.symbol$,
   ]).pipe(
-    map(([tradingSymbols, tickers, globalSymbol]) =>
-      this.createRows(tradingSymbols, tickers, globalSymbol)
+    map(([tradingSymbols, tickers]) =>
+      this.createRows(tradingSymbols, tickers, this.#globalSymbol)
     )
   );
 
@@ -177,24 +178,19 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     const pair = `${base}_${quote}`;
     const symbol = `${base}${quote}`;
 
-    this.globalService.symbol$
-      .pipe(
-        first(),
-        // Dont't change if clicked twtice
-        filter((globalSymbol) => globalSymbol !== symbol)
-      )
-      .subscribe(() => {
-        const url = this.router.createUrlTree([pair]).toString();
+    // Dont't change if clicked twtice
+    if (symbol !== this.#globalSymbol) {
+      const url = this.router.createUrlTree([pair]).toString();
 
-        // First change symbol
-        this.globalService.setCurrency({ base, quote });
+      // First change symbol
+      this.globalService.setCurrency({ base, quote });
 
-        // Then update order book and trades tables data based on new symbol
-        this.updateWidgetsData();
+      // Then update order book and trades tables data based on new symbol
+      this.updateWidgetsData();
 
-        // Don't navigate with refresh, just replace url
-        this.location.go(url);
-      });
+      // Don't navigate with refresh, just replace url
+      this.location.go(url);
+    }
   }
 
   private getRowCurrency(row: Row) {
@@ -243,19 +239,16 @@ export class PairsTableComponent implements OnDestroy, OnInit {
       .pipe(
         filter((status) => status === 'open'),
         switchMap(() =>
-          combineLatest([
-            this.globalService.symbol$.pipe(first()),
-            this.#pageRows$.pipe(
-              filter((rows) => Boolean(rows.length)),
-              first()
-            ),
-          ])
+          this.#pageRows$.pipe(
+            filter((rows) => Boolean(rows.length)),
+            first()
+          )
         )
       )
-      .subscribe(([globalSymbol, pageRows]) => {
+      .subscribe((pageRows) => {
         const symbols = this.filterSymbol(
           this.createSymbolsFromRows(pageRows),
-          globalSymbol
+          this.#globalSymbol
         );
 
         this.subscribeToPageSymbols(symbols);
@@ -267,21 +260,20 @@ export class PairsTableComponent implements OnDestroy, OnInit {
         debounceTime(this.#debounceTime),
         switchMap(() =>
           combineLatest([
-            this.globalService.symbol$.pipe(first()),
             this.#pageRows$.pipe(first()),
             this.#prevPageRows$.pipe(first()),
           ])
         )
       )
-      .subscribe(([globalSymbol, pageRows, prevPageRows]) => {
+      .subscribe(([pageRows, prevPageRows]) => {
         const prevSymbols = this.filterSymbol(
           this.createSymbolsFromRows(prevPageRows),
-          globalSymbol
+          this.#globalSymbol
         );
 
         const symbols = this.filterSymbol(
           this.createSymbolsFromRows(pageRows),
-          globalSymbol
+          this.#globalSymbol
         );
 
         this.unsubscribeFromPageSymbols(prevSymbols);

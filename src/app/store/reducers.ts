@@ -7,10 +7,8 @@ import { exchangeInfoReducer } from '../features/exchange-info/store/exchange-in
 import { candlesReducer } from '../features/candles/store/candles.reducer';
 import { orderBookReducer } from '../features/order-book/store/order-book.reducer';
 import { tradesReducer } from '../features/trades/store/trades.reducer';
-import { globalReducer } from '../features/global/store/global.reducer';
 
 export const reducers: ActionReducerMap<AppState> = {
-  global: globalReducer,
   ticker: tickerReducer,
   symbols: symbolsReducer,
   exchangeInfo: exchangeInfoReducer,

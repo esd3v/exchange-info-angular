@@ -22,6 +22,10 @@ export class ChartService {
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
+  get #globalSymbol() {
+    return this.globalService.symbol;
+  }
+
   loadingController = new LoadingController(true);
 
   subscriber = new WebsocketSubscriber(
@@ -55,14 +59,16 @@ export class ChartService {
   }
 
   loadData() {
-    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
-      this.candlesService.loadData({ symbol, interval: this.interval });
+    this.candlesService.loadData({
+      symbol: this.#globalSymbol,
+      interval: this.interval,
     });
   }
 
   subscribeToStream() {
-    this.globalService.symbol$.pipe(first()).subscribe((symbol) => {
-      this.subscriber.subscribe({ symbol, interval: this.interval });
+    this.subscriber.subscribe({
+      symbol: this.#globalSymbol,
+      interval: this.interval,
     });
   }
 
