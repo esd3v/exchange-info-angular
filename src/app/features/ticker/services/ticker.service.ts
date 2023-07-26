@@ -5,6 +5,9 @@ import { GlobalService } from '../../global/services/global.service';
 import { tickerActions, tickerSelectors } from '../store';
 import { TickerEntity } from '../store/ticker.state';
 import { WebsocketTicker } from '../types/websocket-ticker';
+import { WebsocketTickerStreamParams } from '../types/websocket-ticker-stream-params';
+import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
+import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,42 +15,60 @@ import { WebsocketTicker } from '../types/websocket-ticker';
 export class TickerService {
   constructor(
     private store$: Store<AppState>,
-    private globalService: GlobalService
+    private globalService: GlobalService,
+    private websocketSubscribeService: WebsocketSubscribeService
   ) {}
+
+  createStreamParams = ({ symbols }: WebsocketTickerStreamParams) =>
+    symbols.map((item) => `${item.toLowerCase()}@ticker`);
+
+  singleSubscriber = new WebsocketSubscriber(
+    2,
+    this.createStreamParams,
+    this.websocketSubscribeService
+  );
+
+  multipleSubscriber = new WebsocketSubscriber(
+    5,
+    this.createStreamParams,
+    this.websocketSubscribeService
+  );
 
   get #globalSymbol() {
     return this.globalService.symbol;
   }
 
-  lastPrice$ = this.store$.select(
+  tickers$ = this.store$.select(tickerSelectors.tickers);
+
+  globalTickerLastPrice$ = this.store$.select(
     tickerSelectors.lastPrice(this.#globalSymbol)
   );
 
-  tickSize$ = this.store$.select(tickerSelectors.tickSize(this.#globalSymbol));
+  globalTickerTickSize$ = this.store$.select(
+    tickerSelectors.tickSize(this.#globalSymbol)
+  );
 
-  formattedLastPrice$ = this.store$.select(
+  globalTickerFormattedLastPrice$ = this.store$.select(
     tickerSelectors.formattedLastPrice(this.#globalSymbol)
   );
 
-  prevLastPrice$ = this.store$.select(
+  globalTickerPrevLastPrice$ = this.store$.select(
     tickerSelectors.prevLastPrice(this.#globalSymbol)
   );
 
-  tickers$ = this.store$.select(tickerSelectors.tickers);
-
-  priceChange$ = this.store$.select(
+  globalTickerPriceChange$ = this.store$.select(
     tickerSelectors.priceChange(this.#globalSymbol)
   );
 
-  priceChangePercent$ = this.store$.select(
+  globalTickerPriceChangePercent$ = this.store$.select(
     tickerSelectors.priceChangePercent(this.#globalSymbol)
   );
 
-  lastQuantity$ = this.store$.select(
+  globalTickerLastQuantity$ = this.store$.select(
     tickerSelectors.lastQuantity(this.#globalSymbol)
   );
 
-  numberOfTrades$ = this.store$.select(
+  globalTickerNumberOfTrades$ = this.store$.select(
     tickerSelectors.numberOfTrades(this.#globalSymbol)
   );
 

@@ -19,7 +19,6 @@ import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookTableContainerService } from 'src/app/features/order-book/components/order-book-table-container/order-book-table-container.service';
 import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
-import { TickerWebsocketService } from 'src/app/features/ticker/services/ticker-websocket.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
@@ -78,7 +77,6 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     private exchangeInfoRestService: ExchangeInfoRestService,
     private websocketService: WebsocketService,
     private tableStyleService: TableStyleService,
-    private tickerWebsocketService: TickerWebsocketService,
     private globalService: GlobalService,
     private tradesTableService: TradesTableService,
     private chartService: ChartService,
@@ -205,11 +203,11 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   subscribeToPageSymbols(symbols: string[]) {
-    this.tickerWebsocketService.multipleSubscriber.subscribe({ symbols });
+    this.tickerService.multipleSubscriber.subscribe({ symbols });
   }
 
   unsubscribeFromPageSymbols(symbols: string[]) {
-    this.tickerWebsocketService.multipleSubscriber.unsubscribe({ symbols });
+    this.tickerService.multipleSubscriber.unsubscribe({ symbols });
   }
 
   handleRowClick(row: Row) {

@@ -48,7 +48,7 @@ export class TradesTableService {
 
   data$ = combineLatest([
     this.tradesService.trades$.pipe(filter((trades) => Boolean(trades.length))),
-    this.tickerService.tickSize$.pipe(filter(Boolean)),
+    this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
   ]).pipe(map(([trades, tickSize]) => this.#createRows(trades, tickSize)));
 
   #createRows(trades: TradesEntity[], tickSize: string): Row[] {

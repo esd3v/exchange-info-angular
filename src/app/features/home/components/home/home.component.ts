@@ -86,8 +86,8 @@ export class HomeComponent implements OnInit {
 
   #updateTitle() {
     combineLatest([
-      this.tickerService.lastPrice$,
-      this.tickerService.tickSize$,
+      this.tickerService.globalTickerLastPrice$,
+      this.tickerService.globalTickerTickSize$,
     ]).subscribe(([lastPrice, tickSize]) => {
       const title = this.#createTitle({
         pair: this.globalService.pair,

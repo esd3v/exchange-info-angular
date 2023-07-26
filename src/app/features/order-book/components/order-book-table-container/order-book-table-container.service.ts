@@ -59,7 +59,7 @@ export class OrderBookTableContainerService {
         : this.orderBookService.bids$.pipe(
             filter((bids) => Boolean(bids.length))
           ),
-      this.tickerService.tickSize$.pipe(filter(Boolean)),
+      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
     ]).pipe(
       map(([orderBook, tickSize]) =>
         this.#createRows(orderBook, tickSize, type)

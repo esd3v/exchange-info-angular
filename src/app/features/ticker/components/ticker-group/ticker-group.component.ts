@@ -4,7 +4,6 @@ import { GlobalService } from 'src/app/features/global/services/global.service';
 import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TickerRestService } from '../../services/ticker-rest.service';
-import { TickerWebsocketService } from '../../services/ticker-websocket.service';
 import { TickerService } from '../../services/ticker.service';
 
 @Component({
@@ -52,8 +51,7 @@ export class TickerGroupComponent implements OnInit {
     private globalService: GlobalService,
     private tickerService: TickerService,
     private tickerRestService: TickerRestService,
-    private websocketService: WebsocketService,
-    private tickerWebsocketService: TickerWebsocketService
+    private websocketService: WebsocketService
   ) {}
 
   private isPositive(value: string | number): boolean {
@@ -65,7 +63,7 @@ export class TickerGroupComponent implements OnInit {
     this.websocketService.status$
       .pipe(filter((status) => status === 'open'))
       .subscribe(() => {
-        this.tickerWebsocketService.singleSubscriber.subscribe({
+        this.tickerService.singleSubscriber.subscribe({
           symbols: [this.#globalSymbol],
         });
       });
@@ -75,7 +73,7 @@ export class TickerGroupComponent implements OnInit {
       this.tickerRestService.status$.pipe(
         filter((status) => status === 'loading')
       ),
-      this.tickerService.tickSize$.pipe(
+      this.tickerService.globalTickerTickSize$.pipe(
         filter((tickSize) => !Boolean(tickSize))
       ),
     ]).subscribe(() => {
@@ -88,7 +86,7 @@ export class TickerGroupComponent implements OnInit {
       this.tickerRestService.status$.pipe(
         filter((status) => status === 'success')
       ),
-      this.tickerService.tickSize$.pipe(filter(Boolean)),
+      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
     ]).subscribe(() => {
       this.lastPriceLoading = false;
       this.priceChangeLoading = false;
@@ -114,10 +112,10 @@ export class TickerGroupComponent implements OnInit {
 
     // Last price
     combineLatest([
-      this.tickerService.lastPrice$.pipe(filter(Boolean)),
+      this.tickerService.globalTickerLastPrice$.pipe(filter(Boolean)),
       // don't initially check for boolean because prevLastPrice comes after ws update later
-      this.tickerService.prevLastPrice$,
-      this.tickerService.tickSize$.pipe(filter(Boolean)),
+      this.tickerService.globalTickerPrevLastPrice$,
+      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
     ]).subscribe(([lastPrice, prevLastPrice, tickSize]) => {
       this.lastPrice = formatPrice(lastPrice, tickSize);
 
@@ -130,15 +128,15 @@ export class TickerGroupComponent implements OnInit {
 
     // Price change
     combineLatest([
-      this.tickerService.priceChange$.pipe(filter(Boolean)),
-      this.tickerService.tickSize$.pipe(filter(Boolean)),
+      this.tickerService.globalTickerPriceChange$.pipe(filter(Boolean)),
+      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
     ]).subscribe(([priceChange, tickSize]) => {
       this.priceChange = formatPrice(priceChange, tickSize);
       this.priceChangePositive = this.isPositive(priceChange);
     });
 
     // Price change percent
-    this.tickerService.priceChangePercent$
+    this.tickerService.globalTickerPriceChangePercent$
       .pipe(filter(Boolean))
       .subscribe((priceChangePercent) => {
         this.priceChangePercent = formatPriceChangePercent(priceChangePercent);
@@ -146,14 +144,14 @@ export class TickerGroupComponent implements OnInit {
       });
 
     // Number of trades
-    this.tickerService.numberOfTrades$
+    this.tickerService.globalTickerNumberOfTrades$
       .pipe(filter(Boolean), map(Number))
       .subscribe((numberOfTrades) => {
         this.numberOfTrades = numberOfTrades;
       });
 
     // Last quantity
-    this.tickerService.lastQuantity$
+    this.tickerService.globalTickerLastQuantity$
       .pipe(filter(Boolean), map(Number))
       .subscribe((lastQuantity) => {
         this.lastQuantity = lastQuantity;
