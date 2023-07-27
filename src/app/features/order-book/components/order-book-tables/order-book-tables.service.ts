@@ -82,10 +82,11 @@ export class OrderBookTablesService {
         cells: [
           {
             value: formattedPrice,
-            classNames:
+            classNames: [
               type === 'bids'
                 ? this.tableStyleService.cellPositiveClass
                 : this.tableStyleService.cellNegativeClass,
+            ],
           },
           {
             value: formattedQuantity,
@@ -94,7 +95,6 @@ export class OrderBookTablesService {
             value: total,
           },
         ],
-        classNames: '',
       };
     });
   }

@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Dictionary } from '@ngrx/entity';
 import { Subject, combineLatest, debounceTime, filter, first, map } from 'rxjs';
@@ -19,10 +19,13 @@ import { TableStyleService } from 'src/app/shared/table/components/table/table-s
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Row } from '../../../../shared/table/types/row';
 import { PairColumn } from '../../types/pair-column';
+import { PairsTableStyleService } from './pairs-table-style.service';
 
 @Component({
   selector: 'app-pairs-table',
+  styleUrls: ['./pairs-table.component.scss'],
   templateUrl: './pairs-table.component.html',
+  encapsulation: ViewEncapsulation.None,
 })
 export class PairsTableComponent implements OnDestroy, OnInit {
   get #globalSymbol() {
@@ -52,6 +55,8 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     { id: 'priceChangePercent', numeric: true, label: '24h Change' },
   ];
 
+  styles = this.pairsTableStyleService;
+
   loadingController = new LoadingController(true);
 
   constructor(
@@ -66,7 +71,8 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     private globalService: GlobalService,
     private tradesTableService: TradesTableService,
     private chartService: ChartService,
-    private orderBookTablesService: OrderBookTablesService
+    private orderBookTablesService: OrderBookTablesService,
+    private pairsTableStyleService: PairsTableStyleService
   ) {}
 
   #createPageSymbols(rows: Row[]) {
@@ -118,28 +124,33 @@ export class PairsTableComponent implements OnDestroy, OnInit {
             { value: pair },
             {
               value: formattedPrice,
-              classNames: prevLastPrice
-                ? lastPrice > prevLastPrice
-                  ? this.tableStyleService.cellPositiveClass
-                  : lastPrice < prevLastPrice
-                  ? this.tableStyleService.cellNegativeClass
-                  : ''
-                : '',
+              classNames: [
+                prevLastPrice
+                  ? lastPrice > prevLastPrice
+                    ? this.tableStyleService.cellPositiveClass
+                    : lastPrice < prevLastPrice
+                    ? this.tableStyleService.cellNegativeClass
+                    : ''
+                  : '',
+              ],
             },
             {
               value: priceChangePercentFormatted,
-              classNames:
+              classNames: [
                 Number(priceChangePercent) > 0
                   ? this.tableStyleService.cellPositiveClass
                   : Number(priceChangePercent) < 0
                   ? this.tableStyleService.cellNegativeClass
                   : '',
+              ],
             },
           ],
-          classNames:
+          classNames: [
+            this.pairsTableStyleService.rowClass,
             symbol === globalSymbol
               ? this.tableStyleService.rowHighlightClass
               : '',
+          ],
         });
       }
     }

@@ -26,6 +26,8 @@ import { Row } from '../../types/row';
 export class TableComponent implements OnChanges, OnInit, AfterViewInit {
   @ViewChild(MatPaginator, { static: false }) private paginator!: MatPaginator;
 
+  @Input() className: string = '';
+
   @Input() data: Row[] = [];
 
   @Input() columns: Column[] = [];

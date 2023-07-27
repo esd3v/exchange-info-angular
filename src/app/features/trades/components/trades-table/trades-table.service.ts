@@ -62,9 +62,11 @@ export class TradesTableService {
         cells: [
           {
             value: formattedPrice,
-            classNames: isBuyerMaker
-              ? this.tableStyleService.cellNegativeClass
-              : this.tableStyleService.cellPositiveClass,
+            classNames: [
+              isBuyerMaker
+                ? this.tableStyleService.cellNegativeClass
+                : this.tableStyleService.cellPositiveClass,
+            ],
           },
           {
             value: formattedQty,
@@ -79,7 +81,6 @@ export class TradesTableService {
             }),
           },
         ],
-        classNames: '',
       };
     });
   }

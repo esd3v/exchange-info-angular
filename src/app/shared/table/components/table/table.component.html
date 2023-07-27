@@ -1,6 +1,6 @@
 <table
   mat-table
-  [ngClass]="styles.tableClass"
+  [ngClass]="[styles.tableClass, className]"
   [trackBy]="trackRow"
   [dataSource]="loading ? placeholderRows : dataSource"
 >
@@ -20,11 +20,11 @@
     </th>
     <td
       *matCellDef="let row"
-      [ngClass]="[
-        styles.cellClass,
-        column.numeric ? styles.cellRightClass : '',
-        row.cells[columnIndex]?.classNames || ''
-      ]"
+      [ngClass]="
+        [styles.cellClass, column.numeric ? styles.cellRightClass : '']
+          .concat(row.cells[columnIndex]?.classNames || [])
+          .join(' ')
+      "
       mat-cell
     >
       <app-skeleton *ngIf="loading" width="80%"></app-skeleton>
@@ -37,7 +37,7 @@
   <tr
     mat-row
     *matRowDef="let row; columns: displayedColumns"
-    [ngClass]="[styles.rowClass, row.classNames || '']"
+    [ngClass]="[styles.rowClass].concat(row.classNames || []).join(' ')"
     (click)="handleRowClick(row)"
   ></tr>
 </table>
