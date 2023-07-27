@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   Subject,
-  combineLatest,
   concatMap,
   delay,
   filter,
@@ -18,11 +17,8 @@ import { WebsocketMessageIncoming } from '../types/websocket-message-incoming';
 import { WebsocketMessageStatus } from '../types/websocket-message-status';
 import { WebsocketMessageParams } from '../types/websocket-message-stream-params';
 import { WebsocketService } from './websocket.service';
-import { WebsocketModule } from '../websocket.module';
 
-@Injectable({
-  providedIn: WebsocketModule,
-})
+@Injectable()
 export class WebsocketSubscribeService {
   #messages: WebsocketMessage[] = [];
 
