@@ -21,31 +21,31 @@ export class RootPage {
     cy.get(`@${alias}.all`).its('length').should('eq', length);
   }
 
-  public visit(params?: string) {
+  visit(params?: string) {
     cy.visit(`/${params || ''}`);
   }
 
-  public clickPair(pairSlash: string) {
+  clickPair(pairSlash: string) {
     cy.get('.pairs__row').contains(pairSlash).click();
   }
 
-  public urlContains(value: string) {
+  urlContains(value: string) {
     cy.url().should('contain', value);
   }
 
-  public interceptExchangeInfo() {
+  interceptExchangeInfo() {
     const url = new URL(`${API_HTTP_BASEURL}/exchangeInfo`);
 
     this.intercept('GET', url.href, 'exchangeInfo');
   }
 
-  public interceptTicker() {
+  interceptTicker() {
     const url = new URL(`${API_HTTP_BASEURL}/ticker/24hr`);
 
     this.intercept('GET', url.href, 'ticker');
   }
 
-  public interceptKlines({ interval, symbol }: CandlesGetParams) {
+  interceptKlines({ interval, symbol }: CandlesGetParams) {
     const url = new URL(`${API_HTTP_BASEURL}/klines`);
 
     url.searchParams.append('interval', interval);
@@ -54,7 +54,7 @@ export class RootPage {
     this.intercept('GET', url.href, 'klines');
   }
 
-  public interceptTrades({ symbol, limit }: TradesGetParams) {
+  interceptTrades({ symbol, limit }: TradesGetParams) {
     const url = new URL(`${API_HTTP_BASEURL}/trades`);
 
     url.searchParams.append('symbol', symbol);
@@ -66,7 +66,7 @@ export class RootPage {
     this.intercept('GET', url.href, 'trades');
   }
 
-  public interceptOrderBook({ symbol, limit }: OrderBookGetParams) {
+  interceptOrderBook({ symbol, limit }: OrderBookGetParams) {
     const url = new URL(`${API_HTTP_BASEURL}/depth`);
 
     url.searchParams.append('symbol', symbol);
@@ -78,43 +78,43 @@ export class RootPage {
     this.intercept('GET', url.href, 'depth');
   }
 
-  public checkExchangeInfoStatus(status: number) {
+  checkExchangeInfoStatus(status: number) {
     this.checkStatus('exchangeInfo', status);
   }
 
-  public checkExchangeInfoLength(length: number) {
+  checkExchangeInfoLength(length: number) {
     this.checkLength('exchangeInfo', length);
   }
 
-  public checkTickerStatus(status: number) {
+  checkTickerStatus(status: number) {
     this.checkStatus('ticker', status);
   }
 
-  public checkTickerLength(length: number) {
+  checkTickerLength(length: number) {
     this.checkLength('ticker', length);
   }
 
-  public checkKlinesStatus(status: number) {
+  checkKlinesStatus(status: number) {
     this.checkStatus('klines', status);
   }
 
-  public checkKlinesLength(length: number) {
+  checkKlinesLength(length: number) {
     this.checkLength('klines', length);
   }
 
-  public checkTradesStatus(status: number) {
+  checkTradesStatus(status: number) {
     this.checkStatus('trades', status);
   }
 
-  public checkTradesLength(length: number) {
+  checkTradesLength(length: number) {
     this.checkLength('trades', length);
   }
 
-  public checkOrderBookStatus(status: number) {
+  checkOrderBookStatus(status: number) {
     this.checkStatus('depth', status);
   }
 
-  public checkOrderBookLength(length: number) {
+  checkOrderBookLength(length: number) {
     this.checkLength('depth', length);
   }
 }

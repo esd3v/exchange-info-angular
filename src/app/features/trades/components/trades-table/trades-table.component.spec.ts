@@ -5,7 +5,7 @@ import { TradesTableModule } from './trades-table.module';
 import { AppStoreModule } from 'src/app/store/store.module';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-describe('TradesTableContainerComponent', () => {
+describe('TradesTableComponent', () => {
   let component: TradesTableComponent;
   let fixture: ComponentFixture<TradesTableComponent>;
 
