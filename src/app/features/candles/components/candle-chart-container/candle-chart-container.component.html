@@ -1,18 +1,16 @@
-<app-window title="Chart" [loading]="loading">
-  <div
-    echarts
-    [options]="chartOptions"
-    [merge]="mergeOptions"
-    (chartInit)="onChartInit($event)"
-    class="chart"
-  ></div>
+<app-window title="Chart" [loading]="loadingController.loading">
+  <app-candle-chart
+    [data]="data"
+    [loading]="loadingController.loading"
+    (chartInit)="handleChartInit()"
+  ></app-candle-chart>
   <div role="actions">
     <span class="time">Time</span>
     <mat-form-field appearance="legacy" floatLabel="never">
       <mat-label>Time</mat-label>
       <mat-select
         panelOpen="false"
-        [disabled]="loading"
+        [disabled]="loadingController.loading"
         [value]="interval"
         (selectionChange)="handleIntervalChange($event)"
         ><mat-option *ngFor="let interval of intervals" [value]="interval">

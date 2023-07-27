@@ -1,30 +1,36 @@
 import { Injectable } from '@angular/core';
-import { filter, first, map, switchMap } from 'rxjs';
-import { GlobalService } from 'src/app/features/global/services/global.service';
-import { WIDGET_CHART_DEFAULT_CANDLEINTERVAL } from 'src/app/shared/config';
-import { getFormattedDate } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
-import { CandlesRestService } from '../../services/candles-rest.service';
 import { CandlesService } from '../../services/candles.service';
-import { CandleEntity } from '../../store/candles.state';
+import { GlobalService } from 'src/app/features/global/services/global.service';
+import { WIDGET_CHART_DEFAULT_CANDLEINTERVAL } from 'src/app/shared/config';
 import { CandleInterval } from '../../types/candle-interval';
+import { filter, switchMap, first, map } from 'rxjs';
+import { CandlesRestService } from '../../services/candles-rest.service';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { getFormattedDate } from 'src/app/shared/helpers';
+import { CandleEntity } from '../../store/candles.state';
+import { CandleChartData } from '../candle-chart/candle-chart.component';
 
 @Injectable({ providedIn: 'root' })
-export class ChartService {
+export class CandleChartContainerService {
   constructor(
-    private globalService: GlobalService,
-    private candlesRestService: CandlesRestService,
-    private candlesService: CandlesService,
     private websocketService: WebsocketService,
-    private websocketSubscribeService: WebsocketSubscribeService
+    private candlesRestService: CandlesRestService,
+    private websocketSubscribeService: WebsocketSubscribeService,
+    private globalService: GlobalService,
+    private candlesService: CandlesService
   ) {}
 
   get #globalSymbol() {
     return this.globalService.symbol;
   }
+
+  data$ = this.candlesService.candles$.pipe(
+    filter((candles) => Boolean(candles.length)),
+    map((candles) => this.#createData(candles))
+  );
 
   loadingController = new LoadingController(true);
 
@@ -36,12 +42,7 @@ export class ChartService {
 
   interval: CandleInterval = WIDGET_CHART_DEFAULT_CANDLEINTERVAL;
 
-  data$ = this.candlesService.candles$.pipe(
-    filter((candles) => Boolean(candles.length)),
-    map((candles) => this.#createData(candles))
-  );
-
-  #createData(candles: CandleEntity[]) {
+  #createData(candles: CandleEntity[]): CandleChartData {
     return candles.map(({ open, high, low, close, openTime, volume }) => ({
       date: getFormattedDate({
         msec: openTime,
@@ -54,10 +55,6 @@ export class ChartService {
     }));
   }
 
-  setInterval(interval: CandleInterval) {
-    this.interval = interval;
-  }
-
   loadData() {
     this.candlesService.loadData({
       symbol: this.#globalSymbol,
@@ -65,10 +62,18 @@ export class ChartService {
     });
   }
 
-  subscribeToStream() {
+  #subscribeToStream() {
     this.subscriber.subscribeToStream({
       symbol: this.#globalSymbol,
       interval: this.interval,
+    });
+  }
+
+  subscribeLoadData() {
+    this.#subscribeToStream();
+
+    this.subscriber.subscribed$.subscribe(() => {
+      this.loadData();
     });
   }
 
@@ -77,14 +82,6 @@ export class ChartService {
 
     this.subscriber.unsubscribed$.subscribe(() => {
       this.subscribeLoadData();
-    });
-  }
-
-  subscribeLoadData() {
-    this.subscribeToStream();
-
-    this.subscriber.subscribed$.subscribe(() => {
-      this.loadData();
     });
   }
 

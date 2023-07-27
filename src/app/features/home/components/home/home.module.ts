@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { ChartModule } from 'src/app/features/candles/components/chart/chart.module';
+import { CandleChartContainerModule } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.module';
 import { OrderBookTablesModule } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.module';
 import { PairsTableModule } from 'src/app/features/pairs/components/pairs-table/pairs-table.module';
 import { TickerGroupModule } from 'src/app/features/ticker/components/ticker-group/ticker-group.module';
@@ -14,7 +14,7 @@ import { HomeComponent } from './home.component';
     HeaderModule,
     PairsTableModule,
     TickerGroupModule,
-    ChartModule,
+    CandleChartContainerModule,
     OrderBookTablesModule,
     TradesTableModule,
     MatSnackBarModule,

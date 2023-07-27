@@ -3,7 +3,6 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Dictionary } from '@ngrx/entity';
 import { Subject, combineLatest, debounceTime, filter, first, map } from 'rxjs';
-import { ChartService } from 'src/app/features/candles/components/chart/chart.service';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
@@ -20,6 +19,7 @@ import { Row } from '../../../../shared/table/types/row';
 import { PairColumn } from '../../types/pair-column';
 import { PairsTableStyleService } from './pairs-table-style.service';
 import { ExchangeSymbolEntity } from 'src/app/features/exchange-info/store/exchange-info.state';
+import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -70,7 +70,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     private tableStyleService: TableStyleService,
     private globalService: GlobalService,
     private tradesTableService: TradesTableService,
-    private chartService: ChartService,
+    private candleChartContainerService: CandleChartContainerService,
     private orderBookTablesService: OrderBookTablesService,
     private pairsTableStyleService: PairsTableStyleService
   ) {}
@@ -161,10 +161,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   #updateWidgetsData() {
     // Set loading manually because of ws delay
     this.tradesTableService.loadingController.setLoading(true);
-    this.chartService.loadingController.setLoading(true);
+    this.candleChartContainerService.loadingController.setLoading(true);
     this.orderBookTablesService.loadingController.setLoading(true);
 
-    this.chartService.resubscribeLoadData();
+    this.candleChartContainerService.resubscribeLoadData();
     this.orderBookTablesService.resubscribeLoadData();
     this.tradesTableService.resubscribeLoadData();
   }

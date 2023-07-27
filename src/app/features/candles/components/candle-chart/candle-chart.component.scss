@@ -1,8 +1,6 @@
-.chart {
+.candle-chart {
   $pairsHeight: 465;
   height: #{($pairsHeight - 8)-8}px;
 }
 
-.time {
-  margin-right: 8px;
-}
+
