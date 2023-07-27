@@ -1,4 +1,3 @@
-import { symbolsReducer } from '../features/symbols/store/symbols.reducer';
 import { ActionReducerMap, MetaReducer } from '@ngrx/store';
 import { environment } from '../../environments/environment';
 import { AppState } from './state';
@@ -10,7 +9,6 @@ import { tradesReducer } from '../features/trades/store/trades.reducer';
 
 export const reducers: ActionReducerMap<AppState> = {
   ticker: tickerReducer,
-  symbols: symbolsReducer,
   exchangeInfo: exchangeInfoReducer,
   candles: candlesReducer,
   orderBook: orderBookReducer,

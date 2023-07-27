@@ -8,7 +8,6 @@ import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services
 import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
-import { ExchangeSymbolEntity } from 'src/app/features/symbols/store/symbols.state';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
@@ -20,6 +19,7 @@ import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Row } from '../../../../shared/table/types/row';
 import { PairColumn } from '../../types/pair-column';
 import { PairsTableStyleService } from './pairs-table-style.service';
+import { ExchangeSymbolEntity } from 'src/app/features/exchange-info/store/exchange-info.state';
 
 @Component({
   selector: 'app-pairs-table',

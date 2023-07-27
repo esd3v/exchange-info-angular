@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { switchMap, map } from 'rxjs';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { exchangeInfoActions } from '.';
-import { symbolsActions } from '../../symbols/store';
 
 @Injectable()
 export class ExchangeInfoEffects {
@@ -22,7 +21,7 @@ export class ExchangeInfoEffects {
     return this.actions$.pipe(
       ofType(exchangeInfoActions.loadSuccess),
       map((data) => {
-        return symbolsActions.create(data);
+        return exchangeInfoActions.createSymbols(data);
       })
     );
   });
