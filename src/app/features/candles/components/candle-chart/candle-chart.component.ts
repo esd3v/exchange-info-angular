@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -21,6 +22,7 @@ export type CandleChartData = {
   selector: 'app-candle-chart',
   templateUrl: './candle-chart.component.html',
   styleUrls: ['./candle-chart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CandleChartComponent implements OnChanges {
   @Input() loading: boolean = false;

@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   ComponentRef,
   HostBinding,
@@ -13,6 +14,7 @@ import { SkeletonProps } from './skeleton-props';
 @Component({
   selector: 'app-skeleton',
   templateUrl: 'skeleton.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SkeletonComponent implements OnInit {
   @ViewChild('ngxSkeleton', { read: ViewContainerRef })

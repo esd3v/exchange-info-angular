@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -22,6 +23,7 @@ import { Row } from '../../types/row';
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnChanges, OnInit, AfterViewInit {
   @ViewChild(MatPaginator, { static: false }) private paginator!: MatPaginator;
