@@ -1,8 +1,7 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { formatPrice } from 'src/app/shared/helpers';
 import { AppState } from '../../../store';
-import { tickerAdapter } from './ticker.state';
 import { symbols } from '../../exchange-info/store/exchange-info.selectors';
+import { tickerAdapter } from './ticker.state';
 
 const { selectAll, selectEntities } = tickerAdapter.getSelectors();
 
@@ -36,11 +35,6 @@ export const lastQuantity = (symbol: string) =>
 
 export const tickSize = (symbol: string) =>
   createSelector(symbols, (state) => state[symbol]?.PRICE_FILTER.tickSize);
-
-export const formattedLastPrice = (symbol: string) =>
-  createSelector(tickSize(symbol), lastPrice(symbol), (tickSize, lastPrice) =>
-    tickSize && lastPrice ? formatPrice(lastPrice, tickSize) : lastPrice
-  );
 
 export const numberOfTrades = (symbol: string) =>
   createSelector(ticker(symbol), (state) => state?.count);

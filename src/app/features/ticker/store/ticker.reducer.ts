@@ -28,6 +28,7 @@ export const tickerReducer = createReducer(
         count,
         priceChange,
         priceChangePercent,
+        prevLastPrice: lastPrice,
       };
     }) as TickerEntity[];
 

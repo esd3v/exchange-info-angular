@@ -38,18 +38,18 @@ export class TradesTableService {
     this.websocketSubscribeService
   );
 
-  get currency() {
-    return this.globalService.currency;
-  }
+  globalCurrency$ = this.globalService.currency$;
 
-  get #globalSymbol() {
-    return this.globalService.symbol;
-  }
+  #globalPair$ = this.globalService.pair$;
 
   data$ = combineLatest([
     this.tradesService.trades$.pipe(filter((trades) => Boolean(trades.length))),
-    this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
-  ]).pipe(map(([trades, tickSize]) => this.#createRows(trades, tickSize)));
+    this.tickerService.globalTicker$.pipe(filter(Boolean)),
+  ]).pipe(
+    map(([trades, globalTicker]) =>
+      this.#createRows(trades, globalTicker.tickSize)
+    )
+  );
 
   #createRows(trades: TradesEntity[], tickSize: string): Row[] {
     return trades.map((item) => {
@@ -86,11 +86,15 @@ export class TradesTableService {
   }
 
   loadData() {
-    this.tradesService.loadData({ symbol: this.#globalSymbol });
+    this.#globalPair$.pipe(first()).subscribe((globalPair) => {
+      this.tradesService.loadData({ symbol: globalPair.symbol });
+    });
   }
 
   subscribeToStream() {
-    this.subscriber.subscribeToStream({ symbol: this.#globalSymbol });
+    this.#globalPair$.pipe(first()).subscribe((globalPair) => {
+      this.subscriber.subscribeToStream({ symbol: globalPair.symbol });
+    });
   }
 
   resubscribeLoadData() {

@@ -1,11 +1,14 @@
 <div class="col">
-  <app-ticker-card title="Pair" [value]="globalPair"></app-ticker-card>
+  <app-ticker-card
+    title="Pair"
+    [value]="(globalPair$ | async)?.slash || ''"
+  ></app-ticker-card>
 </div>
 <div class="col">
   <app-ticker-card
     title="Last price"
     [value]="lastPrice"
-    [loading]="lastPriceLoading"
+    [loading]="loading"
     [positive]="lastPricePositive"
   >
   </app-ticker-card>
@@ -14,7 +17,7 @@
   <app-ticker-card
     title="24 change"
     [value]="priceChange"
-    [loading]="priceChangeLoading"
+    [loading]="loading"
     [positive]="priceChangePositive"
   >
   </app-ticker-card>
@@ -23,7 +26,7 @@
   <app-ticker-card
     title="24 change percent"
     [value]="priceChangePercent"
-    [loading]="priceChangePercentLoading"
+    [loading]="loading"
     [positive]="priceChangePercentPositive"
   >
   </app-ticker-card>
@@ -32,15 +35,11 @@
   <app-ticker-card
     title="Last quantity"
     [value]="lastQuantity"
-    [loading]="lastQuantityLoading"
+    [loading]="loading"
   >
   </app-ticker-card>
 </div>
 <div class="col">
-  <app-ticker-card
-    title="Trades"
-    [value]="numberOfTrades"
-    [loading]="numberOfTradesLoading"
-  >
+  <app-ticker-card title="Trades" [value]="numberOfTrades" [loading]="loading">
   </app-ticker-card>
 </div>

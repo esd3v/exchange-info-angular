@@ -23,9 +23,7 @@ export class CandleChartContainerService {
     private candlesService: CandlesService
   ) {}
 
-  get #globalSymbol() {
-    return this.globalService.symbol;
-  }
+  #globalPair$ = this.globalService.pair$;
 
   data$ = this.candlesService.candles$.pipe(
     filter((candles) => Boolean(candles.length)),
@@ -56,16 +54,20 @@ export class CandleChartContainerService {
   }
 
   loadData() {
-    this.candlesService.loadData({
-      symbol: this.#globalSymbol,
-      interval: this.interval,
+    this.#globalPair$.pipe(first()).subscribe((globalPair) => {
+      this.candlesService.loadData({
+        symbol: globalPair.symbol,
+        interval: this.interval,
+      });
     });
   }
 
   #subscribeToStream() {
-    this.subscriber.subscribeToStream({
-      symbol: this.#globalSymbol,
-      interval: this.interval,
+    this.#globalPair$.pipe(first()).subscribe((globalPair) => {
+      this.subscriber.subscribeToStream({
+        symbol: globalPair.symbol,
+        interval: this.interval,
+      });
     });
   }
 

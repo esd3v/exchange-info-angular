@@ -4,38 +4,28 @@ import {
   APP_DEFAULT_QUOTE_CURRENCY,
 } from 'src/app/shared/config';
 import { Currency } from '../types/currency';
+import { BehaviorSubject, map } from 'rxjs';
+import { createPair } from 'src/app/shared/helpers';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GlobalService {
-  constructor() {}
-
-  currency: Currency = {
+  currency$ = new BehaviorSubject<Currency>({
     base: APP_DEFAULT_BASE_CURRENCY,
     quote: APP_DEFAULT_QUOTE_CURRENCY,
-  };
+  });
+
+  pair$ = this.currency$.pipe(map(createPair));
+
+  constructor() {}
 
   notification = {
     type: 'info',
     message: '',
   };
 
-  get pair() {
-    const { base, quote } = this.currency;
-
-    return `${base}/${quote}`;
-  }
-
-  get symbol() {
-    return this.pair.replace('/', '');
-  }
-
-  get pairUnderscore() {
-    return this.pair.replace('/', '_');
-  }
-
   setCurrency(currency: Currency) {
-    this.currency = currency;
+    this.currency$.next(currency);
   }
 }

@@ -1,160 +1,98 @@
 import { Component, OnInit } from '@angular/core';
-import { combineLatest, filter, map } from 'rxjs';
+import { filter, first, map, switchMap } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { TickerRestService } from '../../services/ticker-rest.service';
 import { TickerService } from '../../services/ticker.service';
+import { GlobalTicker } from '../../types/global-ticker';
 
 @Component({
   selector: 'app-ticker-group',
   templateUrl: './ticker-group.component.html',
 })
 export class TickerGroupComponent implements OnInit {
-  get #globalSymbol() {
-    return this.globalService.symbol;
+  globalPair$ = this.globalService.pair$;
+
+  ticker!: GlobalTicker;
+
+  get loading() {
+    return !Boolean(this.ticker);
   }
 
-  get globalPair() {
-    return this.globalService.pair;
+  get lastPrice() {
+    return this.ticker
+      ? formatPrice(this.ticker.lastPrice, this.ticker.tickSize)
+      : '';
   }
 
-  pairLoading: boolean = false;
+  get priceChange() {
+    return this.ticker
+      ? formatPrice(this.ticker.priceChange, this.ticker.tickSize)
+      : '';
+  }
 
-  lastPrice!: string;
+  get priceChangePercent() {
+    return this.ticker
+      ? formatPriceChangePercent(this.ticker.priceChangePercent)
+      : '';
+  }
 
-  lastPriceLoading: boolean = false;
+  get numberOfTrades() {
+    return this.ticker ? Number(this.ticker.numberOfTrades) : '';
+  }
 
-  lastPricePositive!: boolean;
+  get lastQuantity() {
+    return this.ticker ? Number(this.ticker.lastQuantity) : '';
+  }
 
-  priceChange!: string;
+  get lastPricePositive() {
+    return this.ticker
+      ? this.ticker.lastPrice > this.ticker.prevLastPrice
+      : null;
+  }
 
-  priceChangeLoading: boolean = false;
+  get priceChangePositive() {
+    return this.ticker ? this.isPositive(this.ticker.priceChange) : null;
+  }
 
-  priceChangePositive!: boolean;
-
-  priceChangePercent!: string;
-
-  priceChangePercentLoading: boolean = false;
-
-  priceChangePercentPositive!: boolean;
-
-  numberOfTrades!: number;
-
-  numberOfTradesLoading: boolean = false;
-
-  lastQuantity!: number;
-
-  lastQuantityLoading: boolean = false;
+  get priceChangePercentPositive() {
+    return this.ticker ? this.isPositive(this.ticker.priceChangePercent) : null;
+  }
 
   constructor(
     private globalService: GlobalService,
     private tickerService: TickerService,
-    private tickerRestService: TickerRestService,
     private websocketService: WebsocketService
   ) {}
 
-  private isPositive(value: string | number): boolean {
+  isPositive(value: string | number): boolean {
     return Number(value) > 0;
   }
 
-  ngOnInit(): void {
-    // On websocket start
+  onWebsocketOpen() {
     this.websocketService.status$
-      .pipe(filter((status) => status === 'open'))
-      .subscribe(() => {
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() => this.globalPair$.pipe(first()))
+      )
+      .subscribe((globalPair) => {
         this.tickerService.singleSubscriber.subscribeToStream({
-          symbols: [this.#globalSymbol],
+          symbols: [globalPair.symbol],
         });
       });
+  }
 
-    // Loading with tickSize
-    combineLatest([
-      this.tickerRestService.status$.pipe(
-        filter((status) => status === 'loading')
-      ),
-      this.tickerService.globalTickerTickSize$.pipe(
-        filter((tickSize) => !Boolean(tickSize))
-      ),
-    ]).subscribe(() => {
-      this.lastPriceLoading = true;
-      this.priceChangeLoading = true;
-    });
-
-    // Loading with tickSize complete
-    combineLatest([
-      this.tickerRestService.status$.pipe(
-        filter((status) => status === 'success')
-      ),
-      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
-    ]).subscribe(() => {
-      this.lastPriceLoading = false;
-      this.priceChangeLoading = false;
-    });
-
-    // Loading without tickSize
-    this.tickerRestService.status$
-      .pipe(filter((status) => status === 'loading'))
-      .subscribe(() => {
-        this.priceChangePercentLoading = true;
-        this.lastQuantityLoading = true;
-        this.numberOfTradesLoading = true;
-      });
-
-    // Loading without tickSize complete
-    this.tickerRestService.status$
-      .pipe(filter((status) => status === 'success'))
-      .subscribe(() => {
-        this.priceChangePercentLoading = false;
-        this.lastQuantityLoading = false;
-        this.numberOfTradesLoading = false;
-      });
-
-    // Last price
-    combineLatest([
-      this.tickerService.globalTickerLastPrice$.pipe(filter(Boolean)),
-      // don't initially check for boolean because prevLastPrice comes after ws update later
-      this.tickerService.globalTickerPrevLastPrice$,
-      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
-    ]).subscribe(([lastPrice, prevLastPrice, tickSize]) => {
-      this.lastPrice = formatPrice(lastPrice, tickSize);
-
-      if (Number(lastPrice) > Number(prevLastPrice)) {
-        this.lastPricePositive = true;
-      } else if (Number(lastPrice) < Number(prevLastPrice)) {
-        this.lastPricePositive = false;
-      }
-    });
-
-    // Price change
-    combineLatest([
-      this.tickerService.globalTickerPriceChange$.pipe(filter(Boolean)),
-      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
-    ]).subscribe(([priceChange, tickSize]) => {
-      this.priceChange = formatPrice(priceChange, tickSize);
-      this.priceChangePositive = this.isPositive(priceChange);
-    });
-
-    // Price change percent
-    this.tickerService.globalTickerPriceChangePercent$
+  onGlobalTickerUpdate() {
+    this.tickerService.globalTicker$
       .pipe(filter(Boolean))
-      .subscribe((priceChangePercent) => {
-        this.priceChangePercent = formatPriceChangePercent(priceChangePercent);
-        this.priceChangePercentPositive = this.isPositive(priceChangePercent);
+      .subscribe((ticker) => {
+        this.ticker = ticker;
       });
+  }
 
-    // Number of trades
-    this.tickerService.globalTickerNumberOfTrades$
-      .pipe(filter(Boolean), map(Number))
-      .subscribe((numberOfTrades) => {
-        this.numberOfTrades = numberOfTrades;
-      });
+  ngOnInit(): void {
+    this.onWebsocketOpen();
 
-    // Last quantity
-    this.tickerService.globalTickerLastQuantity$
-      .pipe(filter(Boolean), map(Number))
-      .subscribe((lastQuantity) => {
-        this.lastQuantity = lastQuantity;
-      });
+    this.onGlobalTickerUpdate();
   }
 }

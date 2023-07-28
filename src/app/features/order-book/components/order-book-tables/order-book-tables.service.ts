@@ -30,13 +30,9 @@ export class OrderBookTablesService {
     private websocketSubscribeService: WebsocketSubscribeService
   ) {}
 
-  get #globalSymbol() {
-    return this.globalService.symbol;
-  }
+  #globalPair$ = this.globalService.pair$;
 
-  get currency() {
-    return this.globalService.currency;
-  }
+  globalCurrency$ = this.globalService.currency$;
 
   loadingController = new LoadingController(true);
 
@@ -59,10 +55,10 @@ export class OrderBookTablesService {
         : this.orderBookService.bids$.pipe(
             filter((bids) => Boolean(bids.length))
           ),
-      this.tickerService.globalTickerTickSize$.pipe(filter(Boolean)),
+      this.tickerService.globalTicker$.pipe(filter(Boolean)),
     ]).pipe(
-      map(([orderBook, tickSize]) =>
-        this.#createRows(orderBook, tickSize, type)
+      map(([orderBook, globalTicker]) =>
+        this.#createRows(orderBook, globalTicker.tickSize, type)
       )
     );
   }
@@ -100,13 +96,17 @@ export class OrderBookTablesService {
   }
 
   loadData() {
-    this.orderBookService.loadData({ symbol: this.#globalSymbol });
+    this.#globalPair$.pipe(first()).subscribe((globalPair) => {
+      this.orderBookService.loadData({ symbol: globalPair.symbol });
+    });
   }
 
   subscribeToStream() {
-    this.subscriber.subscribeToStream({
-      symbol: this.#globalSymbol,
-      limit: WIDGET_DEPTH_DEFAULT_LIMIT,
+    this.#globalPair$.pipe(first()).subscribe((globalPair) => {
+      this.subscriber.subscribeToStream({
+        symbol: globalPair.symbol,
+        limit: WIDGET_DEPTH_DEFAULT_LIMIT,
+      });
     });
   }
 

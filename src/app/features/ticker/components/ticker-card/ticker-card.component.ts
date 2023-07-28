@@ -13,7 +13,7 @@ export class TickerCardComponent {
 
   @Input() loading: boolean = false;
 
-  @Input() positive!: boolean;
+  @Input() positive: boolean | null = null;
 
   constructor() {}
 }

@@ -17,7 +17,7 @@ export const isScientific = (value: string | number) =>
     typeof value === 'number' ? value.toString() : value
   );
 
-export const createPair = (base: string, quote: string) => {
+export const createPair = ({ base, quote }: Currency) => {
   return {
     underscore: `${base}_${quote}`,
     slash: `${base}/${quote}`,

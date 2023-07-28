@@ -68,6 +68,10 @@ export class TradesTableComponent implements OnInit {
       this.data = data;
     });
 
-    this.columns = this.#createColumns(this.tradesTableService.currency);
+    this.tradesTableService.globalCurrency$
+      .pipe(first())
+      .subscribe((currency) => {
+        this.columns = this.#createColumns(currency);
+      });
   }
 }

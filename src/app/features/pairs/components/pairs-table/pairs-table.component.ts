@@ -2,7 +2,15 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { Dictionary } from '@ngrx/entity';
-import { Subject, combineLatest, debounceTime, filter, first, map } from 'rxjs';
+import {
+  Subject,
+  combineLatest,
+  debounceTime,
+  filter,
+  first,
+  map,
+  switchMap,
+} from 'rxjs';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
@@ -28,9 +36,7 @@ import { CandleChartContainerService } from 'src/app/features/candles/components
   encapsulation: ViewEncapsulation.None,
 })
 export class PairsTableComponent implements OnDestroy, OnInit {
-  get #globalSymbol() {
-    return this.globalService.symbol;
-  }
+  #globalPair$ = this.globalService.pair$;
 
   #debounceTime = 1000;
 
@@ -39,9 +45,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   #data$ = combineLatest([
     this.exchangeInfoService.tradingSymbols$,
     this.tickerService.tickers$,
+    this.#globalPair$,
   ]).pipe(
-    map(([tradingSymbols, tickers]) =>
-      this.#createRows(tradingSymbols, tickers, this.#globalSymbol)
+    map(([tradingSymbols, tickers, globalPair]) =>
+      this.#createRows(tradingSymbols, tickers, globalPair.symbol)
     )
   );
 
@@ -89,10 +96,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   // Exclude globalSymbol because we already subscribed to it
-  #createFilteredPageSymbols(rows: Row[]) {
+  #createFilteredPageSymbols(rows: Row[], symbol: string) {
     const symbols = this.#createPageSymbols(rows);
 
-    return symbols.filter((item) => item !== this.#globalSymbol);
+    return symbols.filter((item) => item !== symbol);
   }
 
   #createRows(
@@ -196,24 +203,30 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     const symbol = `${base}${quote}`;
 
     // Prevent double click
-    if (symbol !== this.#globalSymbol) {
-      // First set currecy (global symbol)
-      this.globalService.setCurrency({ base, quote });
-      // Then update order book and trades tables data based on new symbol
-      this.#updateWidgetsData();
-      // And change url
-      this.#setLocation(pair);
-    }
+    this.#globalPair$.pipe(first()).subscribe((globalPair) => {
+      if (symbol !== globalPair.symbol) {
+        // First set currecy (global symbol)
+        this.globalService.setCurrency({ base, quote });
+        // Then update order book and trades tables data based on new symbol
+        this.#updateWidgetsData();
+        // And change url
+        this.#setLocation(pair);
+      }
+    });
   }
 
   handlePageDataInit(rows: Row[]) {
     this.websocketService.status$
       .pipe(
         filter((status) => status === 'open'),
+        switchMap(() => this.#globalPair$),
         first()
       )
-      .subscribe(() => {
-        const symbols = this.#createFilteredPageSymbols(rows);
+      .subscribe((globalPair) => {
+        const symbols = this.#createFilteredPageSymbols(
+          rows,
+          globalPair.symbol
+        );
 
         this.#subscribeToStream(symbols);
       });
@@ -224,14 +237,18 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   #onPageChangeDebounced() {
-    this.#nextPageRows$
-      .pipe(debounceTime(this.#debounceTime))
-      .subscribe((pageRows) => {
-        const symbols = this.#createFilteredPageSymbols(pageRows);
+    combineLatest([
+      this.#nextPageRows$.pipe(debounceTime(this.#debounceTime)),
+      this.#globalPair$.pipe(first()),
+    ]).subscribe(([pageRows, globalPair]) => {
+      const symbols = this.#createFilteredPageSymbols(
+        pageRows,
+        globalPair.symbol
+      );
 
-        this.#unsubscribeFromCurrentStream();
-        this.#subscribeToStream(symbols);
-      });
+      this.#unsubscribeFromCurrentStream();
+      this.#subscribeToStream(symbols);
+    });
   }
 
   #subscribeToStream(symbols: string[]) {

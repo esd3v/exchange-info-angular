@@ -61,7 +61,11 @@ export class OrderBookTablesComponent implements OnInit {
     this.orderBookTablesService.onRestLoading();
     this.orderBookTablesService.onRestAndDataComplete();
 
-    this.columns = this.#createColumns(this.orderBookTablesService.currency);
+    this.orderBookTablesService.globalCurrency$
+      .pipe(first())
+      .subscribe((currency) => {
+        this.columns = this.#createColumns(currency);
+      });
 
     this.orderBookTablesService.asksData$.subscribe((data) => {
       this.asksData = data;

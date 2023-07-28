@@ -1,23 +1,77 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest, filter, switchMap, tap } from 'rxjs';
 import { AppState } from 'src/app/store';
+import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
+import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
 import { GlobalService } from '../../global/services/global.service';
 import { tickerActions, tickerSelectors } from '../store';
 import { TickerEntity } from '../store/ticker.state';
+import { GlobalTicker } from '../types/global-ticker';
 import { WebsocketTicker } from '../types/websocket-ticker';
 import { WebsocketTickerStreamParams } from '../types/websocket-ticker-stream-params';
-import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
-import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TickerService {
+  #globalPair$ = this.globalService.pair$;
+
   constructor(
     private store$: Store<AppState>,
     private globalService: GlobalService,
     private websocketSubscribeService: WebsocketSubscribeService
-  ) {}
+  ) {
+    this.#globalPair$
+      .pipe(
+        switchMap((pair) =>
+          combineLatest([
+            this.store$
+              .select(tickerSelectors.lastPrice(pair.symbol))
+              .pipe(filter(Boolean)),
+            this.store$
+              .select(tickerSelectors.tickSize(pair.symbol))
+              .pipe(filter(Boolean)),
+            this.store$
+              .select(tickerSelectors.prevLastPrice(pair.symbol))
+              .pipe(filter(Boolean)),
+            this.store$
+              .select(tickerSelectors.priceChange(pair.symbol))
+              .pipe(filter(Boolean)),
+            this.store$
+              .select(tickerSelectors.priceChangePercent(pair.symbol))
+              .pipe(filter(Boolean)),
+            this.store$
+              .select(tickerSelectors.lastQuantity(pair.symbol))
+              .pipe(filter(Boolean)),
+            this.store$
+              .select(tickerSelectors.numberOfTrades(pair.symbol))
+              .pipe(filter(Boolean)),
+          ])
+        )
+      )
+      .subscribe(
+        ([
+          lastPrice,
+          tickSize,
+          prevLastPrice,
+          priceChange,
+          priceChangePercent,
+          lastQuantity,
+          numberOfTrades,
+        ]) => {
+          this.globalTicker$.next({
+            lastPrice,
+            lastQuantity,
+            numberOfTrades,
+            prevLastPrice,
+            priceChange,
+            priceChangePercent,
+            tickSize,
+          });
+        }
+      );
+  }
 
   createStreamParams = ({ symbols }: WebsocketTickerStreamParams) =>
     symbols.map((item) => `${item.toLowerCase()}@ticker`);
@@ -34,43 +88,9 @@ export class TickerService {
     this.websocketSubscribeService
   );
 
-  get #globalSymbol() {
-    return this.globalService.symbol;
-  }
+  globalTicker$ = new BehaviorSubject<GlobalTicker>(null);
 
   tickers$ = this.store$.select(tickerSelectors.tickers);
-
-  globalTickerLastPrice$ = this.store$.select(
-    tickerSelectors.lastPrice(this.#globalSymbol)
-  );
-
-  globalTickerTickSize$ = this.store$.select(
-    tickerSelectors.tickSize(this.#globalSymbol)
-  );
-
-  globalTickerFormattedLastPrice$ = this.store$.select(
-    tickerSelectors.formattedLastPrice(this.#globalSymbol)
-  );
-
-  globalTickerPrevLastPrice$ = this.store$.select(
-    tickerSelectors.prevLastPrice(this.#globalSymbol)
-  );
-
-  globalTickerPriceChange$ = this.store$.select(
-    tickerSelectors.priceChange(this.#globalSymbol)
-  );
-
-  globalTickerPriceChangePercent$ = this.store$.select(
-    tickerSelectors.priceChangePercent(this.#globalSymbol)
-  );
-
-  globalTickerLastQuantity$ = this.store$.select(
-    tickerSelectors.lastQuantity(this.#globalSymbol)
-  );
-
-  globalTickerNumberOfTrades$ = this.store$.select(
-    tickerSelectors.numberOfTrades(this.#globalSymbol)
-  );
 
   handleWebsocketData({ s, c, Q, P, p, n }: WebsocketTicker) {
     this.updateTicker({
