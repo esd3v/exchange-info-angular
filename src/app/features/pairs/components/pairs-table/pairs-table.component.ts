@@ -22,7 +22,7 @@ import { convertPairToCurrency } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Row } from '../../../../shared/table/types/row';
 import { PairColumn } from '../../types/pair-column';
-import { PairsTableService } from './pairs-table-service';
+import { PairsTableService } from './pairs-table.service';
 import { PairsTableStyleService } from './pairs-table-style.service';
 
 @Component({

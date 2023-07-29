@@ -6,7 +6,6 @@ import { CandleChartContainerService } from 'src/app/features/candles/components
 import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
-import { PairsTableService } from 'src/app/features/pairs/components/pairs-table/pairs-table-service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import {
@@ -16,6 +15,7 @@ import {
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { HomeService } from './home.service';
+import { PairsTableService } from 'src/app/features/pairs/components/pairs-table/pairs-table.service';
 
 @Component({
   selector: 'app-home',
