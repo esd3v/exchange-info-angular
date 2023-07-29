@@ -182,9 +182,10 @@ export class HomeComponent {
     this.tradesTableService.onWebsocketOpen();
     this.tradesTableService.onRestAndDataComplete();
 
-    // Order book table
+    // Pairs table
     //////////////////////////////////////////
     //////////////////////////////////////////
+    this.pairsTableService.onWebsocketOpen();
     this.pairsTableService.onRestAndDataComplete();
   }
 }

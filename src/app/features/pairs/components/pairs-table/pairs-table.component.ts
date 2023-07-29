@@ -1,29 +1,18 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  BehaviorSubject,
-  Subject,
-  combineLatest,
-  debounceTime,
-  filter,
-  first,
-  map,
-  switchMap,
-} from 'rxjs';
+import { combineLatest, debounceTime, filter, first } from 'rxjs';
 import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
-import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import { convertPairToCurrency } from 'src/app/shared/helpers';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Row } from '../../../../shared/table/types/row';
 import { PairColumn } from '../../types/pair-column';
-import { PairsTableService } from './pairs-table.service';
 import { PairsTableStyleService } from './pairs-table-style.service';
+import { PairsTableService } from './pairs-table.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -35,10 +24,6 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   #globalPair$ = this.globalService.pair$;
 
   #debounceTime = 1000;
-
-  #nextPageRows$ = new Subject<Row[]>();
-
-  #prevPageRows$ = new BehaviorSubject<Row[]>([]);
 
   data: Row[] = [];
 
@@ -57,10 +42,8 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   constructor(
     private router: Router,
     private location: Location,
-    private tickerService: TickerService,
     private tickerRestService: TickerRestService,
     private exchangeInfoRestService: ExchangeInfoRestService,
-    private websocketService: WebsocketService,
     private globalService: GlobalService,
     private tradesTableService: TradesTableService,
     private candleChartContainerService: CandleChartContainerService,
@@ -68,26 +51,6 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     private pairsTableStyleService: PairsTableStyleService,
     private pairsTableService: PairsTableService
   ) {}
-
-  #createPageSymbols(rows: Row[]) {
-    return rows.map((row) => {
-      const pairCell = row.cells[0];
-
-      const { base, quote } = convertPairToCurrency(
-        pairCell.value as string,
-        '/'
-      );
-
-      return `${base}${quote}`;
-    });
-  }
-
-  // Exclude globalSymbol because we already subscribed to it
-  #createFilteredPageSymbols(rows: Row[], symbol: string) {
-    const symbols = this.#createPageSymbols(rows);
-
-    return symbols.filter((item) => item !== symbol);
-  }
 
   #updateWidgetsData() {
     // Set loading manually because of ws delay
@@ -140,67 +103,23 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   handlePageDataInit(rows: Row[]) {
-    this.websocketService.status$
-      .pipe(
-        filter((status) => status === 'open'),
-        switchMap(() => this.#globalPair$),
-        first()
-      )
-      .subscribe((globalPair) => {
-        const symbols = this.#createFilteredPageSymbols(
-          rows,
-          globalPair.symbol
-        );
-
-        this.#subscribeToStream(symbols);
-      });
-
-    this.#prevPageRows$.next(rows);
+    this.pairsTableService.pageRows$.next(rows);
   }
 
   handlePageChange(rows: Row[]) {
-    this.#nextPageRows$.next(rows);
+    this.pairsTableService.pageRows$.pipe(first()).subscribe((pageRows) => {
+      this.pairsTableService.pageRows$.next(rows);
+      this.pairsTableService.prevPageRows$.next(pageRows);
+    });
   }
 
   #onPageChangeDebounced() {
-    this.#nextPageRows$
-      .pipe(
-        debounceTime(this.#debounceTime),
-        switchMap((nextPageRows) =>
-          combineLatest([
-            this.#prevPageRows$.pipe(first()),
-            this.#globalPair$.pipe(first()),
-          ]).pipe(
-            map(
-              ([prevPageRows, globalPair]) =>
-                [nextPageRows, prevPageRows, globalPair] as const
-            )
-          )
-        )
-      )
-      .subscribe(([nextPageRows, prevPageRows, globalPair]) => {
-        const nextSymbols = this.#createFilteredPageSymbols(
-          nextPageRows,
-          globalPair.symbol
-        );
-
-        const prevSymbols = this.#createFilteredPageSymbols(
-          prevPageRows,
-          globalPair.symbol
-        );
-
-        this.#unsubscribeFromStream(prevSymbols);
-        this.#subscribeToStream(nextSymbols);
-        this.#prevPageRows$.next(nextPageRows);
+    this.pairsTableService.prevPageRows$
+      .pipe(filter((prevPageRows) => Boolean(prevPageRows.length)))
+      .pipe(debounceTime(this.#debounceTime))
+      .subscribe(() => {
+        this.pairsTableService.resubscribeToNextPageStream();
       });
-  }
-
-  #subscribeToStream(symbols: string[]) {
-    this.tickerService.multipleSubscriber.subscribeToStream({ symbols });
-  }
-
-  #unsubscribeFromStream(symbols: string[]) {
-    this.tickerService.multipleSubscriber.unsubscribeFromStream({ symbols });
   }
 
   #onDataUpdate() {
@@ -229,6 +148,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
-    this.#nextPageRows$.complete();
+    this.pairsTableService.pageRows$.complete();
+    this.pairsTableService.prevPageRows$.complete();
   }
 }
