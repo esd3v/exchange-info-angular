@@ -2,11 +2,13 @@ import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import {
+  BehaviorSubject,
   Subject,
   combineLatest,
   debounceTime,
   filter,
   first,
+  map,
   switchMap,
 } from 'rxjs';
 import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
@@ -35,6 +37,8 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   #debounceTime = 1000;
 
   #nextPageRows$ = new Subject<Row[]>();
+
+  #prevPageRows$ = new BehaviorSubject<Row[]>([]);
 
   data: Row[] = [];
 
@@ -150,6 +154,8 @@ export class PairsTableComponent implements OnDestroy, OnInit {
 
         this.#subscribeToStream(symbols);
       });
+
+    this.#prevPageRows$.next(rows);
   }
 
   handlePageChange(rows: Row[]) {
@@ -157,26 +163,44 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   #onPageChangeDebounced() {
-    combineLatest([
-      this.#nextPageRows$.pipe(debounceTime(this.#debounceTime)),
-      this.#globalPair$.pipe(first()),
-    ]).subscribe(([pageRows, globalPair]) => {
-      const symbols = this.#createFilteredPageSymbols(
-        pageRows,
-        globalPair.symbol
-      );
+    this.#nextPageRows$
+      .pipe(
+        debounceTime(this.#debounceTime),
+        switchMap((nextPageRows) =>
+          combineLatest([
+            this.#prevPageRows$.pipe(first()),
+            this.#globalPair$.pipe(first()),
+          ]).pipe(
+            map(
+              ([prevPageRows, globalPair]) =>
+                [nextPageRows, prevPageRows, globalPair] as const
+            )
+          )
+        )
+      )
+      .subscribe(([nextPageRows, prevPageRows, globalPair]) => {
+        const nextSymbols = this.#createFilteredPageSymbols(
+          nextPageRows,
+          globalPair.symbol
+        );
 
-      this.#unsubscribeFromCurrentStream();
-      this.#subscribeToStream(symbols);
-    });
+        const prevSymbols = this.#createFilteredPageSymbols(
+          prevPageRows,
+          globalPair.symbol
+        );
+
+        this.#unsubscribeFromStream(prevSymbols);
+        this.#subscribeToStream(nextSymbols);
+        this.#prevPageRows$.next(nextPageRows);
+      });
   }
 
   #subscribeToStream(symbols: string[]) {
     this.tickerService.multipleSubscriber.subscribeToStream({ symbols });
   }
 
-  #unsubscribeFromCurrentStream() {
-    this.tickerService.multipleSubscriber.unsubscribeFromCurrentStream();
+  #unsubscribeFromStream(symbols: string[]) {
+    this.tickerService.multipleSubscriber.unsubscribeFromStream({ symbols });
   }
 
   #onDataUpdate() {
