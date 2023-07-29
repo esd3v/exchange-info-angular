@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { TradesColumn } from '../../types/trades-column';
-import { TradesTableService } from './trades-table.service';
 import { first } from 'rxjs';
 import { Currency } from 'src/app/features/global/types/currency';
+import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Row } from '../../../../shared/table/types/row';
+import { TradesColumn } from '../../types/trades-column';
+import { TradesTableService } from './trades-table.service';
 
 @Component({
   selector: 'app-trades-table',
@@ -53,16 +53,7 @@ export class TradesTableComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.websocketService.status$.pipe(first()).subscribe((status) => {
-      if (status === null) {
-        // Load REST data only if we start the app with websockets disabled
-        this.tradesTableService.loadData();
-      }
-    });
-
-    this.tradesTableService.onWebsocketOpen();
     this.tradesTableService.onRestLoading();
-    this.tradesTableService.onRestAndDataComplete();
 
     this.tradesTableService.data$.subscribe((data) => {
       this.data = data;

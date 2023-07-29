@@ -1,33 +1,27 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import { Dictionary } from '@ngrx/entity';
 import {
   Subject,
   combineLatest,
   debounceTime,
   filter,
   first,
-  map,
   switchMap,
 } from 'rxjs';
+import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
-import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
-import { TickerEntity } from 'src/app/features/ticker/store/ticker.state';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
-import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
-import { LoadingController } from 'src/app/shared/loading-controller';
-import { TableStyleService } from 'src/app/shared/table/components/table/table-style.service';
+import { convertPairToCurrency } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Row } from '../../../../shared/table/types/row';
 import { PairColumn } from '../../types/pair-column';
+import { PairsTableService } from './pairs-table-service';
 import { PairsTableStyleService } from './pairs-table-style.service';
-import { ExchangeSymbolEntity } from 'src/app/features/exchange-info/store/exchange-info.state';
-import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
 
 @Component({
   selector: 'app-pairs-table',
@@ -42,16 +36,6 @@ export class PairsTableComponent implements OnDestroy, OnInit {
 
   #nextPageRows$ = new Subject<Row[]>();
 
-  #data$ = combineLatest([
-    this.exchangeInfoService.tradingSymbols$,
-    this.tickerService.tickers$,
-    this.#globalPair$,
-  ]).pipe(
-    map(([tradingSymbols, tickers, globalPair]) =>
-      this.#createRows(tradingSymbols, tickers, globalPair.symbol)
-    )
-  );
-
   data: Row[] = [];
 
   pageSizeOptions = [15];
@@ -64,22 +48,21 @@ export class PairsTableComponent implements OnDestroy, OnInit {
 
   styles = this.pairsTableStyleService;
 
-  loadingController = new LoadingController(true);
+  loadingController = this.pairsTableService.loadingController;
 
   constructor(
     private router: Router,
     private location: Location,
     private tickerService: TickerService,
     private tickerRestService: TickerRestService,
-    private exchangeInfoService: ExchangeInfoService,
     private exchangeInfoRestService: ExchangeInfoRestService,
     private websocketService: WebsocketService,
-    private tableStyleService: TableStyleService,
     private globalService: GlobalService,
     private tradesTableService: TradesTableService,
     private candleChartContainerService: CandleChartContainerService,
     private orderBookTablesService: OrderBookTablesService,
-    private pairsTableStyleService: PairsTableStyleService
+    private pairsTableStyleService: PairsTableStyleService,
+    private pairsTableService: PairsTableService
   ) {}
 
   #createPageSymbols(rows: Row[]) {
@@ -100,69 +83,6 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     const symbols = this.#createPageSymbols(rows);
 
     return symbols.filter((item) => item !== symbol);
-  }
-
-  #createRows(
-    symbols: ExchangeSymbolEntity[],
-    tickers: Dictionary<TickerEntity>,
-    globalSymbol: string
-  ) {
-    const rows: Row[] = [];
-
-    for (const {
-      baseAsset,
-      quoteAsset,
-      PRICE_FILTER: { tickSize },
-    } of symbols) {
-      const symbol = `${baseAsset}${quoteAsset}`;
-      const pair = `${baseAsset}/${quoteAsset}`;
-      const ticker = tickers[symbol];
-
-      if (ticker) {
-        const { lastPrice, priceChangePercent, prevLastPrice } = ticker;
-        const formattedPrice = formatPrice(lastPrice, tickSize);
-
-        const priceChangePercentFormatted = `${
-          Number(priceChangePercent) > 0 ? '+' : ''
-        }${priceChangePercent}%`;
-
-        rows.push({
-          cells: [
-            { value: pair },
-            {
-              value: formattedPrice,
-              classNames: [
-                prevLastPrice
-                  ? lastPrice > prevLastPrice
-                    ? this.tableStyleService.cellPositiveClass
-                    : lastPrice < prevLastPrice
-                    ? this.tableStyleService.cellNegativeClass
-                    : ''
-                  : '',
-              ],
-            },
-            {
-              value: priceChangePercentFormatted,
-              classNames: [
-                Number(priceChangePercent) > 0
-                  ? this.tableStyleService.cellPositiveClass
-                  : Number(priceChangePercent) < 0
-                  ? this.tableStyleService.cellNegativeClass
-                  : '',
-              ],
-            },
-          ],
-          classNames: [
-            this.pairsTableStyleService.rowClass,
-            symbol === globalSymbol
-              ? this.tableStyleService.rowHighlightClass
-              : '',
-          ],
-        });
-      }
-    }
-
-    return rows;
   }
 
   #updateWidgetsData() {
@@ -260,7 +180,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   #onDataUpdate() {
-    this.#data$.subscribe((data) => {
+    this.pairsTableService.data$.subscribe((data) => {
       this.data = data;
     });
   }
@@ -278,25 +198,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     });
   }
 
-  #onRestAndDataComplete() {
-    combineLatest([
-      this.tickerRestService.status$.pipe(
-        filter((status) => status === 'success')
-      ),
-      this.exchangeInfoRestService.status$.pipe(
-        filter((status) => status === 'success')
-      ),
-      this.#data$.pipe(filter((data) => Boolean(data.length))),
-    ]).subscribe(() => {
-      this.loadingController.setLoading(false);
-    });
-  }
-
   ngOnInit(): void {
     this.#onDataUpdate();
     this.#onRestLoading();
     this.#onPageChangeDebounced();
-    this.#onRestAndDataComplete();
   }
 
   ngOnDestroy(): void {

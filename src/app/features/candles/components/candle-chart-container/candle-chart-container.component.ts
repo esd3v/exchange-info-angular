@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSelectChange } from '@angular/material/select';
 import { EChartsOption } from 'echarts';
-import { first } from 'rxjs';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { CandleInterval } from '../../types/candle-interval';
 import { CandleChartData } from '../candle-chart/candle-chart.component';
 import { CandleChartContainerService } from './candle-chart-container.service';
@@ -14,7 +12,6 @@ import { CandleChartContainerService } from './candle-chart-container.service';
 })
 export class CandleChartContainerComponent implements OnInit {
   constructor(
-    private websocketService: WebsocketService,
     private candleChartContainerService: CandleChartContainerService
   ) {}
 
@@ -68,15 +65,6 @@ export class CandleChartContainerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.websocketService.status$.pipe(first()).subscribe((status) => {
-      if (status === null) {
-        // Load REST data only if we start the app with websockets disabled
-        this.candleChartContainerService.loadData();
-      }
-    });
-
-    this.candleChartContainerService.onWebsocketOpen();
     this.candleChartContainerService.onRestLoading();
-    this.candleChartContainerService.onRestAndDataComplete();
   }
 }

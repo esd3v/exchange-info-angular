@@ -1,23 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { combineLatest, first } from 'rxjs';
+import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
+import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
+import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
+import { PairsTableService } from 'src/app/features/pairs/components/pairs-table/pairs-table-service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
+import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import {
   APP_SITE_NAME,
   WEBSOCKET_ENABLED_AT_START,
 } from 'src/app/shared/config';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { HomeService } from './home.service';
-import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent {
   constructor(
     private router: Router,
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
@@ -27,7 +32,12 @@ export class HomeComponent implements OnInit {
     private titleService: Title,
     private globalService: GlobalService,
     private exchangeInfoService: ExchangeInfoService,
-    private tickerService: TickerService
+    private tickerService: TickerService,
+    private websocketService: WebsocketService,
+    private candleChartContainerService: CandleChartContainerService,
+    private orderBookTablesService: OrderBookTablesService,
+    private tradesTableService: TradesTableService,
+    private pairsTableService: PairsTableService
   ) {
     this.#onRouteEvent();
   }
@@ -49,7 +59,7 @@ export class HomeComponent implements OnInit {
     return { base, quote };
   }
 
-  #handleNavigationEnd() {
+  #setCurrency() {
     const parsedRoutePair = this.#getParsedRoutePair();
 
     if (!parsedRoutePair) {
@@ -59,8 +69,6 @@ export class HomeComponent implements OnInit {
     const { base, quote } = parsedRoutePair;
 
     this.globalService.setCurrency({ base, quote });
-    this.exchangeInfoService.loadData();
-    this.tickerService.loadData();
   }
 
   #createTitle({
@@ -107,12 +115,14 @@ export class HomeComponent implements OnInit {
 
       // If navigation ended
       if (Number(type) === 1) {
-        this.#handleNavigationEnd();
+        this.#onNavigationEnd();
       }
     });
   }
 
-  ngOnInit(): void {
+  #onNavigationEnd() {
+    this.#setCurrency();
+
     if (WEBSOCKET_ENABLED_AT_START) {
       this.homeService.startWebSocket();
     }
@@ -121,5 +131,60 @@ export class HomeComponent implements OnInit {
 
     this.homeService.onWebsocketMessage();
     this.homeService.onWebsocketStatus();
+
+    // Exchange info
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    this.exchangeInfoService.loadData();
+
+    // Ticker
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    this.tickerService.loadData();
+    this.tickerService.onWebsocketOpen();
+
+    // Candle chart
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === null) {
+        // Load REST data only if we start the app with websockets disabled
+        this.candleChartContainerService.loadData();
+      }
+    });
+
+    this.candleChartContainerService.onWebsocketOpen();
+    this.candleChartContainerService.onRestAndDataComplete();
+
+    // Order book table
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === null) {
+        // Load REST data only if we start the app with websockets disabled
+        this.orderBookTablesService.loadData();
+      }
+    });
+
+    this.orderBookTablesService.onWebsocketOpen();
+    this.orderBookTablesService.onRestAndDataComplete();
+
+    // Trades table
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === null) {
+        // Load REST data only if we start the app with websockets disabled
+        this.tradesTableService.loadData();
+      }
+    });
+
+    this.tradesTableService.onWebsocketOpen();
+    this.tradesTableService.onRestAndDataComplete();
+
+    // Order book table
+    //////////////////////////////////////////
+    //////////////////////////////////////////
+    this.pairsTableService.onRestAndDataComplete();
   }
 }

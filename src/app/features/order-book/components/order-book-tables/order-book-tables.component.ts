@@ -50,16 +50,7 @@ export class OrderBookTablesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.websocketService.status$.pipe(first()).subscribe((status) => {
-      if (status === null) {
-        // Load REST data only if we start the app with websockets disabled
-        this.orderBookTablesService.loadData();
-      }
-    });
-
-    this.orderBookTablesService.onWebsocketOpen();
     this.orderBookTablesService.onRestLoading();
-    this.orderBookTablesService.onRestAndDataComplete();
 
     this.orderBookTablesService.globalCurrency$
       .pipe(first())

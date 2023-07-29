@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, filter, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  filter,
+  first,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { AppState } from 'src/app/store';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
@@ -10,6 +17,7 @@ import { TickerEntity } from '../store/ticker.state';
 import { GlobalTicker } from '../types/global-ticker';
 import { WebsocketTicker } from '../types/websocket-ticker';
 import { WebsocketTickerStreamParams } from '../types/websocket-ticker-stream-params';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +28,8 @@ export class TickerService {
   constructor(
     private store$: Store<AppState>,
     private globalService: GlobalService,
-    private websocketSubscribeService: WebsocketSubscribeService
+    private websocketSubscribeService: WebsocketSubscribeService,
+    private websocketService: WebsocketService
   ) {
     this.#globalPair$
       .pipe(
@@ -105,6 +114,19 @@ export class TickerService {
 
   loadData() {
     this.store$.dispatch(tickerActions.load());
+  }
+
+  onWebsocketOpen() {
+    this.websocketService.status$
+      .pipe(
+        filter((status) => status === 'open'),
+        switchMap(() => this.globalService.pair$.pipe(first()))
+      )
+      .subscribe((globalPair) => {
+        this.singleSubscriber.subscribeToStream({
+          symbols: [globalPair.symbol],
+        });
+      });
   }
 
   updateTicker(ticker: TickerEntity) {

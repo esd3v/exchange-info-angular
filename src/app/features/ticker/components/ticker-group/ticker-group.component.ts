@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { filter, first, map, switchMap } from 'rxjs';
+import { filter } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
@@ -69,19 +69,6 @@ export class TickerGroupComponent implements OnInit {
     return Number(value) > 0;
   }
 
-  onWebsocketOpen() {
-    this.websocketService.status$
-      .pipe(
-        filter((status) => status === 'open'),
-        switchMap(() => this.globalPair$.pipe(first()))
-      )
-      .subscribe((globalPair) => {
-        this.tickerService.singleSubscriber.subscribeToStream({
-          symbols: [globalPair.symbol],
-        });
-      });
-  }
-
   onGlobalTickerUpdate() {
     this.tickerService.globalTicker$
       .pipe(filter(Boolean))
@@ -91,8 +78,6 @@ export class TickerGroupComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.onWebsocketOpen();
-
     this.onGlobalTickerUpdate();
   }
 }
