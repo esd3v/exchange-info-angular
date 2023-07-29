@@ -77,7 +77,7 @@ export class HomeService {
       } else if (status === 'closed') {
         if (reason === 'terminated') {
           this.#openSnackBar('WebSocket connection terminated');
-        } else {
+        } else if (reason !== null) {
           this.#openSnackBar('WebSocket connection closed');
         }
       } else if (status === 'closing') {

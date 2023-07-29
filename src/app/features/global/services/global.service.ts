@@ -20,11 +20,6 @@ export class GlobalService {
 
   constructor() {}
 
-  notification = {
-    type: 'info',
-    message: '',
-  };
-
   setCurrency(currency: Currency) {
     this.currency$.next(currency);
   }
