@@ -8,7 +8,11 @@ import {
 } from '../../src/app/shared/config';
 import { RootPage } from './RootPage';
 
-const pair = createPair(APP_DEFAULT_BASE_CURRENCY, APP_DEFAULT_QUOTE_CURRENCY);
+const pair = createPair({
+  base: APP_DEFAULT_BASE_CURRENCY,
+  quote: APP_DEFAULT_QUOTE_CURRENCY,
+});
+
 const status = 200;
 const loadCount = 1;
 

@@ -8,10 +8,10 @@ import { RootPage } from './RootPage';
 it('Fix wrong pair parameter in url', () => {
   const rootPage = new RootPage();
 
-  const pair = createPair(
-    APP_DEFAULT_BASE_CURRENCY,
-    APP_DEFAULT_QUOTE_CURRENCY
-  );
+  const pair = createPair({
+    base: APP_DEFAULT_BASE_CURRENCY,
+    quote: APP_DEFAULT_QUOTE_CURRENCY,
+  });
 
   rootPage.visit('ETH_');
 

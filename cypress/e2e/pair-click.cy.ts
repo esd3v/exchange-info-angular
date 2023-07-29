@@ -8,7 +8,12 @@ import { RootPage } from './RootPage';
 
 it('Pair click', () => {
   const rootPage = new RootPage();
-  const pair = createPair('LTC', 'BTC');
+
+  const pair = createPair({
+    base: 'LTC',
+    quote: 'BTC',
+  });
+
   const status = 200;
   const loadCount = 1;
 
