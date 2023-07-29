@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { first } from 'rxjs';
 import { Currency } from 'src/app/features/global/types/currency';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { Row } from '../../../../shared/table/types/row';
@@ -48,11 +47,9 @@ export class OrderBookTablesComponent implements OnInit {
   ngOnInit(): void {
     this.orderBookTablesService.onRestLoading();
 
-    this.orderBookTablesService.globalCurrency$
-      .pipe(first())
-      .subscribe((currency) => {
-        this.columns = this.#createColumns(currency);
-      });
+    this.orderBookTablesService.globalCurrency$.subscribe((currency) => {
+      this.columns = this.#createColumns(currency);
+    });
 
     this.orderBookTablesService.asksData$.subscribe((data) => {
       this.asksData = data;

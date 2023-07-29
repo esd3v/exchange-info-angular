@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { first } from 'rxjs';
 import { Currency } from 'src/app/features/global/types/currency';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { Row } from '../../../../shared/table/types/row';
@@ -55,10 +54,8 @@ export class TradesTableComponent implements OnInit {
       this.data = data;
     });
 
-    this.tradesTableService.globalCurrency$
-      .pipe(first())
-      .subscribe((currency) => {
-        this.columns = this.#createColumns(currency);
-      });
+    this.tradesTableService.globalCurrency$.subscribe((currency) => {
+      this.columns = this.#createColumns(currency);
+    });
   }
 }
