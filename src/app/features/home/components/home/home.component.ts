@@ -147,7 +147,7 @@ export class HomeComponent {
     //////////////////////////////////////////
     //////////////////////////////////////////
     this.websocketService.status$.pipe(first()).subscribe((status) => {
-      if (status === null) {
+      if (status === 'closed') {
         // Load REST data only if we start the app with websockets disabled
         this.candleChartContainerService.loadData();
       }
@@ -160,7 +160,7 @@ export class HomeComponent {
     //////////////////////////////////////////
     //////////////////////////////////////////
     this.websocketService.status$.pipe(first()).subscribe((status) => {
-      if (status === null) {
+      if (status === 'closed') {
         // Load REST data only if we start the app with websockets disabled
         this.orderBookTablesService.loadData();
       }
@@ -173,7 +173,7 @@ export class HomeComponent {
     //////////////////////////////////////////
     //////////////////////////////////////////
     this.websocketService.status$.pipe(first()).subscribe((status) => {
-      if (status === null) {
+      if (status === 'closed') {
         // Load REST data only if we start the app with websockets disabled
         this.tradesTableService.loadData();
       }

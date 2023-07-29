@@ -12,7 +12,7 @@ import {
 import { TOKEN_WEBSOCKET_CONFIG } from '../injection-tokens';
 import { WebsocketConfig } from '../types/websocket-config';
 
-type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing' | null;
+type WebsocketStatus = 'open' | 'connecting' | 'closed' | 'closing';
 
 export type Reason =
   | 'failed'
@@ -34,7 +34,7 @@ export class WebsocketService implements OnDestroy {
 
   #reason$ = new BehaviorSubject<Reason>(null);
 
-  #status$ = new BehaviorSubject<WebsocketStatus>(null);
+  #status$ = new BehaviorSubject<WebsocketStatus>('closed');
 
   get messages$() {
     return this.#messages$;

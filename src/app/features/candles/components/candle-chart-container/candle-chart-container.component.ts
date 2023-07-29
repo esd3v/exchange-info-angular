@@ -4,6 +4,8 @@ import { EChartsOption } from 'echarts';
 import { CandleInterval } from '../../types/candle-interval';
 import { CandleChartData } from '../candle-chart/candle-chart.component';
 import { CandleChartContainerService } from './candle-chart-container.service';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { filter, first } from 'rxjs';
 
 @Component({
   selector: 'app-candle-chart-container',
@@ -12,7 +14,8 @@ import { CandleChartContainerService } from './candle-chart-container.service';
 })
 export class CandleChartContainerComponent implements OnInit {
   constructor(
-    private candleChartContainerService: CandleChartContainerService
+    private candleChartContainerService: CandleChartContainerService,
+    private websocketService: WebsocketService
   ) {}
 
   intervals: CandleInterval[] = [
@@ -51,7 +54,13 @@ export class CandleChartContainerComponent implements OnInit {
 
     this.candleChartContainerService.interval = interval;
 
-    this.candleChartContainerService.resubscribeLoadData();
+    this.websocketService.status$.pipe(first()).subscribe((status) => {
+      if (status === 'closed') {
+        this.candleChartContainerService.loadData();
+      } else {
+        this.candleChartContainerService.resubscribeLoadData();
+      }
+    });
   }
 
   #onDataupdate() {

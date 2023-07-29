@@ -151,29 +151,37 @@ export class PairsTableService {
   }
 
   resubscribeToNextPageStream() {
-    combineLatest([
-      this.pageRows$.pipe(first()),
-      this.prevPageRows$.pipe(first()),
-      this.#globalPair$.pipe(first()),
-    ]).subscribe(([nextPageRows, prevPageRows, globalPair]) => {
-      const nextSymbols = this.#createFilteredPageSymbols(
-        nextPageRows,
-        globalPair.symbol
-      );
+    this.websocketService.status$
+      .pipe(
+        first(),
+        filter((status) => status === 'open'),
+        switchMap(() =>
+          combineLatest([
+            this.pageRows$.pipe(first()),
+            this.prevPageRows$.pipe(first()),
+            this.#globalPair$.pipe(first()),
+          ])
+        )
+      )
+      .subscribe(([nextPageRows, prevPageRows, globalPair]) => {
+        const nextSymbols = this.#createFilteredPageSymbols(
+          nextPageRows,
+          globalPair.symbol
+        );
 
-      const prevSymbols = this.#createFilteredPageSymbols(
-        prevPageRows,
-        globalPair.symbol
-      );
+        const prevSymbols = this.#createFilteredPageSymbols(
+          prevPageRows,
+          globalPair.symbol
+        );
 
-      this.tickerService.multipleSubscriber.unsubscribeFromStream({
-        symbols: prevSymbols,
+        this.tickerService.multipleSubscriber.unsubscribeFromStream({
+          symbols: prevSymbols,
+        });
+
+        this.tickerService.multipleSubscriber.subscribeToStream({
+          symbols: nextSymbols,
+        });
       });
-
-      this.tickerService.multipleSubscriber.subscribeToStream({
-        symbols: nextSymbols,
-      });
-    });
   }
 
   onWebsocketOpen() {

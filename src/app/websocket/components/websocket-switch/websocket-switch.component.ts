@@ -24,10 +24,7 @@ export class WebsocketSwitchComponent {
     if (checked) {
       this.checked$.next(true);
 
-      if (
-        this.websocketService.status === 'closed' ||
-        this.websocketService.status === null
-      ) {
+      if (this.websocketService.status === 'closed') {
         this.websocketService.connect('switch');
       }
     } else {
