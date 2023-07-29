@@ -1,15 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import {
-  BehaviorSubject,
-  combineLatest,
-  filter,
-  first,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, filter, first, switchMap } from 'rxjs';
 import { AppState } from 'src/app/store';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
+import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
 import { GlobalService } from '../../global/services/global.service';
 import { tickerActions, tickerSelectors } from '../store';
@@ -17,7 +11,6 @@ import { TickerEntity } from '../store/ticker.state';
 import { GlobalTicker } from '../types/global-ticker';
 import { WebsocketTicker } from '../types/websocket-ticker';
 import { WebsocketTickerStreamParams } from '../types/websocket-ticker-stream-params';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 
 @Injectable({
   providedIn: 'root',

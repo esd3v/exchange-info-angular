@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { OrderBookColumn } from '../../types/order-book-column';
 import { first } from 'rxjs';
 import { Currency } from 'src/app/features/global/types/currency';
-import { OrderBookTablesService } from './order-book-tables.service';
+import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { Row } from '../../../../shared/table/types/row';
+import { OrderBookColumn } from '../../types/order-book-column';
+import { OrderBookTablesService } from './order-book-tables.service';
 
 @Component({
   selector: 'app-order-book-tables',
@@ -24,10 +23,7 @@ export class OrderBookTablesComponent implements OnInit {
     return this.orderBookTablesService.loadingController.loading;
   }
 
-  constructor(
-    private orderBookTablesService: OrderBookTablesService,
-    private websocketService: WebsocketService
-  ) {}
+  constructor(private orderBookTablesService: OrderBookTablesService) {}
 
   #createColumns({ base, quote }: Currency): OrderBookColumn[] {
     return [

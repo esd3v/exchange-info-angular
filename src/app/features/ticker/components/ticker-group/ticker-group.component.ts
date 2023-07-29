@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { filter } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TickerService } from '../../services/ticker.service';
 import { GlobalTicker } from '../../types/global-ticker';
 
@@ -61,8 +60,7 @@ export class TickerGroupComponent implements OnInit {
 
   constructor(
     private globalService: GlobalService,
-    private tickerService: TickerService,
-    private websocketService: WebsocketService
+    private tickerService: TickerService
   ) {}
 
   isPositive(value: string | number): boolean {

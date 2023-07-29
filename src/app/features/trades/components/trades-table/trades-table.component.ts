@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { first } from 'rxjs';
 import { Currency } from 'src/app/features/global/types/currency';
 import { WIDGET_TRADES_DEFAULT_LIMIT } from 'src/app/shared/config';
-import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { Row } from '../../../../shared/table/types/row';
 import { TradesColumn } from '../../types/trades-column';
 import { TradesTableService } from './trades-table.service';
@@ -12,10 +11,7 @@ import { TradesTableService } from './trades-table.service';
   templateUrl: './trades-table.component.html',
 })
 export class TradesTableComponent implements OnInit {
-  constructor(
-    private tradesTableService: TradesTableService,
-    private websocketService: WebsocketService
-  ) {}
+  constructor(private tradesTableService: TradesTableService) {}
 
   data: Row[] = [];
 
