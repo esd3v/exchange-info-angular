@@ -43,7 +43,7 @@ export class PairsTableService {
     this.#globalPair$,
   ]).pipe(
     map(([tradingSymbols, tickers, globalPair]) =>
-      this.#createRows(tradingSymbols, tickers, globalPair.symbol)
+      this.createRows(tradingSymbols, tickers, globalPair.symbol)
     )
   );
 
@@ -53,7 +53,7 @@ export class PairsTableService {
 
   loadingController = new LoadingController(true);
 
-  #createRows(
+  createRows(
     symbols: ExchangeSymbolEntity[],
     tickers: Dictionary<TickerEntity>,
     globalSymbol: string
@@ -116,7 +116,7 @@ export class PairsTableService {
     return rows;
   }
 
-  #createPageSymbols(rows: Row[]) {
+  createPageSymbols(rows: Row[]) {
     return rows.map((row) => {
       const pairCell = row.cells[0];
 
@@ -131,7 +131,7 @@ export class PairsTableService {
 
   // Exclude globalSymbol because we already subscribed to it
   #createFilteredPageSymbols(rows: Row[], symbol: string) {
-    const symbols = this.#createPageSymbols(rows);
+    const symbols = this.createPageSymbols(rows);
 
     return symbols.filter((item) => item !== symbol);
   }
