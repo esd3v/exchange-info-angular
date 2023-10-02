@@ -9,7 +9,7 @@ export const WIDGET_TRADES_DEFAULT_LIMIT = 20;
 export const WIDGET_DEPTH_DEFAULT_LIMIT = 20;
 
 export const API_HTTP_VERSION = 3;
-export const API_HTTP_BASEURL = `https://data.binance.com/api/v${API_HTTP_VERSION}`;
+export const API_HTTP_BASEURL = `https://api.binance.com/api/v${API_HTTP_VERSION}`;
 export const API_HTTP_TIMEOUT = 30000;
 export const API_WEBSOCKET_BASEURL = 'wss://stream.binance.com:9443/ws';
 // export const API_START_DELAY = 0;
