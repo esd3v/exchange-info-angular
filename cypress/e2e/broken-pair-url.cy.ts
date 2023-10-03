@@ -13,16 +13,16 @@ it('Fix wrong pair parameter in url', () => {
     quote: APP_DEFAULT_QUOTE_CURRENCY,
   });
 
-  rootPage.visit('ETH_');
+  rootPage.visit('trade/ETH_');
 
   // URL should contain corrected pair route
   rootPage.urlContains(pair.underscore);
 
-  rootPage.visit('123');
+  rootPage.visit('trade/123');
 
   rootPage.urlContains(pair.underscore);
 
-  rootPage.visit('.#*@][');
+  rootPage.visit('trade/.#*@][');
 
   rootPage.urlContains(pair.underscore);
 });

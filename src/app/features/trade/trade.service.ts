@@ -3,16 +3,16 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { combineLatest, first } from 'rxjs';
 import { CandlesService } from 'src/app/features/candles/services/candles.service';
+import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookService } from 'src/app/features/order-book/services/order-book.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
+import { TradesService } from 'src/app/features/trades/services/trades.service';
 import { MISC_SNACKBAR_DURATION } from 'src/app/shared/config';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { GlobalService } from '../../../global/services/global.service';
-import { TradesService } from '../../../trades/services/trades.service';
 
 @Injectable({ providedIn: 'root' })
-export class HomeService {
+export class TradeService {
   constructor(
     private globalService: GlobalService,
     private router: Router,
@@ -27,7 +27,7 @@ export class HomeService {
 
   navigateToDefaultPair() {
     this.globalService.pair$.pipe(first()).subscribe((globalPair) => {
-      this.router.navigate([globalPair.underscore]);
+      this.router.navigate([`trade/${globalPair.underscore}`]);
     });
   }
 

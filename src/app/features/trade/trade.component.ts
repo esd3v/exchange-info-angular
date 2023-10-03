@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { combineLatest, first } from 'rxjs';
 import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
 import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
+import { PairsTableService } from 'src/app/features/pairs/components/pairs-table/pairs-table.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import {
@@ -14,21 +15,18 @@ import {
 } from 'src/app/shared/config';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
-import { HomeService } from './home.service';
-import { PairsTableService } from 'src/app/features/pairs/components/pairs-table/pairs-table.service';
+import { TradeService } from './trade.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.scss'],
+  selector: 'app-trade',
+  templateUrl: './trade.component.html',
 })
-export class HomeComponent {
+export class TradeComponent implements OnInit {
   constructor(
-    private router: Router,
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
     private route: ActivatedRoute,
-    private homeService: HomeService,
+    private tradeService: TradeService,
     private titleService: Title,
     private globalService: GlobalService,
     private exchangeInfoService: ExchangeInfoService,
@@ -38,35 +36,16 @@ export class HomeComponent {
     private orderBookTablesService: OrderBookTablesService,
     private tradesTableService: TradesTableService,
     private pairsTableService: PairsTableService
-  ) {
-    this.#onRouteEvent();
-  }
-
-  #getParsedRoutePair() {
-    const routePair = this.route.snapshot.paramMap.get('pair');
-
-    if (routePair === null) {
-      return null;
-    }
-
-    const { base, quote } = convertPairToCurrency(routePair, '_');
-
-    // e.g "ETH_" or "_BTC"
-    if (!base || !quote) {
-      return null;
-    }
-
-    return { base, quote };
-  }
+  ) {}
 
   #setCurrency() {
-    const parsedRoutePair = this.#getParsedRoutePair();
+    const pair = this.route.snapshot.paramMap.get('pair');
 
-    if (!parsedRoutePair) {
-      return this.homeService.navigateToDefaultPair();
+    if (!pair) {
+      return;
     }
 
-    const { base, quote } = parsedRoutePair;
+    const { base, quote } = convertPairToCurrency(pair, '_');
 
     this.globalService.setCurrency({ base, quote });
   }
@@ -107,30 +86,16 @@ export class HomeComponent {
     });
   }
 
-  #onRouteEvent() {
-    const routeEvents$ = this.router.events;
-
-    routeEvents$.subscribe((data: unknown) => {
-      const { type } = data as Event;
-
-      // If navigation ended
-      if (Number(type) === 1) {
-        this.#onNavigationEnd();
-      }
-    });
-  }
-
-  #onNavigationEnd() {
+  ngOnInit(): void {
     this.#setCurrency();
-
-    if (WEBSOCKET_ENABLED_AT_START) {
-      this.homeService.startWebSocket();
-    }
-
     this.#updateTitle();
 
-    this.homeService.onWebsocketMessage();
-    this.homeService.onWebsocketStatus();
+    if (WEBSOCKET_ENABLED_AT_START) {
+      this.tradeService.startWebSocket();
+    }
+
+    this.tradeService.onWebsocketMessage();
+    this.tradeService.onWebsocketStatus();
 
     // Exchange info
     //////////////////////////////////////////

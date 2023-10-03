@@ -1,11 +1,11 @@
-import { routes } from './routes';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { HomeModule } from '../features/home/components/home/home.module';
+import { routes } from './routes';
+import { TradeModule } from '../features/trade/trade.module';
 
 @NgModule({
   declarations: [],
-  imports: [RouterModule.forRoot(routes), HomeModule],
+  imports: [RouterModule.forRoot(routes), TradeModule],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

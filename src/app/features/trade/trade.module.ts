@@ -6,19 +6,19 @@ import { PairsTableModule } from 'src/app/features/pairs/components/pairs-table/
 import { TickerGroupModule } from 'src/app/features/ticker/components/ticker-group/ticker-group.module';
 import { TradesTableModule } from 'src/app/features/trades/components/trades-table/trades-table.module';
 import { HeaderModule } from 'src/app/shared/components/header/header.module';
-import { HomeComponent } from './home.component';
+import { TradeComponent } from './trade.component';
 
 @NgModule({
-  declarations: [HomeComponent],
+  declarations: [TradeComponent],
   imports: [
-    HeaderModule,
     PairsTableModule,
     TickerGroupModule,
     CandleChartContainerModule,
     OrderBookTablesModule,
     TradesTableModule,
     MatSnackBarModule,
+    HeaderModule,
   ],
-  exports: [HomeComponent],
+  exports: [TradeComponent],
 })
-export class HomeModule {}
+export class TradeModule {}
