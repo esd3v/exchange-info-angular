@@ -77,7 +77,7 @@ export class TradesTableService {
           {
             value: getFormattedDate({
               msec: time,
-              format: 'HH:mm:ss:SSS',
+              format: 'HH:mm:ss',
             }),
           },
         ],
