@@ -64,7 +64,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   }
 
   #setLocation(pair: string) {
-    const url = this.router.createUrlTree([pair]).toString();
+    const url = this.router.createUrlTree([`trade/${pair}`]).toString();
 
     // Don't navigate with refresh, just replace url
     this.location.go(url);
