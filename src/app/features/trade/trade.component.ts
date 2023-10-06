@@ -5,7 +5,6 @@ import { combineLatest, first } from 'rxjs';
 import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
 import { ExchangeInfoService } from 'src/app/features/exchange-info/services/exchange-info.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
-import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
 import { PairsTableService } from 'src/app/features/pairs/components/pairs-table/pairs-table.service';
 import { TickerService } from 'src/app/features/ticker/services/ticker.service';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
@@ -16,6 +15,7 @@ import {
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
 import { LayoutService } from 'src/app/shared/services/layout.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
+import { OrderBookTablesService } from '../order-book/services/order-book-tables.service';
 import { TradeService } from './trade.service';
 
 @Component({

@@ -8,15 +8,17 @@ import {
   multiplyDecimal,
 } from 'src/app/shared/helpers';
 import { LoadingController } from 'src/app/shared/loading-controller';
-import { OrderBookRestService } from '../../services/order-book-rest.service';
-import { OrderBookService } from '../../services/order-book.service';
-import { OrderBook } from '../../types/order-book';
 import { WebsocketSubscriber } from 'src/app/websocket/websocket-subscriber';
 import { WebsocketSubscribeService } from 'src/app/websocket/services/websocket-subscribe.service';
 import { WIDGET_DEPTH_DEFAULT_LIMIT } from 'src/app/shared/config';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TableStyleService } from 'src/app/shared/table/components/table/table-style.service';
-import { Row } from '../../../../shared/table/types/row';
+import { Currency } from 'src/app/features/global/types/currency';
+import { Row } from 'src/app/shared/table/types/row';
+import { OrderBook } from '../types/order-book';
+import { OrderBookColumn } from '../types/order-book-column';
+import { OrderBookRestService } from './order-book-rest.service';
+import { OrderBookService } from './order-book.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderBookTablesService {
@@ -45,6 +47,26 @@ export class OrderBookTablesService {
     this.orderBookService.createStreamParams,
     this.websocketSubscribeService
   );
+
+  createColumns({ base, quote }: Currency): OrderBookColumn[] {
+    return [
+      {
+        id: 'price',
+        numeric: false,
+        label: `Price${quote ? ` (${quote})` : ''}`,
+      },
+      {
+        id: 'amount',
+        numeric: true,
+        label: `Amount${base ? ` (${base})` : ''}`,
+      },
+      {
+        id: 'total',
+        numeric: true,
+        label: 'Total',
+      },
+    ];
+  }
 
   #getData$(type: 'asks' | 'bids') {
     return combineLatest([

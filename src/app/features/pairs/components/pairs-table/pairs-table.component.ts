@@ -5,7 +5,7 @@ import { combineLatest, debounceTime, filter, first } from 'rxjs';
 import { CandleChartContainerService } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.service';
 import { ExchangeInfoRestService } from 'src/app/features/exchange-info/services/exchange-info-rest.service';
 import { GlobalService } from 'src/app/features/global/services/global.service';
-import { OrderBookTablesService } from 'src/app/features/order-book/components/order-book-tables/order-book-tables.service';
+import { OrderBookTablesService } from 'src/app/features/order-book/services/order-book-tables.service';
 import { TickerRestService } from 'src/app/features/ticker/services/ticker-rest.service';
 import { TradesTableService } from 'src/app/features/trades/components/trades-table/trades-table.service';
 import { convertPairToCurrency } from 'src/app/shared/helpers';
