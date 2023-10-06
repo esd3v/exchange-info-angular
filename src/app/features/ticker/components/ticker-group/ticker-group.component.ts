@@ -2,15 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { filter } from 'rxjs';
 import { GlobalService } from 'src/app/features/global/services/global.service';
 import { formatPrice, formatPriceChangePercent } from 'src/app/shared/helpers';
+import { LayoutService } from 'src/app/shared/services/layout.service';
 import { TickerService } from '../../services/ticker.service';
 import { GlobalTicker } from '../../types/global-ticker';
 
 @Component({
   selector: 'app-ticker-group',
   templateUrl: './ticker-group.component.html',
+  styleUrls: ['./ticker-group.component.scss'],
 })
 export class TickerGroupComponent implements OnInit {
   globalPair$ = this.globalService.pair$;
+
+  breakpoint$ = this.layoutService.breakpoint$;
 
   ticker!: GlobalTicker;
 
@@ -60,7 +64,8 @@ export class TickerGroupComponent implements OnInit {
 
   constructor(
     private globalService: GlobalService,
-    private tickerService: TickerService
+    private tickerService: TickerService,
+    private layoutService: LayoutService
   ) {}
 
   isPositive(value: string | number): boolean {

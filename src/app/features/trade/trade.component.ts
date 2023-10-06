@@ -14,6 +14,7 @@ import {
   WEBSOCKET_ENABLED_AT_START,
 } from 'src/app/shared/config';
 import { convertPairToCurrency, formatPrice } from 'src/app/shared/helpers';
+import { LayoutService } from 'src/app/shared/services/layout.service';
 import { WebsocketService } from 'src/app/websocket/services/websocket.service';
 import { TradeService } from './trade.service';
 
@@ -22,6 +23,8 @@ import { TradeService } from './trade.service';
   templateUrl: './trade.component.html',
 })
 export class TradeComponent implements OnInit {
+  breakpoint$ = this.layoutService.breakpoint$;
+
   constructor(
     // ActivatedRoute shouldn't be in a service because it doesn't work in services
     // https://github.com/angular/angular/issues/12884#issuecomment-260575298
@@ -35,7 +38,8 @@ export class TradeComponent implements OnInit {
     private candleChartContainerService: CandleChartContainerService,
     private orderBookTablesService: OrderBookTablesService,
     private tradesTableService: TradesTableService,
-    private pairsTableService: PairsTableService
+    private pairsTableService: PairsTableService,
+    private layoutService: LayoutService
   ) {}
 
   #setCurrency() {

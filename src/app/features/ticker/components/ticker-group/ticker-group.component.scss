@@ -1,0 +1,64 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+
+@mixin common() {
+    flex-wrap: wrap;
+    & > * {
+        &:not(:last-child) {
+            margin-right: 0;
+        }
+    }
+}
+
+@mixin largeMedium() {
+    @include common();
+
+    & > * {
+        width: 30%;
+        flex-grow: 1;
+        &:first-child {
+           margin-bottom: $grid-gutter-width;
+        }
+        &:nth-child(1), &:nth-child(2), &:nth-child(4), &:nth-child(5) {
+            margin-right: $grid-gutter-width;
+        }
+    }
+}
+
+.ticker-group {
+    display: flex;
+    justify-content: space-between;
+    & > * {
+        width: 20%;
+        &:not(:last-child) {
+           margin-right: $grid-gutter-width;
+        }
+    }
+    &__large {
+        @include largeMedium();
+    }
+    &__medium {
+        @include largeMedium();
+    }
+    &__small {
+        @include common();
+
+        & > * {
+            width: 48%;
+            &:nth-child(1), &:nth-child(3) {
+               margin-bottom: 16px;
+            }
+        }
+    }
+    &__xsmall {
+        @include common();
+
+        & > * {
+            width: 100%;
+            &:not(:last-child) {
+               margin-bottom: 16px;
+            }
+        }
+    }
+}

@@ -1,10 +1,16 @@
-<div class="col">
+<div
+  class="ticker-group"
+  [ngClass]="{
+    'ticker-group__large': (breakpoint$ | async) === 'Large',
+    'ticker-group__medium': (breakpoint$ | async) === 'Medium',
+    'ticker-group__small': (breakpoint$ | async) === 'Small',
+    'ticker-group__xsmall': (breakpoint$ | async) === 'XSmall'
+  }"
+>
   <app-ticker-card
     title="Pair"
     [value]="(globalPair$ | async)?.slash || ''"
   ></app-ticker-card>
-</div>
-<div class="col">
   <app-ticker-card
     title="Last price"
     [value]="lastPrice"
@@ -12,8 +18,6 @@
     [positive]="lastPricePositive"
   >
   </app-ticker-card>
-</div>
-<div class="col">
   <app-ticker-card
     title="24 change"
     [value]="priceChange"
@@ -21,8 +25,6 @@
     [positive]="priceChangePositive"
   >
   </app-ticker-card>
-</div>
-<div class="col">
   <app-ticker-card
     title="24 change percent"
     [value]="priceChangePercent"
@@ -30,16 +32,12 @@
     [positive]="priceChangePercentPositive"
   >
   </app-ticker-card>
-</div>
-<div class="col">
   <app-ticker-card
     title="Last quantity"
     [value]="lastQuantity"
     [loading]="loading"
   >
   </app-ticker-card>
-</div>
-<div class="col">
   <app-ticker-card title="Trades" [value]="numberOfTrades" [loading]="loading">
   </app-ticker-card>
 </div>

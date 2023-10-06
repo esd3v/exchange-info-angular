@@ -1,4 +1,14 @@
-<mat-toolbar color="primary">
-  <h6>{{ siteName }}</h6>
-  <app-websocket-switch></app-websocket-switch>
+<mat-toolbar
+  color="primary"
+  class="header"
+  [ngClass]="{
+    header__xsmall: (breakpoint$ | async) === 'XSmall'
+  }"
+>
+  <mat-toolbar-row>
+    <h6>{{ siteName }}</h6></mat-toolbar-row
+  >
+  <mat-toolbar-row>
+    <app-websocket-switch></app-websocket-switch
+  ></mat-toolbar-row>
 </mat-toolbar>

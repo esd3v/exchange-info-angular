@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CandleChartContainerModule } from 'src/app/features/candles/components/candle-chart-container/candle-chart-container.module';
@@ -11,6 +12,7 @@ import { TradeComponent } from './trade.component';
 @NgModule({
   declarations: [TradeComponent],
   imports: [
+    CommonModule,
     PairsTableModule,
     TickerGroupModule,
     CandleChartContainerModule,

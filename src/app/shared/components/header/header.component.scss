@@ -1,7 +1,15 @@
 @import "src/styles/variables";
 
-mat-toolbar {
+.header {
   margin-bottom: ($spacer * 1);
   display: flex;
   justify-content: space-between;
+  flex-direction: row;
+  & > * {
+    width: auto;
+  }
+  &__xsmall {
+    flex-direction: column;
+    align-items: center;
+  }
 }
