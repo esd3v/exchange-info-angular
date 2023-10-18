@@ -31,10 +31,10 @@
     "@angular/platform-browser": "15.2.10",
     "@angular/platform-browser-dynamic": "15.2.10",
     "@angular/router": "15.2.10",
-    "@ngrx/effects": "14.0.2",
-    "@ngrx/entity": "14.0.2",
-    "@ngrx/store": "14.0.2",
-    "@ngrx/store-devtools": "14.0.2",
+    "@ngrx/effects": "15.4.0",
+    "@ngrx/entity": "15.4.0",
+    "@ngrx/store": "15.4.0",
+    "@ngrx/store-devtools": "15.4.0",
     "big.js": "6.2.1",
     "bootstrap": "5.2.0",
     "dayjs": "1.11.5",
@@ -43,7 +43,7 @@
     "ngx-skeleton-loader": "5.0.0",
     "rxjs": "7.5.0",
     "tslib": "2.3.0",
-    "zone.js": "0.11.4"
+    "zone.js": "0.13.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "15.2.10",
