@@ -13,8 +13,8 @@ export class WebsocketSwitchComponent {
 
   disabled$ = this.websocketService.status$.pipe(
     map((status) =>
-      status === 'closing' || status === 'connecting' ? true : false
-    )
+      status === 'closing' || status === 'connecting' ? true : false,
+    ),
   );
 
   constructor(private websocketService: WebsocketService) {}

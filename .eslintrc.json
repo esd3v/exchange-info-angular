@@ -4,10 +4,12 @@
   "overrides": [
     {
       "files": ["*.ts", "*.js"],
+      "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": ["tsconfig.json"],
         "createDefaultProgram": true
       },
+      "plugins": ["@typescript-eslint"],
       "extends": [
         "plugin:@angular-eslint/recommended",
         "plugin:rxjs/recommended",
