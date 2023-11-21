@@ -2,6 +2,7 @@
   mat-table
   [ngClass]="[styles.tableClass, className]"
   [trackBy]="trackRow"
+  [fixedLayout]="true"
   [dataSource]="loading ? placeholderRows : dataSource"
 >
   <ng-container
@@ -10,7 +11,7 @@
   >
     <th
       [ngClass]="[
-        styles.cellClass,
+        styles.headerCellClass,
         column.numeric ? styles.cellRightClass : ''
       ]"
       mat-header-cell
@@ -33,7 +34,7 @@
       </ng-template>
     </td>
   </ng-container>
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-header-row *matHeaderRowDef="displayedColumns" [ngClass]="styles.headerRowClass"></tr>
   <tr
     mat-row
     *matRowDef="let row; columns: displayedColumns"
@@ -47,6 +48,7 @@
   showFirstLastButtons
   aria-label="Select page"
   [length]="paginatorLength"
+  [hidePageSize]="true"
   (page)="handlePageChange($event)"
 >
 </mat-paginator>

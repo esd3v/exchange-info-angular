@@ -1,19 +1,44 @@
-@import "/src/styles/overrides.scss";
+@use "@angular/material" as mat;
 
 .table {
-  width: 100%;
+  $highlight: green;  
+  $padding: 4px;
+  $hoverColor: mat.get-color-from-palette(mat.$grey-palette, 200);
+  
   table-layout: fixed;
-  $highlight: red;
+  width: 100%;
 
-  @include override-mat-table();
-
+  &__headerRow {
+    height: 0;
+    font-size: 12px;
+  }
+  &__headerCell {
+    padding: 0 $padding $padding $padding;
+    &:first-of-type {
+      padding-left: 0;
+    }
+    &:last-of-type {
+      padding-right: 0;
+    }
+  }
   &__row {
     cursor: pointer;
+    height: 0;
+    &:hover {
+      background-color: $hoverColor;
+    }
     &--highlight {
       background-color: $hoverColor;
     }
   }
   &__cell {
+    padding: $padding;
+    &:first-of-type {
+      padding-left: 0;
+    }
+    &:last-of-type {
+      padding-right: 0;
+    }
     &--alignedRight {
       text-align: right !important;
     }

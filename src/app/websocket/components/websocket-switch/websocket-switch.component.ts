@@ -7,7 +7,6 @@ import { WEBSOCKET_ENABLED_AT_START } from '../../../shared/config';
 @Component({
   selector: 'app-websocket-switch',
   templateUrl: './websocket-switch.component.html',
-  styleUrls: ['./websocket-switch.component.scss'],
 })
 export class WebsocketSwitchComponent {
   checked$ = new BehaviorSubject(WEBSOCKET_ENABLED_AT_START);

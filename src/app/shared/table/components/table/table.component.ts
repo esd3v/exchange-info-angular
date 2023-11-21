@@ -7,22 +7,20 @@ import {
   OnChanges,
   OnInit,
   Output,
-  ViewChild,
-  ViewEncapsulation,
+  ViewChild
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { filter, first, skip } from 'rxjs';
 import { NgChanges } from 'src/app/shared/types/misc';
 import { Column } from '../../types/column';
-import { TableStyleService } from './table-style.service';
 import { Row } from '../../types/row';
+import { TableStyleService } from './table-style.service';
 
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
-  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnChanges, OnInit, AfterViewInit {

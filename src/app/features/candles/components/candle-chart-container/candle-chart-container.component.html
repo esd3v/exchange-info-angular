@@ -5,9 +5,8 @@
     (chartInit)="handleChartInit()"
   ></app-candle-chart>
   <div role="actions">
+    <div class="time-action">
     <span class="time">Time</span>
-    <mat-form-field appearance="legacy" floatLabel="never">
-      <mat-label>Time</mat-label>
       <mat-select
         panelOpen="false"
         [disabled]="loadingController.loading"
@@ -17,6 +16,6 @@
           {{ interval }}
         </mat-option></mat-select
       >
-    </mat-form-field>
+    </div>
   </div>
 </app-window>
