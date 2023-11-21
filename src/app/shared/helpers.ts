@@ -1,13 +1,10 @@
 import { Big } from 'big.js';
 import { MISC_TOFIXED_DIGITS } from './config';
-import * as dayjs from 'dayjs';
-import * as utc from 'dayjs/plugin/utc';
 import { Column } from './table/types/column';
 import { Row } from './table/types/row';
 import { SortOrder } from './table/types/sort-order';
 import { Currency } from '../features/global/types/currency';
-
-dayjs.extend(utc);
+import * as dateFns from 'date-fns';
 
 export const addPlusIfPositive = (value: string): string =>
   `${Number(value) > 0 ? `+${value}` : value}`;
@@ -79,13 +76,11 @@ export const formatPriceChangePercent = (value: string) =>
 
 export const getFormattedDate = ({
   msec,
-  utc,
-  format = 'DD-MM-YYYY HH:mm:ss',
+  format = 'dd-MM-yyyy HH:mm:ss',
 }: {
   msec: number;
   format?: string;
-  utc?: boolean;
-}) => (utc ? dayjs.utc(msec).format(format) : dayjs(msec).format(format));
+}) => dateFns.format(new Date(msec), format);
 
 export function getSortOrder<T extends number | string>(a: T, b: T) {
   const result1 = (b as number) - (a as number);
