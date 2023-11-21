@@ -13,12 +13,12 @@ export class TradesEffects {
         return this.tradesRestService
           .get$({ symbol, limit })
           .pipe(map((data) => tradesActions.loadSuccess({ trades: data })));
-      })
+      }),
     );
   });
 
   constructor(
     private actions$: Actions,
-    private tradesRestService: TradesRestService
+    private tradesRestService: TradesRestService,
   ) {}
 }

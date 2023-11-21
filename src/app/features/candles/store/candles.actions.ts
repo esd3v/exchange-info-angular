@@ -13,15 +13,15 @@ export const load = createAction(LOAD, props<CandlesGetParams>());
 
 export const loadSuccess = createAction(
   SUCCESS,
-  props<{ candles: Candle[]; interval?: CandleInterval }>()
+  props<{ candles: Candle[]; interval?: CandleInterval }>(),
 );
 
 export const addCandleAndRemoveFirst = createAction(
   ADD_CANDLE_AND_REMOVE_FIRST,
-  props<{ candle: Candle }>()
+  props<{ candle: Candle }>(),
 );
 
 export const updateCandle = createAction(
   UPDATE_CANDLE,
-  props<{ candle: Candle }>()
+  props<{ candle: Candle }>(),
 );

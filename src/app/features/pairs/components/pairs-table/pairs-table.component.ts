@@ -49,7 +49,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
     private candleChartContainerService: CandleChartContainerService,
     private orderBookTablesService: OrderBookTablesService,
     private pairsTableStyleService: PairsTableStyleService,
-    private pairsTableService: PairsTableService
+    private pairsTableService: PairsTableService,
   ) {}
 
   #updateWidgetsData() {
@@ -75,7 +75,7 @@ export class PairsTableComponent implements OnDestroy, OnInit {
 
     const { base, quote } = convertPairToCurrency(
       pairCell.value as string,
-      '/'
+      '/',
     );
 
     return { base, quote };
@@ -131,10 +131,10 @@ export class PairsTableComponent implements OnDestroy, OnInit {
   #onRestLoading() {
     combineLatest([
       this.tickerRestService.status$.pipe(
-        filter((status) => status === 'loading')
+        filter((status) => status === 'loading'),
       ),
       this.exchangeInfoRestService.status$.pipe(
-        filter((status) => status === 'loading')
+        filter((status) => status === 'loading'),
       ),
     ]).subscribe(() => {
       this.loadingController.setLoading(true);

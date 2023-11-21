@@ -109,7 +109,7 @@ export class WebsocketService implements OnDestroy {
     this.#status$.next('connecting');
 
     this.#reason$.next(
-      reason || (this.#reason === 'terminated' ? 'restoring' : this.#reason)
+      reason || (this.#reason === 'terminated' ? 'restoring' : this.#reason),
     );
 
     this.#socket = new WebSocket(this.config.url);
@@ -119,7 +119,7 @@ export class WebsocketService implements OnDestroy {
       this.#status$.next('open');
 
       this.#reason$.next(
-        this.#reason === 'restoring' ? 'restored' : this.#reason
+        this.#reason === 'restoring' ? 'restored' : this.#reason,
       );
 
       if (this.config.keepAlive) {
@@ -150,9 +150,9 @@ export class WebsocketService implements OnDestroy {
                 // e.g it wasn't switched off by websocket switch
                 this.reason$.pipe(
                   first(),
-                  filter((reason) => reason === 'terminated')
-                )
-              )
+                  filter((reason) => reason === 'terminated'),
+                ),
+              ),
             )
             .subscribe(() => {
               this.connect();

@@ -20,14 +20,14 @@ export class CandleChartContainerService {
     private candlesRestService: CandlesRestService,
     private websocketSubscribeService: WebsocketSubscribeService,
     private globalService: GlobalService,
-    private candlesService: CandlesService
+    private candlesService: CandlesService,
   ) {}
 
   #globalPair$ = this.globalService.pair$;
 
   data$ = this.candlesService.candles$.pipe(
     filter((candles) => Boolean(candles.length)),
-    map((candles) => this.#createData(candles))
+    map((candles) => this.#createData(candles)),
   );
 
   loadingController = new LoadingController(true);
@@ -35,7 +35,7 @@ export class CandleChartContainerService {
   subscriber = new WebsocketSubscriber(
     1,
     this.candlesService.createStreamParams,
-    this.websocketSubscribeService
+    this.websocketSubscribeService,
   );
 
   interval: CandleInterval = WIDGET_CHART_DEFAULT_CANDLEINTERVAL;
@@ -107,7 +107,7 @@ export class CandleChartContainerService {
     this.candlesRestService.status$
       .pipe(
         filter((status) => status === 'success'),
-        switchMap(() => this.data$.pipe(first()))
+        switchMap(() => this.data$.pipe(first())),
       )
       .subscribe(() => {
         this.loadingController.setLoading(false);

@@ -7,7 +7,7 @@ export class TableStyleService {
   tableClass = 'table';
 
   rowClass = `${this.tableClass}__row`;
-  
+
   headerRowClass = `${this.tableClass}__headerRow`;
 
   headerCellClass = `${this.tableClass}__headerCell`;

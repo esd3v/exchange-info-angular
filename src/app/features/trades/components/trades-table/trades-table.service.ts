@@ -27,7 +27,7 @@ export class TradesTableService {
     private tickerService: TickerService,
     private globalService: GlobalService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
   ) {}
 
   loadingController = new LoadingController(true);
@@ -35,7 +35,7 @@ export class TradesTableService {
   subscriber = new WebsocketSubscriber(
     3,
     this.tradesService.createStreamParams,
-    this.websocketSubscribeService
+    this.websocketSubscribeService,
   );
 
   globalCurrency$ = this.globalService.currency$;
@@ -47,8 +47,8 @@ export class TradesTableService {
     this.tickerService.globalTicker$.pipe(filter(Boolean)),
   ]).pipe(
     map(([trades, globalTicker]) =>
-      this.#createRows(trades, globalTicker.tickSize)
-    )
+      this.#createRows(trades, globalTicker.tickSize),
+    ),
   );
 
   #createRows(trades: TradesEntity[], tickSize: string): Row[] {
@@ -133,7 +133,7 @@ export class TradesTableService {
     this.tradesRestService.status$
       .pipe(
         filter((status) => status === 'success'),
-        switchMap(() => this.data$.pipe(first()))
+        switchMap(() => this.data$.pipe(first())),
       )
       .subscribe(() => {
         this.loadingController.setLoading(false);

@@ -41,5 +41,5 @@ export const numberOfTrades = (symbol: string) =>
 
 export const loading = createSelector(
   state,
-  (state) => state.status === 'loading'
+  (state) => state.status === 'loading',
 );

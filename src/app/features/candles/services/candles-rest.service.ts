@@ -13,7 +13,10 @@ import { candlesSelectors } from '../store';
 export class CandlesRestService {
   status$ = this.store$.select(candlesSelectors.status);
 
-  constructor(private http: HttpClient, private store$: Store<AppState>) {}
+  constructor(
+    private http: HttpClient,
+    private store$: Store<AppState>,
+  ) {}
 
   get$(params: CandlesGetParams): Observable<Candle[]> {
     return this.http.get<Candle[]>('klines', { params });

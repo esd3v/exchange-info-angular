@@ -8,7 +8,7 @@ const CREATE_SYMBOLS = `${PREFIX} CREATE SYMBOLS`;
 
 export const createSymbols = createAction(
   CREATE_SYMBOLS,
-  props<ExchangeInfo>()
+  props<ExchangeInfo>(),
 );
 
 export const load = createAction(LOAD);

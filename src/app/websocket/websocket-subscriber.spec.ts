@@ -15,7 +15,7 @@ describe('WebsocketSubscriber', () => {
   beforeEach(() => {
     websocketSubscribeServiceSpy = jasmine.createSpyObj(
       'WebsocketSubscribeService',
-      ['subscribe', 'unsubscribe', 'unsubscribeCurrent']
+      ['subscribe', 'unsubscribe', 'unsubscribeCurrent'],
     );
 
     websocketSubscribeServiceSpy.subscribeStatus$ = (() =>
@@ -39,7 +39,7 @@ describe('WebsocketSubscriber', () => {
     subscriber = new WebsocketSubscriber<any>(
       id,
       () => streamParams,
-      websocketSubscribeService
+      websocketSubscribeService,
     );
   });
 
@@ -48,7 +48,7 @@ describe('WebsocketSubscriber', () => {
 
     expect(websocketSubscribeServiceSpy.subscribe).toHaveBeenCalledWith(
       streamParams,
-      id
+      id,
     );
   });
 
@@ -57,7 +57,7 @@ describe('WebsocketSubscriber', () => {
 
     expect(websocketSubscribeServiceSpy.unsubscribe).toHaveBeenCalledWith(
       streamParams,
-      id
+      id,
     );
   });
 
@@ -65,7 +65,7 @@ describe('WebsocketSubscriber', () => {
     subscriber.unsubscribeFromCurrentStream();
 
     expect(
-      websocketSubscribeServiceSpy.unsubscribeCurrent
+      websocketSubscribeServiceSpy.unsubscribeCurrent,
     ).toHaveBeenCalledWith(id);
   });
 });

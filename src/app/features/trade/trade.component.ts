@@ -39,7 +39,7 @@ export class TradeComponent implements OnInit {
     private orderBookTablesService: OrderBookTablesService,
     private tradesTableService: TradesTableService,
     private pairsTableService: PairsTableService,
-    private layoutService: LayoutService
+    private layoutService: LayoutService,
   ) {}
 
   #setCurrency() {

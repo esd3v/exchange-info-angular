@@ -41,5 +41,5 @@ export const candlesReducer = createReducer(
     const id = entity.openTime.toString();
 
     return candlesAdapter.updateOne({ id, changes: entity }, state);
-  })
+  }),
 );

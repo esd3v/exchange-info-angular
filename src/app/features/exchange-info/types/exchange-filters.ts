@@ -12,5 +12,5 @@ export type ExchangeFilters = [
     {
       maxNumAlgoOrders: number;
     }
-  >
+  >,
 ];

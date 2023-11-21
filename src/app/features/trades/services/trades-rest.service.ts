@@ -13,7 +13,10 @@ import { tradesSelectors } from '../store';
 export class TradesRestService {
   status$ = this.store$.select(tradesSelectors.status);
 
-  constructor(private http: HttpClient, private store$: Store<AppState>) {}
+  constructor(
+    private http: HttpClient,
+    private store$: Store<AppState>,
+  ) {}
 
   get$(params: TradesGetParams): Observable<Trades[]> {
     return this.http.get<Trades[]>('trades', { params });

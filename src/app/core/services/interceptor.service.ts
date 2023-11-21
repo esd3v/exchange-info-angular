@@ -12,7 +12,7 @@ import { API_HTTP_BASEURL } from '../../shared/config';
 export class InterceptorService implements HttpInterceptor {
   intercept(
     req: HttpRequest<any>,
-    next: HttpHandler
+    next: HttpHandler,
   ): Observable<HttpEvent<any>> {
     const cloned = req.clone({
       url: `${API_HTTP_BASEURL}/${req.url}`,

@@ -14,5 +14,5 @@ export const loadSuccess = createAction(SUCCESS, props<{ trades: Trades[] }>());
 
 export const addAndRemoveLast = createAction(
   ADDANDREMOVELAST,
-  props<TradesEntity>()
+  props<TradesEntity>(),
 );

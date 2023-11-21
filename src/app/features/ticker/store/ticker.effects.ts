@@ -13,12 +13,12 @@ export class TickerEffects {
         return this.tickerRestService
           .get$()
           .pipe(map((data) => tickerActions.loadSuccess({ data })));
-      })
+      }),
     );
   });
 
   constructor(
     private actions$: Actions,
-    private tickerRestService: TickerRestService
+    private tickerRestService: TickerRestService,
   ) {}
 }

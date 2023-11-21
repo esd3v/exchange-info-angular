@@ -35,9 +35,9 @@ export class WebsocketSubscribeService {
       .pipe(
         // emit each message with delay
         concatMap((value) =>
-          of(value).pipe(delay(WEBSOCKET_MESSAGES_QUEUE_DELAY))
+          of(value).pipe(delay(WEBSOCKET_MESSAGES_QUEUE_DELAY)),
         ),
-        filter(Boolean)
+        filter(Boolean),
       )
       .subscribe((message) => {
         this.#sendMessage(message);
@@ -54,7 +54,7 @@ export class WebsocketSubscribeService {
 
   #setStatus(id: number, status: WebsocketMessageStatus) {
     const updated = this.#messages.map((item) =>
-      item.params.id === id ? { ...item, status } : item
+      item.params.id === id ? { ...item, status } : item,
     );
 
     this.#messages = updated;
@@ -63,13 +63,13 @@ export class WebsocketSubscribeService {
 
   #addMessage(message: WebsocketMessage) {
     const index = this.#messages.findIndex(
-      (item) => item.params.id === message.params.id
+      (item) => item.params.id === message.params.id,
     );
 
     const updated =
       index > -1
         ? this.#messages.map((item) =>
-            item.params.id === message.params.id ? message : item
+            item.params.id === message.params.id ? message : item,
           )
         : [...this.#messages, message];
 
@@ -124,7 +124,7 @@ export class WebsocketSubscribeService {
 
   messageStatusById$(id: number) {
     return this.#messages$.pipe(
-      map((messages) => messages.find((item) => item.params.id === id)?.status)
+      map((messages) => messages.find((item) => item.params.id === id)?.status),
     );
   }
 

@@ -13,12 +13,12 @@ export class OrderBookEffects {
         return this.orderBookRestService
           .get$({ symbol, limit })
           .pipe(map((data) => orderBookActions.loadSuccess(data)));
-      })
+      }),
     );
   });
 
   constructor(
     private actions$: Actions,
-    private orderBookRestService: OrderBookRestService
+    private orderBookRestService: OrderBookRestService,
   ) {}
 }

@@ -14,7 +14,7 @@ export const addPlusIfPositive = (value: string): string =>
 
 export const isScientific = (value: string | number) =>
   /\d+\.?\d*e[+-]*\d+/i.test(
-    typeof value === 'number' ? value.toString() : value
+    typeof value === 'number' ? value.toString() : value,
   );
 
 export const createPair = ({ base, quote }: Currency) => {
@@ -27,7 +27,7 @@ export const createPair = ({ base, quote }: Currency) => {
 
 export const convertPairToCurrency = (
   pair: string,
-  separator: '/' | '_'
+  separator: '/' | '_',
 ): Currency => {
   const [base, quote] = pair.split(separator);
 
@@ -46,7 +46,7 @@ export const formatDecimal = (value: number | string) => {
 
 export const formatPrice = (
   amount: string | number,
-  stepOrTickSize: string | number
+  stepOrTickSize: string | number,
 ) => {
   const stepOrTickSizeFixed = formatDecimal(stepOrTickSize);
   const split = stepOrTickSizeFixed.split('.');

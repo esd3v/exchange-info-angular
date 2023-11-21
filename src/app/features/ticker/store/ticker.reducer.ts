@@ -50,8 +50,8 @@ export const tickerReducer = createReducer(
                   : state.entities[data.symbol]?.prevLastPrice,
             },
           },
-          state
+          state,
         )
       : state;
-  })
+  }),
 );

@@ -7,7 +7,7 @@ import {
   OnChanges,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -87,7 +87,7 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
       .pipe(
         // Skip immediate value from BehaviorSubject (don't get old rows)
         skip(1),
-        first()
+        first(),
       )
       .subscribe((rows) => {
         this.paginatorPageChange?.emit(rows);
@@ -99,7 +99,7 @@ export class TableComponent implements OnChanges, OnInit, AfterViewInit {
     this.#pageRows$
       .pipe(
         filter((rows) => Boolean(rows.length)),
-        first()
+        first(),
       )
       .subscribe((rows) => {
         this.paginatorPageDataInit?.emit(rows);

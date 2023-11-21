@@ -15,7 +15,7 @@ import { filter, first } from 'rxjs';
 export class CandleChartContainerComponent implements OnInit {
   constructor(
     private candleChartContainerService: CandleChartContainerService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
   ) {}
 
   intervals: CandleInterval[] = [

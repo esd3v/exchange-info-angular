@@ -22,7 +22,7 @@ export class TradeService {
     private websocketService: WebsocketService,
     private tickerService: TickerService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private candlesService: CandlesService
+    private candlesService: CandlesService,
   ) {}
 
   navigateToDefaultPair() {

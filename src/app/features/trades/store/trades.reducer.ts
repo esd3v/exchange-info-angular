@@ -22,5 +22,5 @@ export const tradesReducer = createReducer(
       ...state,
       data: updated,
     };
-  })
+  }),
 );

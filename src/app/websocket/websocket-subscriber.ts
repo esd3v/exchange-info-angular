@@ -5,36 +5,36 @@ export class WebsocketSubscriber<T> {
   subscribeStatus$ = this.websocketSubscribeService.subscribeStatus$(this.id);
 
   unsubscribeStatus$ = this.websocketSubscribeService.unsubscribeStatus$(
-    this.id
+    this.id,
   );
 
   subscribed$ = this.subscribeStatus$.pipe(
     filter((status) => status === 'done'),
-    first()
+    first(),
   );
 
   unsubscribed$ = this.unsubscribeStatus$.pipe(
     filter((status) => status === 'done'),
-    first()
+    first(),
   );
 
   constructor(
     private id: number,
     private createStreamParams: (params: T) => string[],
-    private websocketSubscribeService: WebsocketSubscribeService
+    private websocketSubscribeService: WebsocketSubscribeService,
   ) {}
 
   subscribeToStream(params: T) {
     this.websocketSubscribeService.subscribe(
       this.createStreamParams(params),
-      this.id
+      this.id,
     );
   }
 
   unsubscribeFromStream(params: T) {
     this.websocketSubscribeService.unsubscribe(
       this.createStreamParams(params),
-      this.id
+      this.id,
     );
   }
 

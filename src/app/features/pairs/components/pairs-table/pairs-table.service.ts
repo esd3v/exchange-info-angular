@@ -32,7 +32,7 @@ export class PairsTableService {
     private tableStyleService: TableStyleService,
     private globalService: GlobalService,
     private websocketService: WebsocketService,
-    private pairsTableStyleService: PairsTableStyleService
+    private pairsTableStyleService: PairsTableStyleService,
   ) {}
 
   #globalPair$ = this.globalService.pair$;
@@ -43,8 +43,8 @@ export class PairsTableService {
     this.#globalPair$,
   ]).pipe(
     map(([tradingSymbols, tickers, globalPair]) =>
-      this.createRows(tradingSymbols, tickers, globalPair.symbol)
-    )
+      this.createRows(tradingSymbols, tickers, globalPair.symbol),
+    ),
   );
 
   pageRows$ = new BehaviorSubject<Row[]>([]);
@@ -56,7 +56,7 @@ export class PairsTableService {
   createRows(
     symbols: ExchangeSymbolEntity[],
     tickers: Dictionary<TickerEntity>,
-    globalSymbol: string
+    globalSymbol: string,
   ) {
     const rows: Row[] = [];
 
@@ -122,7 +122,7 @@ export class PairsTableService {
 
       const { base, quote } = convertPairToCurrency(
         pairCell.value as string,
-        '/'
+        '/',
       );
 
       return `${base}${quote}`;
@@ -143,7 +143,7 @@ export class PairsTableService {
     ]).subscribe(([nextPageRows, globalPair]) => {
       const symbols = this.#createFilteredPageSymbols(
         nextPageRows,
-        globalPair.symbol
+        globalPair.symbol,
       );
 
       this.tickerService.multipleSubscriber.subscribeToStream({ symbols });
@@ -160,18 +160,18 @@ export class PairsTableService {
             this.pageRows$.pipe(first()),
             this.prevPageRows$.pipe(first()),
             this.#globalPair$.pipe(first()),
-          ])
-        )
+          ]),
+        ),
       )
       .subscribe(([nextPageRows, prevPageRows, globalPair]) => {
         const nextSymbols = this.#createFilteredPageSymbols(
           nextPageRows,
-          globalPair.symbol
+          globalPair.symbol,
         );
 
         const prevSymbols = this.#createFilteredPageSymbols(
           prevPageRows,
-          globalPair.symbol
+          globalPair.symbol,
         );
 
         this.tickerService.multipleSubscriber.unsubscribeFromStream({
@@ -191,9 +191,9 @@ export class PairsTableService {
         switchMap(() =>
           this.pageRows$.pipe(
             filter((pageRows) => Boolean(pageRows.length)),
-            first()
-          )
-        )
+            first(),
+          ),
+        ),
       )
       .subscribe(() => {
         this.#subscribeToPageStream();
@@ -203,10 +203,10 @@ export class PairsTableService {
   onRestAndDataComplete() {
     combineLatest([
       this.tickerRestService.status$.pipe(
-        filter((status) => status === 'success')
+        filter((status) => status === 'success'),
       ),
       this.exchangeInfoRestService.status$.pipe(
-        filter((status) => status === 'success')
+        filter((status) => status === 'success'),
       ),
       this.data$.pipe(filter((data) => Boolean(data.length))),
     ]).subscribe(() => {

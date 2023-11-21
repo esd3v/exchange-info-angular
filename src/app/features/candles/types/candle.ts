@@ -10,5 +10,5 @@ export type Candle = [
   numberOfTrades: number,
   takerBuyBaseAssetVolume: string,
   takerBuyQuoteAssetVolume: string,
-  ignore: string
+  ignore: string,
 ];

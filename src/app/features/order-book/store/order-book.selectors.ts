@@ -11,5 +11,5 @@ export const asks = createSelector(state, (state) => state.asks);
 
 export const lastUpdateId = createSelector(
   state,
-  (state) => state.lastUpdateId
+  (state) => state.lastUpdateId,
 );

@@ -12,7 +12,10 @@ import { exchangeInfoSelectors } from '../store';
 export class ExchangeInfoRestService {
   status$ = this.store$.select(exchangeInfoSelectors.status);
 
-  constructor(private http: HttpClient, private store$: Store<AppState>) {}
+  constructor(
+    private http: HttpClient,
+    private store$: Store<AppState>,
+  ) {}
 
   get$(): Observable<ExchangeInfo> {
     return this.http.get<ExchangeInfo>('exchangeInfo');

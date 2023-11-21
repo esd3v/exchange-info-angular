@@ -39,7 +39,7 @@ describe('CandlesRestService', () => {
     });
 
     const req = httpMock.expectOne(
-      `klines?symbol=${symbol}&interval=${interval}`
+      `klines?symbol=${symbol}&interval=${interval}`,
     );
 
     expect(req.request.method).toBe('GET');

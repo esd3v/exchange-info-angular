@@ -13,7 +13,7 @@ export class ExchangeInfoEffects {
         return this.exchangeInfoRestService
           .get$()
           .pipe(map((data) => exchangeInfoActions.loadSuccess(data)));
-      })
+      }),
     );
   });
 
@@ -22,12 +22,12 @@ export class ExchangeInfoEffects {
       ofType(exchangeInfoActions.loadSuccess),
       map((data) => {
         return exchangeInfoActions.createSymbols(data);
-      })
+      }),
     );
   });
 
   constructor(
     private actions$: Actions,
-    private exchangeInfoRestService: ExchangeInfoRestService
+    private exchangeInfoRestService: ExchangeInfoRestService,
   ) {}
 }

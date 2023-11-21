@@ -22,7 +22,7 @@ export const exchangeInfoReducer = createReducer(
       const { symbol, baseAsset, quoteAsset, status, filters } = item;
 
       const priceFilter = filters.find(
-        ({ filterType }) => filterType === 'PRICE_FILTER'
+        ({ filterType }) => filterType === 'PRICE_FILTER',
       ) as PriceFilter | undefined;
 
       const tickSize = priceFilter?.tickSize;
@@ -47,5 +47,5 @@ export const exchangeInfoReducer = createReducer(
       ...state,
       symbols: symbolsAdapter.setAll(symbols, state.symbols),
     };
-  })
+  }),
 );

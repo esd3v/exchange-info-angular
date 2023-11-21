@@ -65,7 +65,7 @@ export class TickerGroupComponent implements OnInit {
   constructor(
     private globalService: GlobalService,
     private tickerService: TickerService,
-    private layoutService: LayoutService
+    private layoutService: LayoutService,
   ) {}
 
   isPositive(value: string | number): boolean {

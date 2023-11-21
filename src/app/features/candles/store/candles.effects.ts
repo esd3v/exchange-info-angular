@@ -14,15 +14,15 @@ export class CandlesEffects {
           .get$({ interval, symbol })
           .pipe(
             map((data) =>
-              candlesActions.loadSuccess({ candles: data, interval })
-            )
+              candlesActions.loadSuccess({ candles: data, interval }),
+            ),
           );
-      })
+      }),
     );
   });
 
   constructor(
     private actions$: Actions,
-    private candlesRestService: CandlesRestService
+    private candlesRestService: CandlesRestService,
   ) {}
 }

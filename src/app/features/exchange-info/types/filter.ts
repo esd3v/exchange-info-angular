@@ -12,7 +12,7 @@ export type Filter<
     | 'MAX_POSITION'
     | 'EXCHANGE_MAX_NUM_ORDERS'
     | 'EXCHANGE_MAX_NUM_ALGO_ORDERS',
-  T extends Record<string, any>
+  T extends Record<string, any>,
 > = {
   filterType: filterType;
 } & T;

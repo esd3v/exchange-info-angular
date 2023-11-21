@@ -29,7 +29,7 @@ export class OrderBookTablesService {
     private tableStyleService: TableStyleService,
     private orderBookService: OrderBookService,
     private websocketService: WebsocketService,
-    private websocketSubscribeService: WebsocketSubscribeService
+    private websocketSubscribeService: WebsocketSubscribeService,
   ) {}
 
   #globalPair$ = this.globalService.pair$;
@@ -45,7 +45,7 @@ export class OrderBookTablesService {
   subscriber = new WebsocketSubscriber(
     4,
     this.orderBookService.createStreamParams,
-    this.websocketSubscribeService
+    this.websocketSubscribeService,
   );
 
   createColumns({ base, quote }: Currency): OrderBookColumn[] {
@@ -72,23 +72,23 @@ export class OrderBookTablesService {
     return combineLatest([
       type === 'asks'
         ? this.orderBookService.asks$.pipe(
-            filter((asks) => Boolean(asks.length))
+            filter((asks) => Boolean(asks.length)),
           )
         : this.orderBookService.bids$.pipe(
-            filter((bids) => Boolean(bids.length))
+            filter((bids) => Boolean(bids.length)),
           ),
       this.tickerService.globalTicker$.pipe(filter(Boolean)),
     ]).pipe(
       map(([orderBook, globalTicker]) =>
-        this.#createRows(orderBook, globalTicker.tickSize, type)
-      )
+        this.#createRows(orderBook, globalTicker.tickSize, type),
+      ),
     );
   }
 
   #createRows(
     orderBook: OrderBook['asks'] | OrderBook['bids'],
     tickSize: string,
-    type: 'asks' | 'bids'
+    type: 'asks' | 'bids',
   ): Row[] {
     return orderBook.map((item) => {
       const [price, quantity] = item;
@@ -169,8 +169,8 @@ export class OrderBookTablesService {
       .pipe(
         filter((status) => status === 'success'),
         switchMap(() =>
-          combineLatest([this.asksData$, this.bidsData$]).pipe(first())
-        )
+          combineLatest([this.asksData$, this.bidsData$]).pipe(first()),
+        ),
       )
       .subscribe(() => {
         this.loadingController.setLoading(false);

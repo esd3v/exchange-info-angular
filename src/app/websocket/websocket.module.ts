@@ -11,7 +11,7 @@ import { WebsocketSubscribeService } from './services/websocket-subscribe.servic
 })
 export class WebsocketModule {
   static forRoot(
-    config?: WebsocketConfig
+    config?: WebsocketConfig,
   ): ModuleWithProviders<WebsocketModule> {
     return {
       ngModule: WebsocketModule,

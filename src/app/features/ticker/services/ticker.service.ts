@@ -22,7 +22,7 @@ export class TickerService {
     private store$: Store<AppState>,
     private globalService: GlobalService,
     private websocketSubscribeService: WebsocketSubscribeService,
-    private websocketService: WebsocketService
+    private websocketService: WebsocketService,
   ) {
     this.#globalPair$
       .pipe(
@@ -49,8 +49,8 @@ export class TickerService {
             this.store$
               .select(tickerSelectors.numberOfTrades(pair.symbol))
               .pipe(filter(Boolean)),
-          ])
-        )
+          ]),
+        ),
       )
       .subscribe(
         ([
@@ -71,7 +71,7 @@ export class TickerService {
             priceChangePercent,
             tickSize,
           });
-        }
+        },
       );
   }
 
@@ -81,13 +81,13 @@ export class TickerService {
   singleSubscriber = new WebsocketSubscriber(
     2,
     this.createStreamParams,
-    this.websocketSubscribeService
+    this.websocketSubscribeService,
   );
 
   multipleSubscriber = new WebsocketSubscriber(
     5,
     this.createStreamParams,
-    this.websocketSubscribeService
+    this.websocketSubscribeService,
   );
 
   globalTicker$ = new BehaviorSubject<GlobalTicker>(null);
@@ -113,7 +113,7 @@ export class TickerService {
     this.websocketService.status$
       .pipe(
         filter((status) => status === 'open'),
-        switchMap(() => this.globalService.pair$.pipe(first()))
+        switchMap(() => this.globalService.pair$.pipe(first())),
       )
       .subscribe((globalPair) => {
         this.singleSubscriber.subscribeToStream({
