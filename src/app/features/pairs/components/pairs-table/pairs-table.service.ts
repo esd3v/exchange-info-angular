@@ -87,8 +87,8 @@ export class PairsTableService {
                   ? lastPrice > prevLastPrice
                     ? this.tableStyleService.cellPositiveClass
                     : lastPrice < prevLastPrice
-                    ? this.tableStyleService.cellNegativeClass
-                    : ''
+                      ? this.tableStyleService.cellNegativeClass
+                      : ''
                   : '',
               ],
             },
@@ -98,8 +98,8 @@ export class PairsTableService {
                 Number(priceChangePercent) > 0
                   ? this.tableStyleService.cellPositiveClass
                   : Number(priceChangePercent) < 0
-                  ? this.tableStyleService.cellNegativeClass
-                  : '',
+                    ? this.tableStyleService.cellNegativeClass
+                    : '',
               ],
             },
           ],

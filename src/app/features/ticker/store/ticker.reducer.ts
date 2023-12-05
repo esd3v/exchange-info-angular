@@ -1,13 +1,14 @@
 import { createReducer, on } from '@ngrx/store';
 import { tickerActions } from '.';
 import { initialState, TickerEntity, tickerAdapter } from './ticker.state';
+import { LoadingStatus } from 'src/app/store/state';
 
 export const tickerReducer = createReducer(
   initialState,
   on(tickerActions.load, (state) => {
     return tickerAdapter.updateMany([], {
       ...state,
-      status: 'loading',
+      status: 'loading' as LoadingStatus,
     });
   }),
   on(tickerActions.loadSuccess, (state, { data }) => {
@@ -34,7 +35,7 @@ export const tickerReducer = createReducer(
 
     return tickerAdapter.setAll(mapped, {
       ...state,
-      status: 'success',
+      status: 'success' as LoadingStatus,
     });
   }),
   on(tickerActions.update, (state, { data }) => {

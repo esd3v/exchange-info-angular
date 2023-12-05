@@ -2,6 +2,7 @@ import { createReducer, on } from '@ngrx/store';
 import { candlesActions } from '.';
 import { Candle } from '../types/candle';
 import { CandleEntity, candlesAdapter, initialState } from './candles.state';
+import { LoadingStatus } from 'src/app/store/state';
 
 // OHLC order is different on purpose (for echarts)
 const createCandleEntity = (candle: Candle): CandleEntity => ({
@@ -18,7 +19,7 @@ export const candlesReducer = createReducer(
   on(candlesActions.load, (state) => {
     return candlesAdapter.setAll([], {
       ...state,
-      status: 'loading',
+      status: 'loading' as LoadingStatus,
     });
   }),
   on(candlesActions.loadSuccess, (state, { candles }) => {
@@ -26,7 +27,7 @@ export const candlesReducer = createReducer(
 
     return candlesAdapter.setAll(mapped, {
       ...state,
-      status: 'success',
+      status: 'success' as LoadingStatus,
     });
   }),
   on(candlesActions.addCandleAndRemoveFirst, (state, { candle }) => {

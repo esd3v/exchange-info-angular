@@ -6,16 +6,17 @@ import {
   symbolsAdapter,
 } from './exchange-info.state';
 import { PriceFilter } from '../types/symbol-filters';
+import { LoadingStatus } from 'src/app/store/state';
 
 export const exchangeInfoReducer = createReducer(
   initialState,
   on(exchangeInfoActions.load, (state) => ({
     ...state,
-    status: 'loading',
+    status: 'loading' as LoadingStatus,
   })),
   on(exchangeInfoActions.loadSuccess, (state) => ({
     ...state,
-    status: 'success',
+    status: 'success' as LoadingStatus,
   })),
   on(exchangeInfoActions.createSymbols, (state, payload) => {
     const symbols = payload.symbols.map((item) => {

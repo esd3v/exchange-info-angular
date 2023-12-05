@@ -9,7 +9,7 @@ export class FormatPricePipe implements PipeTransform {
     return value === null || tickSize === null
       ? null
       : value
-      ? formatPrice(value, tickSize)
-      : value;
+        ? formatPrice(value, tickSize)
+        : value;
   }
 }
