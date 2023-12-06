@@ -9,7 +9,7 @@ const SUCCESS = `${PREFIX} SUCCESS`;
 const ADD_CANDLE_AND_REMOVE_FIRST = `${PREFIX} ADD CANDLE AND REMOVE FIRST`;
 const UPDATE_CANDLE = `${PREFIX} UPDATE CANDLE`;
 
-export const load = createAction(LOAD, props<any>());
+export const load = createAction(LOAD, props<CandlesGetParams>());
 
 export const loadSuccess = createAction(
   SUCCESS,
